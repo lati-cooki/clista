@@ -55,8 +55,9 @@ git : GitHub :: ClisTa Protocol : Thread Hub.
 node bin/cli.js identity create --name Troy --kind human
 node bin/cli.js ingest --events <clista-log>.ndjson --author <id> --slug my-thread
 node bin/cli.js verify --thread my-thread        # exit 0 iff chain valid
+node bin/cli.js verify --all                     # CI: exit 0 iff every thread is valid
 node bin/cli.js serve --port 7777                # viewer at /t/my-thread
-node --test test/test.js
+npm test
 ```
 
 ## HTTP API
@@ -65,14 +66,29 @@ node --test test/test.js
 GET  /                       instance summary
 GET  /threads                list threads
 POST /threads                { title, question?, author }
-POST /identities             { display_name, kind }
+POST /identities             { display_name, kind, public_key? }   public_key => non-custodial
 GET  /t/:slug                raw viewer (HTML)
 GET  /t/:slug.json           full record chain
 GET  /t/:slug/verify         verification report
-POST /t/:slug/records        { author, kind, payload }
+POST /t/:slug/records        { author, kind, payload }             custodial write
+POST /t/:slug/records/signed { envelope, signature }               non-custodial write
 POST /t/:slug/attest         { author, payload_hash, claim? }
 GET  /r/:hash                single record by content address
 ```
+
+Errors are `{ error, code }` with stable codes (`not_found` 404,
+`stale_chain` 409, `payload_too_large` 413, `rate_limited` 429, …).
+Writes are rate-limited per IP; records are capped at 256KB each.
+
+## Writers
+
+- The hub's own founding decision is dogfood thread #1:
+  `threads/founding-architecture.ndjson` (regenerate with
+  `scripts/generate-founding-thread.js`), including the preserved
+  custodial-keys objection and its minority report.
+- Agents write non-custodially — see `docs/octopus-writer.md` for the
+  Octopus (Hermes Agent plugin) adapter: cascade-block → ObjectionRaised,
+  recovery → DecisionMerged, pre-signed envelopes, client-held keys.
 
 ## Decisions already made (don't relitigate without a thread)
 

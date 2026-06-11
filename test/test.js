@@ -197,8 +197,10 @@ test('non-custodial: wrong prev is rejected', async () => {
     const record_hash = contentAddress(forged);
     const signature = identity.sign(record_hash.slice(7), keypair.privateKeyPem);
     const res = await submit({ envelope: forged, signature });
-    assert.strictEqual(res.status, 400);
-    assert.match((await res.json()).error, /stale chain position/);
+    assert.strictEqual(res.status, 409);
+    const body = await res.json();
+    assert.strictEqual(body.code, 'stale_chain');
+    assert.match(body.error, /stale chain position/);
     assert.strictEqual(hub.store.countRecords(), 1);
   } finally { server.close(); }
 });
@@ -212,8 +214,10 @@ test('non-custodial: seq race — second writer against the same head loses', as
     const resA = await submit({ envelope: a.envelope, signature: a.signature });
     const resB = await submit({ envelope: b.envelope, signature: b.signature });
     assert.strictEqual(resA.status, 201);
-    assert.strictEqual(resB.status, 400);
-    assert.match((await resB.json()).error, /stale chain position/);
+    assert.strictEqual(resB.status, 409);
+    const bodyB = await resB.json();
+    assert.strictEqual(bodyB.code, 'stale_chain');
+    assert.match(bodyB.error, /stale chain position/);
     const report = hub.verifyThread('signed');
     assert.strictEqual(report.valid, true);
     assert.strictEqual(report.records, 2); // genesis + writer a
