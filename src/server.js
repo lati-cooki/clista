@@ -97,7 +97,7 @@ function createServer(dbPath) {
       }
       if (req.method === 'POST' && p === '/identities') {
         const b = await readBody(req);
-        return json(res, 201, hub.createIdentity({ displayName: b.display_name, kind: b.kind }));
+        return json(res, 201, hub.createIdentity({ displayName: b.display_name, kind: b.kind, publicKey: b.public_key }));
       }
 
       let m;
@@ -110,6 +110,11 @@ function createServer(dbPath) {
       if ((m = p.match(/^\/t\/([^/]+)\/records$/)) && req.method === 'POST') {
         const b = await readBody(req);
         const r = hub.append({ threadId: decodeURIComponent(m[1]), authorId: b.author, kind: b.kind ?? 'note', payload: b.payload });
+        return json(res, 201, { record_hash: r.record_hash, seq: r.seq });
+      }
+      if ((m = p.match(/^\/t\/([^/]+)\/records\/signed$/)) && req.method === 'POST') {
+        const b = await readBody(req);
+        const r = hub.appendSigned({ threadId: decodeURIComponent(m[1]), envelope: b.envelope, signature: b.signature });
         return json(res, 201, { record_hash: r.record_hash, seq: r.seq });
       }
       if ((m = p.match(/^\/t\/([^/]+)\/attest$/)) && req.method === 'POST') {

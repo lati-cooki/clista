@@ -39,17 +39,19 @@ class Hub {
   constructor(dbPath) { this.store = new Store(dbPath); }
 
   // --- identities (custodial keys in v1) ---
-  createIdentity({ id, displayName, kind }) {
-    const { publicKeyHex, privateKeyPem } = identity.generateKeypair();
+  // Pass publicKey to register non-custodially: the hub stores only the
+  // public key and the writer signs records client-side (appendSigned).
+  createIdentity({ id, displayName, kind, publicKey }) {
+    const pair = publicKey ? null : identity.generateKeypair();
     const row = {
       id: id ?? rid('id'),
       displayName, kind,
-      publicKey: publicKeyHex,
-      privateKey: privateKeyPem,
+      publicKey: publicKey ?? pair.publicKeyHex,
+      privateKey: pair?.privateKeyPem ?? null,
       createdAt: nowISO(),
     };
     this.store.insertIdentity(row);
-    return { id: row.id, displayName, kind, publicKey: publicKeyHex };
+    return { id: row.id, displayName, kind, publicKey: row.publicKey, custodial: !publicKey };
   }
 
   // --- threads ---
@@ -105,6 +107,51 @@ class Hub {
       authorId: author.id,
       authorKey: author.public_key,
       kind,
+      recordedAt: envelope.recorded_at,
+      body: canonicalize(envelope),
+      signature,
+    });
+    return { record_hash, seq: envelope.seq, signature, envelope };
+  }
+
+  // --- non-custodial write path: client holds the key ---
+  // The client builds and signs the full envelope; the hub only checks
+  // it before insert. Authority stays with the records: a record the
+  // hub could not have forged (it never saw the private key).
+  appendSigned({ threadId, envelope, signature }) {
+    const thread = this.store.getThread(threadId);
+    if (!thread) throw new Error(`unknown thread: ${threadId}`);
+    if (!envelope || typeof envelope !== 'object') throw new Error('missing envelope');
+    if (envelope.hub !== RECORD_SCHEMA) throw new Error(`envelope.hub must be ${RECORD_SCHEMA}`);
+    if (envelope.thread !== thread.id) throw new Error('envelope.thread does not match thread');
+    if (envelope.kind === 'genesis') throw new Error('genesis records are created with the thread');
+
+    const author = this.store.getIdentity(envelope.author);
+    if (!author) throw new Error(`unknown identity: ${envelope.author}`);
+    if (envelope.author_key !== author.public_key) {
+      throw new Error('author_key does not match registered key for author');
+    }
+
+    const record_hash = contentAddress(envelope);
+    if (!identity.verify(record_hash.slice(7), signature ?? '', envelope.author_key)) {
+      throw new Error('invalid signature');
+    }
+
+    // Chain position is checked against the live head; the UNIQUE
+    // (thread_id, seq) constraint backstops the read-check-insert race.
+    const head = this.store.headOf(thread.id);
+    if (envelope.prev !== head.record_hash || envelope.seq !== head.seq + 1) {
+      throw new Error(`stale chain position: head is seq ${head.seq} (${head.record_hash})`);
+    }
+
+    this.store.insertRecord({
+      recordHash: record_hash,
+      threadId: thread.id,
+      seq: envelope.seq,
+      prevHash: envelope.prev,
+      authorId: author.id,
+      authorKey: envelope.author_key,
+      kind: envelope.kind,
       recordedAt: envelope.recorded_at,
       body: canonicalize(envelope),
       signature,
