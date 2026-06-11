@@ -94,6 +94,25 @@ test('ClisTa NDJSON event log ingests as a verifiable thread', () => {
   assert.deepStrictEqual(exported.map(r => r.payload), events);
 });
 
+test('dogfood thread #1: founding architecture log ingests verifiably, objection preserved', () => {
+  const { hub, troy } = seeded();
+  const path = `${__dirname}/../threads/founding-architecture.ndjson`;
+  const events = fs.readFileSync(path, 'utf8').split('\n').filter(Boolean).map(JSON.parse);
+  const { thread } = hub.ingestClistaEvents({ events, authorId: troy.id, slug: 'founding' });
+  assert.strictEqual(hub.verifyThread('founding').valid, true);
+
+  // The custodial-keys objection is the deliberate trust concession of v1.
+  // It must survive into the merged decision, not get cleaned up.
+  const payloads = hub.exportThread(thread.id)
+    .filter(r => r.kind === 'clista.event').map(r => r.payload);
+  const objection = payloads.find(e => e.event_type === 'ObjectionRaised')?.payload.objection;
+  assert.strictEqual(objection.targetObjectId, 'clm_custodial_keys_v1');
+  const merged = payloads.find(e => e.event_type === 'DecisionMerged')?.payload.decisionRecord;
+  assert.ok(merged.preservedObjectionIds.includes(objection.id));
+  assert.ok(payloads.some(e => e.event_type === 'MinorityReportFiled'
+    && e.payload.minorityReport.objectionIds.includes(objection.id)));
+});
+
 test('hash-only attestation records existence without content', () => {
   const { hub, troy } = seeded();
   const t = hub.createThread({ title: 'Notary', authorId: troy.id });

@@ -20,7 +20,7 @@ try {
     case 'identity': {
       const hub = new Hub(DB);
       if (args[1] === 'create') {
-        out(hub.createIdentity({ displayName: flag('name'), kind: flag('kind', 'human') }));
+        out(hub.createIdentity({ id: flag('id'), displayName: flag('name'), kind: flag('kind', 'human') }));
       } else out(hub.store.listIdentities());
       break;
     }
@@ -77,7 +77,7 @@ try {
       out(`threadhub — signed, hash-chained decision record store
 
 usage:
-  threadhub identity create --name <n> --kind human|agent|org [--db path]
+  threadhub identity create --name <n> --kind human|agent|org [--id id_x] [--db path]
   threadhub identity list
   threadhub thread create --title <t> [--question <q>] --author <id>
   threadhub thread list
