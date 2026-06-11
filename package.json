@@ -1,0 +1,9 @@
+{
+  "name": "threadhub",
+  "version": "0.1.0",
+  "description": "Signed, hash-chained, content-addressed decision record store. ClisTa Protocol native. Zero dependencies.",
+  "license": "MIT",
+  "engines": { "node": ">=22" },
+  "bin": { "threadhub": "bin/cli.js" },
+  "scripts": { "test": "node --test test/test.js", "serve": "node bin/cli.js serve" }
+}
