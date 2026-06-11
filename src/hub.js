@@ -28,6 +28,21 @@ const identity = require('./identity');
 const { Store } = require('./store');
 
 const RECORD_SCHEMA = 'threadhub.record.v0';
+const MAX_RECORD_BYTES = 256 * 1024; // per-record cap: the body column stays citable, not a blob store
+
+// Errors carry a stable machine code; the HTTP layer maps code -> status.
+class HubError extends Error {
+  constructor(code, message) { super(message); this.code = code; }
+}
+const fail = (code, message) => { throw new HubError(code, message); };
+
+function checkRecordSize(body) {
+  const bytes = Buffer.byteLength(body, 'utf8');
+  if (bytes > MAX_RECORD_BYTES) {
+    fail('payload_too_large', `record is ${bytes} bytes; cap is ${MAX_RECORD_BYTES}`);
+  }
+  return body;
+}
 
 function nowISO() { return new Date().toISOString(); }
 function rid(prefix) { return `${prefix}_${crypto.randomBytes(6).toString('hex')}`; }
@@ -39,23 +54,25 @@ class Hub {
   constructor(dbPath) { this.store = new Store(dbPath); }
 
   // --- identities (custodial keys in v1) ---
-  createIdentity({ id, displayName, kind }) {
-    const { publicKeyHex, privateKeyPem } = identity.generateKeypair();
+  // Pass publicKey to register non-custodially: the hub stores only the
+  // public key and the writer signs records client-side (appendSigned).
+  createIdentity({ id, displayName, kind, publicKey }) {
+    const pair = publicKey ? null : identity.generateKeypair();
     const row = {
       id: id ?? rid('id'),
       displayName, kind,
-      publicKey: publicKeyHex,
-      privateKey: privateKeyPem,
+      publicKey: publicKey ?? pair.publicKeyHex,
+      privateKey: pair?.privateKeyPem ?? null,
       createdAt: nowISO(),
     };
     this.store.insertIdentity(row);
-    return { id: row.id, displayName, kind, publicKey: publicKeyHex };
+    return { id: row.id, displayName, kind, publicKey: row.publicKey, custodial: !publicKey };
   }
 
   // --- threads ---
   createThread({ title, question, authorId, slug, id }) {
     const author = this.store.getIdentity(authorId);
-    if (!author) throw new Error(`unknown identity: ${authorId}`);
+    if (!author) fail('not_found', `unknown identity: ${authorId}`);
     const thread = {
       id: id ?? rid('thd'),
       slug: slug ?? slugify(title),
@@ -77,10 +94,10 @@ class Hub {
   // --- the only write path ---
   append({ threadId, authorId, kind, payload, recordedAt }) {
     const thread = this.store.getThread(threadId);
-    if (!thread) throw new Error(`unknown thread: ${threadId}`);
+    if (!thread) fail('not_found', `unknown thread: ${threadId}`);
     const author = this.store.getIdentity(authorId);
-    if (!author) throw new Error(`unknown identity: ${authorId}`);
-    if (!author.private_key) throw new Error(`no custodial key for ${authorId}; submit signed record instead`);
+    if (!author) fail('not_found', `unknown identity: ${authorId}`);
+    if (!author.private_key) fail('bad_request', `no custodial key for ${authorId}; submit signed record instead`);
 
     const head = this.store.headOf(thread.id);
     const envelope = {
@@ -94,6 +111,7 @@ class Hub {
       kind,
       payload,
     };
+    const body = checkRecordSize(canonicalize(envelope));
     const record_hash = contentAddress(envelope);
     const signature = identity.sign(record_hash.slice(7), author.private_key);
 
@@ -106,7 +124,53 @@ class Hub {
       authorKey: author.public_key,
       kind,
       recordedAt: envelope.recorded_at,
-      body: canonicalize(envelope),
+      body,
+      signature,
+    });
+    return { record_hash, seq: envelope.seq, signature, envelope };
+  }
+
+  // --- non-custodial write path: client holds the key ---
+  // The client builds and signs the full envelope; the hub only checks
+  // it before insert. Authority stays with the records: a record the
+  // hub could not have forged (it never saw the private key).
+  appendSigned({ threadId, envelope, signature }) {
+    const thread = this.store.getThread(threadId);
+    if (!thread) fail('not_found', `unknown thread: ${threadId}`);
+    if (!envelope || typeof envelope !== 'object') fail('bad_request', 'missing envelope');
+    if (envelope.hub !== RECORD_SCHEMA) fail('bad_request', `envelope.hub must be ${RECORD_SCHEMA}`);
+    if (envelope.thread !== thread.id) fail('bad_request', 'envelope.thread does not match thread');
+    if (envelope.kind === 'genesis') fail('bad_request', 'genesis records are created with the thread');
+
+    const author = this.store.getIdentity(envelope.author);
+    if (!author) fail('not_found', `unknown identity: ${envelope.author}`);
+    if (envelope.author_key !== author.public_key) {
+      fail('author_key_mismatch', 'author_key does not match registered key for author');
+    }
+
+    const body = checkRecordSize(canonicalize(envelope));
+    const record_hash = contentAddress(envelope);
+    if (!identity.verify(record_hash.slice(7), signature ?? '', envelope.author_key)) {
+      fail('invalid_signature', 'invalid signature');
+    }
+
+    // Chain position is checked against the live head; the UNIQUE
+    // (thread_id, seq) constraint backstops the read-check-insert race.
+    const head = this.store.headOf(thread.id);
+    if (envelope.prev !== head.record_hash || envelope.seq !== head.seq + 1) {
+      fail('stale_chain', `stale chain position: head is seq ${head.seq} (${head.record_hash})`);
+    }
+
+    this.store.insertRecord({
+      recordHash: record_hash,
+      threadId: thread.id,
+      seq: envelope.seq,
+      prevHash: envelope.prev,
+      authorId: author.id,
+      authorKey: envelope.author_key,
+      kind: envelope.kind,
+      recordedAt: envelope.recorded_at,
+      body,
       signature,
     });
     return { record_hash, seq: envelope.seq, signature, envelope };
@@ -114,7 +178,7 @@ class Hub {
 
   // --- ingest a ClisTa NDJSON event log as one thread ---
   ingestClistaEvents({ events, authorId, title, slug }) {
-    if (!events.length) throw new Error('empty event log');
+    if (!events.length) fail('bad_request', 'empty event log');
     const threadTitle = title ?? events.find(e => e.event_type === 'ThreadCreated')
       ?.payload?.thread?.title ?? 'Imported ClisTa thread';
     const thread = this.createThread({ title: threadTitle, authorId, slug });
@@ -135,7 +199,7 @@ class Hub {
   // instance) by recording only its content address.
   attest({ threadId, authorId, payloadHash, claim }) {
     if (!/^sha256:[0-9a-f]{64}$/.test(payloadHash)) {
-      throw new Error('payloadHash must be "sha256:<64 hex>"');
+      fail('bad_request', 'payloadHash must be "sha256:<64 hex>"');
     }
     return this.append({
       threadId, authorId,
@@ -147,7 +211,7 @@ class Hub {
   // --- verification: pure function of the records ---
   verifyThread(threadIdOrSlug) {
     const thread = this.store.getThread(threadIdOrSlug);
-    if (!thread) throw new Error(`unknown thread: ${threadIdOrSlug}`);
+    if (!thread) fail('not_found', `unknown thread: ${threadIdOrSlug}`);
     const rows = this.store.recordsOf(thread.id);
     const problems = [];
     let prevHash = null;
@@ -187,9 +251,9 @@ class Hub {
 
   exportThread(threadIdOrSlug) {
     const thread = this.store.getThread(threadIdOrSlug);
-    if (!thread) throw new Error(`unknown thread: ${threadIdOrSlug}`);
+    if (!thread) fail('not_found', `unknown thread: ${threadIdOrSlug}`);
     return this.store.recordsOf(thread.id).map(r => JSON.parse(r.body));
   }
 }
 
-module.exports = { Hub, RECORD_SCHEMA };
+module.exports = { Hub, HubError, RECORD_SCHEMA, MAX_RECORD_BYTES };

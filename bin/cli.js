@@ -20,7 +20,7 @@ try {
     case 'identity': {
       const hub = new Hub(DB);
       if (args[1] === 'create') {
-        out(hub.createIdentity({ displayName: flag('name'), kind: flag('kind', 'human') }));
+        out(hub.createIdentity({ id: flag('id'), displayName: flag('name'), kind: flag('kind', 'human') }));
       } else out(hub.store.listIdentities());
       break;
     }
@@ -57,6 +57,17 @@ try {
     }
     case 'verify': {
       const hub = new Hub(DB);
+      if (args.includes('--all')) {
+        // CI mode: verify every thread, exit 0 iff all chains are valid.
+        const reports = hub.store.listThreads().map((t) => hub.verifyThread(t.id));
+        const invalid = reports.filter((r) => !r.valid);
+        for (const r of reports) {
+          out(`${r.valid ? 'ok     ' : 'INVALID'} ${r.slug}  ${r.records} records  ${r.problems.length} problem(s)`);
+        }
+        out(`${reports.length} thread(s), ${invalid.length} invalid`);
+        process.exitCode = invalid.length === 0 ? 0 : 1;
+        break;
+      }
       const report = hub.verifyThread(flag('thread'));
       out(report);
       process.exitCode = report.valid ? 0 : 1;
@@ -77,7 +88,7 @@ try {
       out(`threadhub — signed, hash-chained decision record store
 
 usage:
-  threadhub identity create --name <n> --kind human|agent|org [--db path]
+  threadhub identity create --name <n> --kind human|agent|org [--id id_x] [--db path]
   threadhub identity list
   threadhub thread create --title <t> [--question <q>] --author <id>
   threadhub thread list
@@ -85,6 +96,7 @@ usage:
   threadhub ingest --events <clista.ndjson> --author <id> [--title t] [--slug s]
   threadhub attest --thread <id|slug> --author <id> --hash sha256:<hex> [--claim text]
   threadhub verify --thread <id|slug>
+  threadhub verify --all                # CI: exit 0 iff every thread chain is valid
   threadhub export --thread <id|slug>
   threadhub serve [--port 7777]`);
   }

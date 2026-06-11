@@ -14,6 +14,33 @@
 const http = require('node:http');
 const { Hub } = require('./hub');
 
+// HubError codes -> HTTP status. Anything uncoded is a plain 400.
+const STATUS_FOR = {
+  not_found: 404,
+  stale_chain: 409,
+  payload_too_large: 413,
+  rate_limited: 429,
+  invalid_signature: 400,
+  author_key_mismatch: 400,
+  bad_request: 400,
+};
+
+// Fixed-window per-IP rate limit on writes. Reads stay unmetered: the
+// viewer and verification are the product surface; POST is the abuse
+// surface.
+function rateLimiter({ max = 120, windowMs = 60_000 } = {}) {
+  const windows = new Map(); // ip -> { count, resetAt }
+  return (ip, now = Date.now()) => {
+    const w = windows.get(ip);
+    if (!w || now >= w.resetAt) {
+      if (windows.size > 10_000) windows.clear(); // crude memory bound
+      windows.set(ip, { count: 1, resetAt: now + windowMs });
+      return true;
+    }
+    return ++w.count <= max;
+  };
+}
+
 function json(res, code, obj) {
   const body = JSON.stringify(obj, null, 2);
   res.writeHead(code, { 'content-type': 'application/json; charset=utf-8' });
@@ -77,12 +104,17 @@ ${rows}
 </main></body></html>`;
 }
 
-function createServer(dbPath) {
+function createServer(dbPath, opts = {}) {
   const hub = new Hub(dbPath);
+  const allowWrite = rateLimiter(opts.rateLimit);
   const server = http.createServer(async (req, res) => {
     try {
       const url = new URL(req.url, 'http://x');
       const p = url.pathname;
+
+      if (req.method === 'POST' && !allowWrite(req.socket.remoteAddress ?? '?')) {
+        return json(res, 429, { error: 'rate limit exceeded', code: 'rate_limited' });
+      }
 
       if (req.method === 'GET' && p === '/') {
         return json(res, 200, {
@@ -97,7 +129,7 @@ function createServer(dbPath) {
       }
       if (req.method === 'POST' && p === '/identities') {
         const b = await readBody(req);
-        return json(res, 201, hub.createIdentity({ displayName: b.display_name, kind: b.kind }));
+        return json(res, 201, hub.createIdentity({ displayName: b.display_name, kind: b.kind, publicKey: b.public_key }));
       }
 
       let m;
@@ -112,6 +144,11 @@ function createServer(dbPath) {
         const r = hub.append({ threadId: decodeURIComponent(m[1]), authorId: b.author, kind: b.kind ?? 'note', payload: b.payload });
         return json(res, 201, { record_hash: r.record_hash, seq: r.seq });
       }
+      if ((m = p.match(/^\/t\/([^/]+)\/records\/signed$/)) && req.method === 'POST') {
+        const b = await readBody(req);
+        const r = hub.appendSigned({ threadId: decodeURIComponent(m[1]), envelope: b.envelope, signature: b.signature });
+        return json(res, 201, { record_hash: r.record_hash, seq: r.seq });
+      }
       if ((m = p.match(/^\/t\/([^/]+)\/attest$/)) && req.method === 'POST') {
         const b = await readBody(req);
         const r = hub.attest({ threadId: decodeURIComponent(m[1]), authorId: b.author, payloadHash: b.payload_hash, claim: b.claim });
@@ -120,18 +157,19 @@ function createServer(dbPath) {
       if ((m = p.match(/^\/t\/([^/]+)$/)) && req.method === 'GET') {
         const slug = decodeURIComponent(m[1]);
         const thread = hub.store.getThread(slug);
-        if (!thread) return json(res, 404, { error: 'thread not found' });
+        if (!thread) return json(res, 404, { error: 'thread not found', code: 'not_found' });
         const html = viewerHTML(thread, hub.store.recordsOf(thread.id), hub.verifyThread(thread.id));
         res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
         return res.end(html);
       }
       if ((m = p.match(/^\/r\/(sha256:[0-9a-f]{64})$/)) && req.method === 'GET') {
         const r = hub.store.getRecord(m[1]);
-        return r ? json(res, 200, JSON.parse(r.body)) : json(res, 404, { error: 'record not found' });
+        return r ? json(res, 200, JSON.parse(r.body)) : json(res, 404, { error: 'record not found', code: 'not_found' });
       }
-      json(res, 404, { error: 'not found' });
+      json(res, 404, { error: 'not found', code: 'not_found' });
     } catch (e) {
-      json(res, 400, { error: e.message });
+      const code = e.code in STATUS_FOR ? e.code : 'bad_request';
+      json(res, STATUS_FOR[code], { error: e.message, code });
     }
   });
   return { server, hub };
