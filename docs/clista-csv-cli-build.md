@@ -17,16 +17,19 @@ This is the canonical live example of the full stack in operation:
    - Verify: `node bin/cli.js verify --thread octo-build`
    - Head (after CLI arm): `sha256:460f601d1af6306a4c1898198d8ade9f394933bbae9781f82c05121fa4e559ef`
 
-2. **clista-csv-cli-build-v2** (slug: `clista-csv-cli-build-v2`, id: `thd_f35bd1d6ffdc`) — **current**
+2. **clista-csv-cli-build-v3** (slug: `clista-csv-cli-build-v3`, id: `thd_432894c119a9`) — **current**
    - Dedicated governance thread for the ClisTa CSV CLI Build Consensus.
-   - 25 records (genesis + 24 events).
+   - 26 records (genesis + 25 events).
    - Ingested from the corrected, **validating** combined event log (`examples/clista-csv-cli-build.ndjson` in the clista-protocol repo). `node src/cli.js validate` passes (exit 0) and the log projects a full `clista.threadState.v0`.
-   - Contains: participants (`id_troy`, `par_octopus`), a `ParticipantAuthorityGranted` (id_troy → decision_owner), DecisionRequest, 3 `DelegationGranted` (one per build arm), foundation `EvidenceCommitted`, 4 Claims, an `AssumptionDeclared`, 3 `ExecutionStarted` (each authorized by its delegation), Positions, Review, 3 live `EvidenceCommitted` (referencing the octo-build blocks by record hash), and a final `DecisionMerged` (`decisionRecord`, approved) — in that causal order.
-   - Created via: `node bin/cli.js ingest --events examples/clista-csv-cli-build.ndjson --author id_troy --title "ClisTa CSV CLI Build Consensus (validated)" --slug clista-csv-cli-build-v2`
-   - Verify: `node bin/cli.js verify --thread clista-csv-cli-build-v2`
-   - Head: `sha256:73c6b909aaff53a2746cf4c3ec8459884954c5925d39c271e3be4e27fdcfd1f2`
+   - Contains: participants (`id_troy`, `par_octopus`), a `ParticipantAuthorityGranted` (id_troy → decision_owner), DecisionRequest, 3 `DelegationGranted` (one per build arm), foundation `EvidenceCommitted`, 4 Claims, an `AssumptionDeclared`, 3 `ExecutionStarted` (each authorized by its delegation), Positions, Review, 4 live `EvidenceCommitted` (referencing the octo-build blocks by record hash — incl. the error-handling arm's cascade-block at octo-build seq 8), and a final `DecisionMerged` (`decisionRecord`, approved) — in that causal order.
+   - Created via: `node bin/cli.js ingest --events examples/clista-csv-cli-build.ndjson --author id_troy --title "ClisTa CSV CLI Build Consensus (validated, +error-handling arm)" --slug clista-csv-cli-build-v3`
+   - Verify: `node bin/cli.js verify --thread clista-csv-cli-build-v3`
+   - Head: `sha256:016c38aa37ae7e7b33a1609be0f5524a1e7f3fa3e0a83efd7d6455dda870dcd0`
 
-   > **Historical:** the original `clista-csv-cli-build` (id `thd_99f812b60f7c`, 20 records) was ingested from an earlier draft of the log that did **not** validate cleanly (the `DecisionMerged` used `payload.decision` instead of `payload.decisionRecord`, and the executions referenced a decision that didn't exist yet). ThreadHub is append-only, so that thread stays as immutable history; `-v2` is the corrected, validating record.
+   > **Lineage (ThreadHub is append-only, so each revision is a fresh thread):**
+   > `clista-csv-cli-build` (`thd_99f812b60f7c`, 20 records) — original, ingested from a draft that did **not** validate (`DecisionMerged` used `payload.decision`; executions referenced a non-existent decision). →
+   > `clista-csv-cli-build-v2` (`thd_f35bd1d6ffdc`, 25 records) — first validating version. →
+   > **`-v3`** (current) — adds the error-handling arm's cascade-block as a 4th live evidence. Predecessors stay as immutable history.
 
 The threads are linked by **content hashes** (not shared state):
 - In `clista-csv-cli-build` the live evidences (evd_live_*) carry `artifactIds` with the exact octo-build record hashes (e.g. `sha256:27226cae...` for parsing arm, `6c39ae70...` for stats, `460f601d...` for CLI integration).
@@ -41,7 +44,7 @@ The threads are linked by **content hashes** (not shared state):
    - Reconstructed the resulting `ObjectionRaised` via `mapBuildEvent`.
    - Committed as `EvidenceCommitted` in the ClisTa CSV thread (with source, finding, and the record hash).
 3. Clean combined log built and **validated** against the ClisTa protocol (`node src/cli.js validate`): participants and authority first, the build arms modeled as `DelegationGranted` (Octopus is a delegated executor), delegation-authorized `ExecutionStarted`, a supporting `AssumptionDeclared`, then the live evidences, with the `DecisionMerged` last (governance gates/ratifies after review).
-4. The validating log was ingested into the dedicated `clista-csv-cli-build-v2` thread.
+4. The validating log was ingested into the dedicated `clista-csv-cli-build-v3` thread.
 
 Future arms (tests, docs, error handling) or new blocks can be emitted the same way. To keep governance clean, continue referencing by hash, extend `examples/clista-csv-cli-build.ndjson` (re-validate, then re-ingest into a fresh `-vN` thread).
 
@@ -50,9 +53,9 @@ Future arms (tests, docs, error handling) or new blocks can be emitted the same 
 ```sh
 # In ThreadHub
 node bin/cli.js thread list
-node bin/cli.js verify --thread clista-csv-cli-build-v2
+node bin/cli.js verify --thread clista-csv-cli-build-v3
 node bin/cli.js verify --thread octo-build
-node bin/cli.js export --thread clista-csv-cli-build-v2 | head -c 2000
+node bin/cli.js export --thread clista-csv-cli-build-v3 | head -c 2000
 
 # Cross-link example (from clista-csv-cli-build evidence)
 # The artifact hash points to a record in octo-build:
@@ -67,7 +70,7 @@ node src/cli.js provenance trace --contribution evd_live_p2 --events examples/cl
 
 ## Operational Notes
 
-- **Dedicated slug**: `clista-csv-cli-build-v2` is the home for the (validated) ClisTa consensus view of this CSV CLI build. `clista-csv-cli-build` is its pre-fix predecessor, kept as immutable history.
+- **Dedicated slug**: `clista-csv-cli-build-v3` is the home for the (validated) ClisTa consensus view of this CSV CLI build. `clista-csv-cli-build` is its pre-fix predecessor, kept as immutable history.
 - **Raw signals**: Stay in `octo-build` (general Octopus log) but are first-class citizens in ClisTa via hash references.
 - **Future work on this project**: When emitting cascade-blocks or recoveries for remaining CSV arms, use `--slug octo-build` (or a project-specific one), add the resulting events to `examples/clista-csv-cli-build.ndjson`, re-validate, and re-ingest into a fresh `-vN` thread.
 - **Non-custodial + verifiable**: All records self-verify. `trusted: false` by design.
