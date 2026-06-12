@@ -89,6 +89,12 @@ Writes are rate-limited per IP; records are capped at 256KB each.
 - Agents write non-custodially — see `docs/octopus-writer.md` for the
   Octopus (Hermes Agent plugin) adapter: cascade-block → ObjectionRaised,
   recovery → DecisionMerged, pre-signed envelopes, client-held keys.
+- **Running example**: Full ClisTa + Octopus + ThreadHub integration for a real
+  CSV CLI build. See `docs/clista-csv-cli-build.md`. Two threads:
+  `octo-build` (raw execution signals, 3 live CSV arms) and dedicated
+  `clista-csv-cli-build` (governance: claims, live evidences with hash links,
+  attribution, provenance). Clean combined log in the clista-protocol repo.
+  Ingested via `threadhub ingest` for a portable, verifiable governance thread.
 
 ## Decisions already made (don't relitigate without a thread)
 
