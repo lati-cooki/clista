@@ -57,8 +57,11 @@ ClisTa CLI / `expected-state.json` — same decision, object IDs, preserved obje
 minority report, and 23-event audit — both in the Node parity test and live in `workerd`.
 Tampering a stored event breaks the chain. The full plan: [`docs/PLAN.md`](docs/PLAN.md).
 
-Next: Phase 5 — deploy `app.clista.ai` (new Pages/Worker project + wildcard
-subdomain + Cloudflare Access app), then cut `cli.clista.ai`'s mock over to it.
+Next: Phase 5 — deploy `app.clista.ai` (Worker + custom domain + Cloudflare Access
+app), then cut `cli.clista.ai`'s mock over to it. **Runbook ready:**
+[`docs/DEPLOY.md`](docs/DEPLOY.md) — config (`wrangler.jsonc` route) and CI
+(`.github/workflows/deploy-app.yml`) are in place; the remaining steps need
+Cloudflare account access (Access app + deploy).
 
 ## Run it
 

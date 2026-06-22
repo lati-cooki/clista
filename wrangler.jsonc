@@ -3,6 +3,11 @@
   "name": "clista-ai-app",
   "main": "worker/index.js",
   "compatibility_date": "2025-09-15",
+  // Serve the Worker at app.clista.ai. custom_domain:true makes `wrangler deploy`
+  // create the DNS record + cert automatically (the clista.ai zone is already in
+  // the account; the *.clista.ai wildcard cert covers it). Safe to deploy without
+  // a route first — comment this out for a *.workers.dev-only smoke deploy.
+  "routes": [{ "pattern": "app.clista.ai", "custom_domain": true }],
   // Engine ported to js-sha256 + Web Crypto; no Node builtins, so no nodejs_compat.
   "assets": {
     "directory": "./dist",
