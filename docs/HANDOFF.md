@@ -1,76 +1,115 @@
-# Transfer / Handoff — building app.clista.ai (the ClisTa Protocol cockpit)
+# Transfer / Handoff — app.clista.ai (the ClisTa Protocol cockpit)
 
-Paste this into a fresh session to resume without replaying the whole history.
+Paste this into a fresh session to resume without replaying the history.
 
-## What we're doing
-Building the missing UI for the ClisTa Protocol. Three repos are one system; the
-owner kept re-deriving the engine because no attempt united rigor + a human surface.
-Decision made: build a new app that is the live, interactive human cockpit OVER the
-real ClisTa engine (event log = source of truth, UI projects state and emits ClisTa
-events), wearing the existing clista.ai design system. It replaces the non-live mock
-at cli.clista.ai. One-liner: "Here's a yes — now trace its shape."
+## One-liner
+The live, interactive human cockpit OVER the real ClisTa engine: event log = source
+of truth, UI projects state and emits validated ClisTa events, wearing the clista.ai
+design system. "Here's a yes — now trace its shape." Replaces the mock at cli.clista.ai.
 
-## The repos (note: two GitHub accounts)
-Both authenticated via gh; switch with `gh auth switch --user <name>`.
-- lati-club/ClisTa-Protocol  (PUBLIC, owner: lati-club) — THE ENGINE. Append-only,
-  hash-chained NDJSON events; deterministic projection; validation-before-trust
-  (fail-closed). Key files to port: src/integrity.js (hash chain), src/events.js
-  (event builders, minus fs), src/projector.js (projection), schemas/v0/*.json
-  (thread/participant/evidence/claim/decision/audit_event), and the canonical sample
-  log examples/scenario-demo/events.ndjson. Also src/cli.js, src/mcp_server.js.
-- lati-cooki/clista-protocol-launch-planning  (PRIVATE, owner: lati-cooki — must
-  `gh auth switch --user lati-cooki` to read) — THE DESIGN SYSTEM + 6 live Cloudflare
-  Pages surfaces (clista.ai, cli/gate/runs/docs/learn). Reuse: website/shared/styles.css
-  + site.css (tokens + components), DESIGN-SPEC.md, website/README.md,
-  website/CLOUDFLARE.md. Monochrome by conviction; color only as protocol signal
-  (verified/evidence/degraded/failed); fonts Jost / IBM Plex Sans / IBM Plex Mono;
-  8 primitives Button/Badge/Card/Eyebrow/RuleDot/IconMedallion/NumberedStep/Terminal;
-  octopus mark. cli.clista.ai is the mock the new app replaces.
-- lati-club/lokahi  (PRIVATE, owner: lati-club; local /Users/troylatimer/Documents/Lokahi,
-  branch master) — the prototype to SALVAGE UX from (StatusStepper, AuditTrail,
-  DraftDecision/ConfirmationBar, the feedback-driven revision loop in src/main.jsx) but
-  its engine (mutable SQLite status column) is dropped. Not productized standalone.
-- lati-club/clista-ai-app  (PRIVATE, owner: lati-club; local
-  /Users/troylatimer/Documents/clista-ai-app, branch main) — THE NEW APP REPO (this one),
-  already created. Currently a placeholder: README.md + docs/PLAN.md + this HANDOFF.
+## Where we are (as of this handoff)
+Phases 0–4 are **built, tested, and committed**; Phase 5 is **prepped, not executed**.
+Everything lives on branch **`phase-0-cockpit-scaffold`** → **open PR #1**
+(https://github.com/lati-club/clista-ai-app/pull/1). Nothing is deployed; no Cloudflare
+account changes have been made. Local repo: `/Users/troylatimer/Documents/clista-ai-app`
+(git user Troy Latimer; remote `lati-club/clista-ai-app`, private).
 
-## The plan (authoritative)
-Full plan is docs/PLAN.md in this repo (also at
-/Users/troylatimer/.claude/plans/playful-wobbling-otter.md). Read it first.
-Architecture: Vite + React SPA -> Worker (router/auth, identity->actor_id) -> one
-Durable Object PER THREAD holding that thread's append-only event log in its SQLite;
-project()/validate()/summary() run in the Worker. A separate IndexDO (or KV) maps
-thread_id -> {title,status,owner} for the list view. Phases 0-5 in the doc.
+- **Phase 0 — surface.** Vite + React 19 SPA implementing the `app.clista.ai` Claude
+  Design project `ClisTa Cockpit.dc.html` (imported via the claude_design MCP /
+  DesignSync; project id `fe28cfec-8f76-4d43-94ae-ff333afa5a89`). Four screens:
+  Thread Cockpit (hero), Thread Index, Compose/Append, Component Kit. Design carried
+  in faithfully via a `css()` inline-style helper (`src/lib/css.js`), an SVG line-icon
+  set (`src/icons.js`), and status/badge tokens (`src/styles.js`). Fonts Inter Tight +
+  JetBrains Mono on warm paper `#e7e6e3` + the signal palette (verified green / evidence
+  blue / degraded amber / failed red) — the design tool's own refinement of the brief's
+  Jost/IBM Plex direction; we implemented the design as delivered.
+- **Phase 1 — engine ported (trust anchor).** Pure ClisTa modules from
+  `lati-club/ClisTa-Protocol` (`src/*.js`) vendored **verbatim** into `worker/engine/`
+  (projector, validator, integrity + all transitive domain modules). Only two
+  adaptations: `integrity.js` hashing `node:crypto` → synchronous **`js-sha256`**
+  (byte-identical → deterministic replay; NOT Web Crypto subtle.digest which is async),
+  and `events.js` fs store → pure builders + Web Crypto randomness. No Node builtins
+  remain (no `nodejs_compat`). `worker/engine/package.json` marks it `commonjs`.
+  `ThreadDO` (`worker/thread-do.js`) holds one thread's append-only, hash-chained log in
+  **DO SQLite**; append is **validate-before-trust, fail-closed** (event_id + reasons,
+  HTTP 422) with server-minted ids. Validator returns `errors` (not `reasons`); integrity
+  returns `reasons` — don't confuse them.
+- **Phase 2/3 — wired live.** Cockpit renders from real projected state (`src/data.js`
+  deleted): `src/api.js` (client) → `src/useThread.js` (load + auto-seed demo) →
+  `src/adapt.js` (projection `clista.threadState.v0` → cockpit view model). `IndexDO`
+  (`worker/index-do.js`) provides the thread ledger; Worker registers a thread after each
+  successful write. Compose posts a real `ObjectionRaised`; verified/degraded driven by
+  the real `/validate` result (the live/degraded toggle is a client preview).
+- **Phase 4 — identity.** `worker/identity.js` resolves the caller: production verifies
+  Cloudflare Access `Cf-Access-Jwt-Assertion` against team JWKS (RS256 via Web Crypto,
+  issuer/aud/exp); local dev uses an `X-Clista-Email` header honored ONLY when
+  `DEV_IDENTITY=true` (`.dev.vars`, gitignored; `.dev.vars.example` committed). `actor_id`
+  (`par_<email-slug>`) is server-authoritative. Writes require auth (401 else). A non-
+  participant gets a fail-closed **Join thread** affordance → appends `ParticipantDeclared`.
+  `GET /api/me` backs the topbar.
 
-Key technical notes / risks:
-- Engine is CommonJS using fs/path/node:crypto. Extract the PURE logic (integrity,
-  events builders, projector, validators); strip filesystem; storage shell becomes DO
-  SQLite (one row per event, append-only).
-- Keep hashing SYNCHRONOUS (bundle a sync sha256, e.g. js-sha256 — NOT Web Crypto
-  subtle.digest which is async) to preserve byte-identical deterministic replay.
-- Trust anchor / first proof: ingest examples/scenario-demo/events.ndjson into a
-  ThreadDO and assert its projection/summary equals ClisTa CLI `state show` /
-  `decision summary` for the same log.
-- v1 object-model scope = the bundled scenario's shape: thread, evidence/assumption/
-  claim, SURVIVING objection, decision request->review->record, minority report,
-  provenance, audit chain. Federation/delegation/negotiation/learning are out of v1.
-- Deploy as app.clista.ai (new Cloudflare Pages/Worker project + custom domain, one
-  more *.clista.ai wildcard; follow launch-planning/website/CLOUDFLARE.md §2-3).
-- Skills to use: durable-objects, cloudflare, wrangler, workers-best-practices,
-  frontend-design.
+## Immediate next step — execute Phase 5 (the runbook), then cut over
+Authoritative runbook: **`docs/DEPLOY.md`**. The owner will do this. Sequence:
+1. **[you/owner]** Create a Cloudflare **Access** self-hosted app for `app.clista.ai`;
+   copy the **AUD tag** and team domain.
+2. Set `ACCESS_TEAM_DOMAIN` + `ACCESS_AUD` in `wrangler.jsonc` `vars` (or `--var` at
+   deploy). NEVER set `DEV_IDENTITY` in prod.
+3. `npm ci && npm run build && npx wrangler deploy` (config already has the
+   `app.clista.ai` custom-domain route; `--dry-run` passes). Or push to `main` with repo
+   secrets `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` → `.github/workflows/deploy-app.yml`.
+4. Verify per `docs/DEPLOY.md §4` (sign-in, auto-seed, `/validate`, 401-when-anon, join).
+5. **Cut over** (separate repo `lati-cooki/clista-protocol-launch-planning`): point
+   `website/cli.clista.ai`'s mock at `https://app.clista.ai`, link from `clista.ai` hero,
+   redeploy that surface per its own `website/CLOUDFLARE.md`.
+Safety: until the Access app + vars exist, prod writes 401 (read-only) — safe by default.
 
-## Where we are / immediate next step
-A UI design brief was written for Claude's design tool (claude.ai/design); the owner is
-bringing back the generated design. WAIT for that design, THEN start Phase 0: scaffold
-Vite + React + Worker + Durable Objects in this repo, port the clista.ai design system +
-the returned components (build the 8 primitives as React components), stand up a
-hello-world at app.clista.ai. Then Phase 1: port the engine into the ThreadDO and prove
-scenario-demo parity. Do NOT rebuild the engine or re-skin from scratch — port and reuse.
+## How to run / verify locally
+- `npm install`
+- `npm test` → engine parity + integrity (6/6; proves scenario-demo projects identically
+  to the ClisTa CLI / `test/fixtures/scenario-demo.expected-state.json`, and js-sha256 is
+  byte-identical, tamper breaks the chain).
+- `npx wrangler dev` → full stack (Worker + DO + SPA) at `localhost:8787`; loads
+  `.dev.vars`. (Plain `npm run dev` = front-end only, /api won't exist.)
+- **Create `.dev.vars`** (gitignored) to drive writes locally:
+  `DEV_IDENTITY=true` and `DEV_EMAIL=troylati@gmail.com` (see `.dev.vars.example`).
+- Browser checks run through the MCP browser, which reaches the host at
+  **`http://host.docker.internal:8787/`** (not localhost). For a clean demo of the join
+  affordance, `rm -rf .wrangler/state` before restarting `wrangler dev` (DO SQLite
+  persists locally across restarts; a pre-seeded thread skips the join banner).
 
-The design brief covers: monochrome + signal palette, the three type voices, the 8
-primitives, and the hero "Thread Cockpit" screen that renders a decision's
-accountability structure (evidence, assumptions, claims, SURVIVING objections, decision
-record, minority report, provenance, audit-chain Terminal with validate/replay badges) —
-plus Thread Index and Compose flows, using the concrete "support-assistant beta" sample
-decision. Must feel like an instrument / verifiable record, not a SaaS dashboard.
-Ask the owner for the design output before scaffolding.
+## Key files
+- Front-end: `src/App.jsx` (shell + topbar identity + routing), `src/screens/{Cockpit,
+  ThreadIndex,Compose,Kit}.jsx`, `src/{api,useThread,adapt,styles,icons}.js`, `src/lib/*`.
+- Worker: `worker/index.js` (router), `worker/thread-do.js`, `worker/index-do.js`,
+  `worker/identity.js`, `worker/scenario-demo.js` (bundled 23-event seed log),
+  `worker/engine/` (vendored engine), `wrangler.jsonc`.
+- Tests/fixtures: `test/engine-parity.test.js`, `test/fixtures/scenario-demo.*`.
+- Docs: `docs/PLAN.md` (authoritative plan), `docs/DEPLOY.md` (Phase 5 runbook), this file.
+
+## API (all same-origin)
+`GET /api/me` · `GET /api/threads` · per-thread `GET …/{state,summary,audit,validate}` ·
+`POST …/{append,ingest,seed-demo,join}` (writes require auth → 401; fail-closed → 422).
+
+## The repos (two GitHub accounts — switch with `gh auth switch --user <name>`)
+- `lati-club/ClisTa-Protocol` (PUBLIC) — THE ENGINE. Cloned at
+  `/Users/troylatimer/Documents/ClisTa-Protocol` for the port (not part of this repo).
+- `lati-cooki/clista-protocol-launch-planning` (PRIVATE, owner lati-cooki) — design system
+  + 6 live Pages surfaces incl. the `cli.clista.ai` mock to cut over. `website/CLOUDFLARE.md`
+  is the storefront deploy convention this app's runbook mirrors.
+- `lati-club/lokahi` (PRIVATE; local `/Users/troylatimer/Documents/Lokahi`) — prototype to
+  salvage UX from; its mutable-SQLite engine is dropped. Not productized.
+- `lati-club/clista-ai-app` (this repo).
+
+## Open follow-ups (optional, not blocking deploy)
+- More Compose event types (AssumptionDeclared, ClaimCreated, ReviewSubmitted,
+  DecisionRequested/Recorded) — currently only ObjectionRaised is wired.
+- Wire the index's **New thread** button (ThreadCreated + first ParticipantDeclared).
+- A `vitest`-pool-workers integration test exercising the DO in-runtime (today's DO proof
+  is via `wrangler dev` + curl/browser; engine proof is the Node parity test).
+- v1 object-model scope = the bundled scenario's shape; federation/delegation/negotiation/
+  learning are out of v1 (still vendored so the projector/validator imports resolve).
+
+## Do NOT
+- Rebuild or re-skin the engine — it's ported; reuse it.
+- Commit `.dev.vars` or set `DEV_IDENTITY` in production.
+- Use async Web Crypto for event hashing (breaks deterministic replay).
