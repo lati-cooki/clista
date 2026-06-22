@@ -7,34 +7,76 @@ deployed to **app.clista.ai**.
 
 > Here's a yes — now trace its shape.
 
-## Status: Phase 0 — surface scaffolded
+## Status: Phase 1 — engine ported, trust anchor proven
 
-The Vite + React 19 front-end is up and renders the full cockpit design
-(imported from the `app.clista.ai` Claude Design project, `ClisTa Cockpit.dc.html`).
-Four screens are live against sample data: **Thread Cockpit** (decided + degraded
-states, surviving-objection panel, provenance traces, collapsible audit terminal),
-**Thread Index** (filterable ledger), **Compose / Append** (fail-closed objection
-form), and the **Component Kit**. The full build plan lives in
-[`docs/PLAN.md`](docs/PLAN.md).
+Phase 0 (the surface) and Phase 1 (the real engine) are both in place.
 
-Next: Phase 1 — port the ClisTa engine into a per-thread Durable Object and prove
-`scenario-demo` parity, then wire these screens to projected state + real events.
+**Front-end** — Vite + React 19 renders the full cockpit design (imported from the
+`app.clista.ai` Claude Design project, `ClisTa Cockpit.dc.html`). Four screens are
+live: **Thread Cockpit** (decided + degraded, surviving-objection panel, provenance
+traces, collapsible audit terminal), **Thread Index** (filterable ledger),
+**Compose / Append** (fail-closed objection form), and the **Component Kit**.
+
+**Back-end** — the real ClisTa engine, ported. The pure modules from
+[`lati-club/ClisTa-Protocol`](https://github.com/lati-club/ClisTa-Protocol) are
+vendored verbatim into `worker/engine/`; only the hashing (`node:crypto` →
+synchronous `js-sha256`, byte-identical) and the storage shell (`.clista/events.ndjson`
+→ **Durable Object SQLite**) were adapted. **One Durable Object per thread** holds
+that thread's append-only, hash-chained event log; projection + validation run in the
+DO. Appends are **validate-before-trust, fail-closed** (rejections return `event_id` +
+reasons, HTTP 422).
+
+**Trust anchor (proven):** the bundled `scenario-demo` log projects identically to the
+ClisTa CLI / `expected-state.json` — same decision, object IDs, preserved objection,
+minority report, and 23-event audit — both in the Node parity test and live in `workerd`.
+Tampering a stored event breaks the chain. The full plan: [`docs/PLAN.md`](docs/PLAN.md).
+
+Next: Phase 2/3 — wire the cockpit screens to the DO's projected state and real
+appended events (replacing `src/data.js`), then Phase 4 identity.
 
 ## Run it
 
 ```sh
 npm install
-npm run dev      # http://localhost:5173
-npm run build    # production build → dist/
+npm run dev                  # front-end only → http://localhost:5173
+npm run build                # SPA build → dist/
+npm test                     # engine parity + integrity tests (Node)
+npx wrangler dev             # full stack (Worker + DO + SPA) → http://localhost:8787
+```
+
+Ingest the canonical sample log into a thread and read it back:
+
+```sh
+# (with `wrangler dev` running)
+curl -X POST localhost:8787/api/threads/thd_scenario_demo/ingest \
+  -H 'content-type: application/json' \
+  -d "{\"events\":[$(paste -sd, test/fixtures/scenario-demo.ndjson)]}"
+curl localhost:8787/api/threads/thd_scenario_demo/state
+curl localhost:8787/api/threads/thd_scenario_demo/validate
 ```
 
 ## Layout
 
 - `src/App.jsx` — app shell (topbar, sidebar nav, screen routing)
 - `src/screens/` — `Cockpit`, `ThreadIndex`, `Compose`, `Kit`
-- `src/data.js` — the sample "support-assistant beta" thread (Phase 1 replaces with projected event-log state)
-- `src/styles.js` / `src/icons.js` — design tokens, status badges, line-icon set
-- `src/lib/` — `css()` style helper, `<Svg>`, `<Hoverable>`
+- `src/data.js` — sample "support-assistant beta" thread (Phase 2/3 replaces with DO state)
+- `src/styles.js` / `src/icons.js` / `src/lib/` — design tokens, icons, `css()`/`<Svg>`/`<Hoverable>`
+- `worker/index.js` — Worker router (`/api/threads/:id/{state,summary,audit,validate,append,ingest}`)
+- `worker/thread-do.js` — `ThreadDO`: SQLite event store, validate-before-trust append, projection
+- `worker/engine/` — vendored ClisTa engine (pure modules; `integrity.js` + `events.js` adapted)
+- `test/engine-parity.test.js` — scenario-demo parity + integrity proof
+- `wrangler.jsonc` — DO binding, SQLite migration, static-asset (SPA) serving
+
+## API
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `POST` | `/api/threads/:id/ingest` | Seed an empty thread with a chained event batch |
+| `POST` | `/api/threads/:id/append` | Append one event (validate-before-trust; 422 fail-closed) |
+| `GET` | `/api/threads/:id/state` | Projected thread state (`clista.threadState.v0`) |
+| `GET` | `/api/threads/:id/summary` | Decision answer-view (`clista.decisionSummary.v0`) |
+| `GET` | `/api/threads/:id/audit` | Append-only audit view (`clista.audit.v0`) |
+| `GET` | `/api/threads/:id/validate` | Re-validate stored chain (integrity + validation) |
 
 ## What this becomes
 
