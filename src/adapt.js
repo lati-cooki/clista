@@ -60,7 +60,8 @@ export function adaptCockpit(state, audit, validate) {
     status: thread.status || 'active',
     verified,
 
-    participants: parts.map((p) => ({ initial: initials(p.name), name: p.name, role: p.role })),
+    participants: parts.map((p) => ({ id: p.id, initial: initials(p.name), name: p.name, role: p.role })),
+    participantIds: parts.map((p) => p.id),
 
     decision: {
       id: dec.id || (r.decision && r.decision.id) || null,

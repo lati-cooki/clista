@@ -5,6 +5,7 @@ import { Hoverable } from '../lib/Hoverable.jsx';
 import { ico } from '../icons.js';
 import { badgeFor, tabStyle, provBtnStyle } from '../styles.js';
 import { useThread } from '../useThread.js';
+import { api } from '../api.js';
 
 const MONO = "font-family:'JetBrains Mono',monospace;";
 const eyebrow = "font-family:'JetBrains Mono',monospace; font-size:11.5px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:#3a3a3a;";
@@ -37,15 +38,24 @@ function Notice({ children }) {
   );
 }
 
-export function Cockpit({ threadId, go }) {
-  const { loading, error, vm, empty } = useThread(threadId);
+export function Cockpit({ threadId, me, go }) {
+  const { loading, error, vm, empty, reload } = useThread(threadId);
   const [previewDegraded, setPreviewDegraded] = useState(false);
   const [prov, setProv] = useState(null);
   const [auditOpen, setAuditOpen] = useState(true);
+  const [joining, setJoining] = useState(false);
 
   if (loading) return <Notice>projecting reasoning state from the event log…</Notice>;
   if (error) return <Notice><span style={css('color:#b3343c;')}>state could not be loaded — {error}</span></Notice>;
   if (empty || !vm) return <Notice>No events in <span style={css(MONO)}>{threadId}</span> yet. The cockpit only renders what the log records.</Notice>;
+
+  const isParticipant = !!(me && me.authenticated && (vm.participantIds || []).includes(me.actorId));
+  const join = async () => {
+    setJoining(true);
+    await api.join(threadId, 'contributor');
+    setJoining(false);
+    reload();
+  };
 
   const isDegraded = !vm.verified || previewDegraded;
   const isDecided = !isDegraded;
@@ -69,6 +79,20 @@ export function Cockpit({ threadId, go }) {
           </div>
         </div>
       </div>
+
+      {/* identity / join affordance */}
+      {me && me.authenticated && !isParticipant && (
+        <div style={css('display:flex; align-items:center; gap:12px; padding:11px 16px; margin-bottom:18px; background:#fff; border:1px solid #e0e0de; border-radius:5px;')}>
+          <Svg html={ico('helpCircle', { size: 16 })} style={css('color:#8a8a8a; flex:none;')} />
+          <span style={css('font-size:13px; color:#4a4a4a;')}>
+            You're viewing as <span style={css(MONO + ' font-size:12px; color:#2a2a2a;')}>{me.actorId}</span> — not yet a participant of this thread. Contributions are rejected fail-closed until you join.
+          </span>
+          <div style={css('flex:1;')} />
+          <Hoverable onClick={joining ? undefined : join} base={css('display:inline-flex; align-items:center; gap:7px; padding:8px 14px; background:#0a0a0a; color:#fff; border:none; border-radius:5px; ' + MONO + ' font-size:11px; font-weight:500; letter-spacing:0.04em; cursor:' + (joining ? 'default' : 'pointer') + '; opacity:' + (joining ? '0.6' : '1') + '; flex:none;')} hover={css('background:#2a2a2a;')}>
+            {joining ? 'joining…' : 'Join thread'}
+          </Hoverable>
+        </div>
+      )}
 
       {/* degraded banner */}
       {isDegraded && (

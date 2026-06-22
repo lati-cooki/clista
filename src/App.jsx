@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { css } from './lib/css.js';
 import { Svg } from './lib/Svg.jsx';
 import { Hoverable } from './lib/Hoverable.jsx';
@@ -8,7 +8,9 @@ import { Cockpit } from './screens/Cockpit.jsx';
 import { ThreadIndex } from './screens/ThreadIndex.jsx';
 import { Compose } from './screens/Compose.jsx';
 import { Kit } from './screens/Kit.jsx';
-import { DEMO_THREAD_ID } from './api.js';
+import { api, DEMO_THREAD_ID } from './api.js';
+
+const initials = (s) => (s || '').split(/\s+/).filter(Boolean).map((w) => w[0]).join('').toUpperCase().slice(0, 2) || '?';
 
 const NAV = [
   { key: 'cockpit', label: 'Thread Cockpit', count: '', icon: ico('cockpit', { size: 18 }) },
@@ -20,6 +22,10 @@ const NAV = [
 export function App() {
   const [screen, setScreen] = useState('cockpit');
   const [threadId, setThreadId] = useState(DEMO_THREAD_ID);
+  const [me, setMe] = useState(null);
+  useEffect(() => {
+    api.me().then((res) => setMe(res.ok ? res.data : { authenticated: false }));
+  }, []);
   const go = (next) => () => setScreen(next);
   const openThread = (id) => {
     setThreadId(id);
@@ -53,9 +59,11 @@ export function App() {
           Conversation is input · Reasoning state is output
         </div>
         <div style={css('width:1px; height:24px; background:#e5e5e5; margin:0 8px;')} />
-        <div style={css('display:flex; align-items:center; gap:8px;')}>
-          <span style={css("display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border:1px solid #e0e0de; border-radius:50%; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600; color:#0a0a0a;")}>M</span>
-          <span style={css('font-size:12.5px; color:#4a4a4a; font-weight:500;')}>Maya</span>
+        <div style={css('display:flex; align-items:center; gap:8px;')} title={me && me.authenticated ? `${me.email} · ${me.actorId} · via ${me.source}` : 'not signed in'}>
+          <span style={css("display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border:1px solid #e0e0de; border-radius:50%; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600; color:#0a0a0a;")}>
+            {me && me.authenticated ? initials(me.name) : '–'}
+          </span>
+          <span style={css('font-size:12.5px; color:#4a4a4a; font-weight:500;')}>{me && me.authenticated ? me.name : 'sign in'}</span>
         </div>
       </header>
 
@@ -105,9 +113,9 @@ export function App() {
           'grid-row:2 / 3; overflow-y:auto; background:#e7e6e3; background-image:radial-gradient(circle at 1px 1px, rgba(10,10,10,0.045) 1px, transparent 0); background-size:24px 24px;'
         )}
       >
-        {screen === 'cockpit' && <Cockpit threadId={threadId} go={go} />}
+        {screen === 'cockpit' && <Cockpit threadId={threadId} me={me} go={go} />}
         {screen === 'index' && <ThreadIndex openThread={openThread} go={go} />}
-        {screen === 'compose' && <Compose threadId={threadId} go={go} />}
+        {screen === 'compose' && <Compose threadId={threadId} me={me} go={go} />}
         {screen === 'kit' && <Kit />}
       </main>
     </div>
