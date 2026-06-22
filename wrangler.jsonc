@@ -1,0 +1,29 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "clista-ai-app",
+  "main": "worker/index.js",
+  "compatibility_date": "2025-09-15",
+  // Engine ported to js-sha256 + Web Crypto; no Node builtins, so no nodejs_compat.
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  },
+  "durable_objects": {
+    "bindings": [
+      { "name": "THREAD", "class_name": "ThreadDO" },
+      { "name": "INDEX", "class_name": "IndexDO" }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["ThreadDO"]
+    },
+    {
+      "tag": "v2",
+      "new_sqlite_classes": ["IndexDO"]
+    }
+  ],
+  "observability": { "enabled": true }
+}

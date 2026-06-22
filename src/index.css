@@ -1,0 +1,42 @@
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #e7e6e3; }
+body {
+  font-family: 'Inter Tight', system-ui, sans-serif;
+  color: #0a0a0a;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+#root { height: 100vh; }
+::selection { background: #0a0a0a; color: #fff; }
+
+@keyframes clistaPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+@keyframes clistaScan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+@keyframes clistaFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.clista-scroll::-webkit-scrollbar { width: 10px; height: 10px; }
+.clista-scroll::-webkit-scrollbar-thumb { background: #d4d4d2; border: 3px solid transparent; background-clip: padding-box; border-radius: 6px; }
+.clista-term::-webkit-scrollbar { width: 10px; }
+.clista-term::-webkit-scrollbar-thumb { background: #2a2d36; border: 3px solid transparent; background-clip: padding-box; border-radius: 6px; }
+
+button { font-family: inherit; }
+
+@media (max-width: 860px) {
+  .clista-shell { grid-template-columns: 1fr !important; grid-template-rows: 57px auto 1fr !important; }
+  .clista-shell > aside {
+    grid-row: 2 / 3 !important; grid-column: 1 / 2 !important;
+    flex-direction: row !important; align-items: center; gap: 4px;
+    overflow-x: auto; padding: 8px 10px !important;
+    border-right: none !important; border-bottom: 1px solid #e5e5e5;
+  }
+  .clista-shell > main { grid-row: 3 / 4 !important; grid-column: 1 / 2 !important; }
+  .clista-shell aside [data-aside-extra] { display: none !important; }
+  .clista-shell aside nav { flex-direction: row !important; gap: 6px !important; flex: none; }
+  .clista-shell aside nav button { width: auto !important; white-space: nowrap; padding: 8px 12px !important; }
+  .clista-shell aside nav button > span:last-child { display: none !important; }
+  .clista-shell [data-topbar-tag] { display: none !important; }
+  .clista-shell main h1 { font-size: 23px !important; }
+  .clista-shell .clista-screen { padding: 20px 16px 48px !important; }
+  .clista-shell .clista-grid-2 { grid-template-columns: 1fr !important; }
+  .clista-shell .clista-ledger-grid { grid-template-columns: 1fr 110px !important; }
+  .clista-shell .clista-ledger-grid > :nth-child(n+3) { display: none !important; }
+}
