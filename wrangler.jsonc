@@ -36,7 +36,7 @@
   // the Access application's AUD tag. Local dev uses DEV_IDENTITY in .dev.vars
   // instead (see .dev.vars.example) — never enable DEV_IDENTITY in production.
   "vars": {
-    "ACCESS_TEAM_DOMAIN": "",
-    "ACCESS_AUD": ""
+    "ACCESS_TEAM_DOMAIN": "laticooki",
+    "ACCESS_AUD": "60455fe3334e5242cb0fe8787064ee31e26e209fed6fe2de2f97c52da5b1cb93"
   }
 }

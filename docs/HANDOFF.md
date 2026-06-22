@@ -8,11 +8,23 @@ of truth, UI projects state and emits validated ClisTa events, wearing the clist
 design system. "Here's a yes — now trace its shape." Replaces the mock at cli.clista.ai.
 
 ## Where we are (as of this handoff)
-Phases 0–4 are **built, tested, and committed**; Phase 5 is **prepped, not executed**.
-Everything lives on branch **`phase-0-cockpit-scaffold`** → **open PR #1**
-(https://github.com/lati-club/clista-ai-app/pull/1). Nothing is deployed; no Cloudflare
-account changes have been made. Local repo: `/Users/troylatimer/Documents/clista-ai-app`
-(git user Troy Latimer; remote `lati-club/clista-ai-app`, private).
+Phases 0–4 are **built, tested, and merged** (PR #1 merged into `main`). Phase 5 is
+**EXECUTED — the app is LIVE at https://app.clista.ai**, gated by a Cloudflare Access
+self-hosted app in the `laticooki` Zero Trust org. Local repo:
+`/Users/troylatimer/Documents/clista-ai-app` (git user Troy Latimer; remote
+`lati-club/clista-ai-app`, private).
+
+- **Deploy facts:** Worker `clista-ai-app` on account `troylati`
+  (`1c0cdbfbea6c50934ddcec8546507314`), custom domain `app.clista.ai`, SQLite DOs
+  (ThreadDO/IndexDO, migrations v1/v2 applied). Identity vars in `wrangler.jsonc`:
+  `ACCESS_TEAM_DOMAIN=laticooki`, `ACCESS_AUD=60455fe3334e5242cb0fe8787064ee31e26e209fed6fe2de2f97c52da5b1cb93`
+  (the AUD is public — appears in the Access login redirect — so it's safe to commit).
+  `DEV_IDENTITY` is unset in prod (correct). Redeploy: `npm run build && npx wrangler deploy`.
+  Edge verification passed (`/`→302 Access login, JWKS 200, advertised AUD matches deployed).
+- **Still TODO after deploy:** (a) the authenticated browser smoke (sign in at
+  app.clista.ai → auto-seed + `/validate` true/true + Join → ParticipantDeclared); needs an
+  interactive Access OTP login, so the owner does it. (b) Phase 6 cut-over of `cli.clista.ai`
+  (DEPLOY.md §6, separate repo) — not yet done.
 
 - **Phase 0 — surface.** Vite + React 19 SPA implementing the `app.clista.ai` Claude
   Design project `ClisTa Cockpit.dc.html` (imported via the claude_design MCP /
@@ -48,20 +60,17 @@ account changes have been made. Local repo: `/Users/troylatimer/Documents/clista
   participant gets a fail-closed **Join thread** affordance → appends `ParticipantDeclared`.
   `GET /api/me` backs the topbar.
 
-## Immediate next step — execute Phase 5 (the runbook), then cut over
-Authoritative runbook: **`docs/DEPLOY.md`**. The owner will do this. Sequence:
-1. **[you/owner]** Create a Cloudflare **Access** self-hosted app for `app.clista.ai`;
-   copy the **AUD tag** and team domain.
-2. Set `ACCESS_TEAM_DOMAIN` + `ACCESS_AUD` in `wrangler.jsonc` `vars` (or `--var` at
-   deploy). NEVER set `DEV_IDENTITY` in prod.
-3. `npm ci && npm run build && npx wrangler deploy` (config already has the
-   `app.clista.ai` custom-domain route; `--dry-run` passes). Or push to `main` with repo
-   secrets `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` → `.github/workflows/deploy-app.yml`.
-4. Verify per `docs/DEPLOY.md §4` (sign-in, auto-seed, `/validate`, 401-when-anon, join).
-5. **Cut over** (separate repo `lati-cooki/clista-protocol-launch-planning`): point
-   `website/cli.clista.ai`'s mock at `https://app.clista.ai`, link from `clista.ai` hero,
-   redeploy that surface per its own `website/CLOUDFLARE.md`.
-Safety: until the Access app + vars exist, prod writes 401 (read-only) — safe by default.
+## Immediate next step — finish verification, then cut over
+Phase 5 deploy is DONE (above). What remains:
+1. **[owner]** Authenticated browser smoke at https://app.clista.ai per `docs/DEPLOY.md §4`
+   (sign in via Access OTP → auto-seed, `/validate` true/true, Join → ParticipantDeclared).
+   Needs interactive login, so the agent can't do it; use `wrangler tail` to debug if needed.
+2. **Cut over** `cli.clista.ai` (separate repo `lati-cooki/clista-protocol-launch-planning`):
+   point `website/cli.clista.ai`'s mock at `https://app.clista.ai`, link from `clista.ai`
+   hero, redeploy that surface per its own `website/CLOUDFLARE.md`. NOT yet done.
+Gotcha learned during deploy: the **AUD the owner first pasted was wrong** (belonged to a
+different field/app); the correct AUD is the one in the live Access login redirect's `kid`
+param (and the app's Overview tab). If sign-in 401s with "audience mismatch", re-check it.
 
 ## How to run / verify locally
 - `npm install`
