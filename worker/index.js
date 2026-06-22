@@ -1,6 +1,7 @@
 import { ThreadDO } from './thread-do.js';
 import { IndexDO } from './index-do.js';
 import { scenarioDemoEvents } from './scenario-demo.js';
+import { resolveIdentity } from './identity.js';
 
 export { ThreadDO, IndexDO };
 
@@ -12,11 +13,6 @@ const json = (data, status = 200) =>
 
 const threadStub = (env, id) => env.THREAD.get(env.THREAD.idFromName(id));
 const indexStub = (env) => env.INDEX.get(env.INDEX.idFromName('index'));
-
-// Phase 4 replaces this with real participant identity (Cloudflare Access / OAuth).
-function actorFrom(request) {
-  return request.headers.get('x-clista-actor') || 'par_system';
-}
 
 // Keep the thread index in sync after a write to a thread.
 async function registerThread(env, stub) {
@@ -31,6 +27,12 @@ export default {
 
     if (parts[0] === 'api') {
       try {
+        // GET /api/me — the resolved identity (for the topbar).
+        if (parts[1] === 'me' && request.method === 'GET') {
+          const id = await resolveIdentity(request, env);
+          return json(id);
+        }
+
         // GET /api/threads — the index/ledger
         if (parts[1] === 'threads' && !parts[2] && request.method === 'GET') {
           return json(await indexStub(env).list());
@@ -49,7 +51,33 @@ export default {
           }
 
           if (request.method === 'POST') {
+            // All writes require an authenticated participant identity.
+            const identity = await resolveIdentity(request, env);
+            if (!identity.authenticated) {
+              return json({ error: 'unauthenticated', reason: identity.reason || 'sign in required' }, 401);
+            }
             const body = await request.json().catch(() => ({}));
+
+            // Join: declare the caller as a participant of this thread.
+            if (action === 'join') {
+              const event = {
+                event_type: 'ParticipantDeclared',
+                thread_id: threadId,
+                actor_id: identity.actorId,
+                payload: {
+                  participant: {
+                    id: identity.actorId,
+                    object: 'participant',
+                    kind: 'human',
+                    name: identity.name,
+                    role: body.role || 'contributor',
+                  },
+                },
+              };
+              const result = await stub.append(event);
+              if (result.ok) await registerThread(env, stub);
+              return json(result, result.ok ? 200 : 422);
+            }
 
             // Seed the demo thread with the bundled canonical scenario log.
             if (action === 'seed-demo') {
@@ -65,9 +93,10 @@ export default {
             }
 
             if (action === 'append') {
+              // Server-authoritative actor: identity decides actor_id, never the client.
               const event = { ...(body.event || body) };
               event.thread_id = event.thread_id || threadId;
-              event.actor_id = event.actor_id || actorFrom(request);
+              event.actor_id = identity.actorId;
               const result = await stub.append(event);
               if (result.ok) await registerThread(env, stub);
               return json(result, result.ok ? 200 : 422); // fail-closed → 422

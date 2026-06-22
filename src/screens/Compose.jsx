@@ -12,26 +12,33 @@ const SEVERITIES = ['minor', 'major', 'blocking'];
 const fieldLabel = "display:block; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#6a6a6a; margin-bottom:8px;";
 const inputBase = "width:100%; padding:11px 13px; font-family:'JetBrains Mono',monospace; font-size:12.5px; color:#1a1a1a; background:#fcfcfb; border:1px solid #d8d8d6; border-radius:5px; outline:none;";
 
-// The challenger raises objections in this demo; a known participant is required
-// for validate-before-trust to accept the append (Phase 4 wires real identity).
-const ACTOR = 'par_privacy';
-
 function objectionId() {
   const buf = new Uint8Array(4);
   crypto.getRandomValues(buf);
   return 'obj_' + Array.from(buf, (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-export function Compose({ threadId, go }) {
-  const { vm } = useThread(threadId);
+export function Compose({ threadId, me, go }) {
+  const { vm, reload } = useThread(threadId);
   const [target, setTarget] = useState('');
   const [statement, setStatement] = useState('');
   const [basis, setBasis] = useState('');
   const [severity, setSeverity] = useState('major');
   const [result, setResult] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [joining, setJoining] = useState(false);
 
   const targets = (vm && vm.composeTargets) || [{ v: '', label: '— select what this challenges —' }];
+  const actorId = me && me.authenticated ? me.actorId : null;
+  const isParticipant = !!(actorId && vm && (vm.participantIds || []).includes(actorId));
+
+  const join = async () => {
+    setJoining(true);
+    await api.join(threadId, 'contributor');
+    setJoining(false);
+    setResult(null);
+    reload();
+  };
 
   const clear = (setter) => (e) => {
     setter(e && e.target ? e.target.value : e);
@@ -52,13 +59,13 @@ export function Compose({ threadId, go }) {
     const isDecision = /^(dcr|dec)/.test(target);
     const event = {
       event_type: 'ObjectionRaised',
-      actor_id: ACTOR,
+      // actor_id is set server-side from the authenticated identity.
       payload: {
         objection: {
           id: objId,
           object: 'objection',
           threadId,
-          participantId: ACTOR,
+          participantId: actorId,
           targetObjectId: target,
           targetObjectType: isDecision ? 'decision' : 'claim',
           text: statement.trim(),
@@ -70,7 +77,7 @@ export function Compose({ threadId, go }) {
     };
 
     setBusy(true);
-    const res = await api.append(threadId, event, ACTOR);
+    const res = await api.append(threadId, event);
     setBusy(false);
 
     if (res.ok && res.data.ok) {
@@ -154,8 +161,19 @@ export function Compose({ threadId, go }) {
           </Hoverable>
           <Hoverable onClick={reset} base={css('padding:11px 16px; background:none; color:#6a6a6a; border:1px solid #d8d8d6; border-radius:5px; ' + MONO + ' font-size:12px; cursor:pointer;')} hover={css('border-color:#0a0a0a; color:#0a0a0a;')}>Reset</Hoverable>
           <div style={css('flex:1;')} />
-          <span style={css(MONO + ' font-size:10.5px; color:#a5a5a5;')}>fail-closed · validated before append · as {ACTOR}</span>
+          <span style={css(MONO + ' font-size:10.5px; color:#a5a5a5;')}>fail-closed · validated before append · as {actorId || 'unauthenticated'}</span>
         </div>
+        {actorId && !isParticipant && (
+          <div style={css('display:flex; align-items:center; gap:12px; margin-top:16px; padding:11px 14px; background:#fcfcfb; border:1px solid #e5e5e5; border-radius:5px;')}>
+            <span style={css('font-size:12.5px; color:#6a6a6a;')}>
+              <span style={css(MONO + ' font-size:12px; color:#2a2a2a;')}>{actorId}</span> is not a participant of this thread — the append will be rejected until you join.
+            </span>
+            <div style={css('flex:1;')} />
+            <Hoverable onClick={joining ? undefined : join} base={css('display:inline-flex; align-items:center; gap:7px; padding:8px 14px; background:#fff; color:#1a1a1a; border:1px solid #d4d4d2; border-radius:5px; ' + MONO + ' font-size:11px; font-weight:500; letter-spacing:0.04em; cursor:' + (joining ? 'default' : 'pointer') + '; flex:none;')} hover={css('border-color:#0a0a0a;')}>
+              {joining ? 'joining…' : 'Join thread'}
+            </Hoverable>
+          </div>
+        )}
       </div>
 
       {/* result */}

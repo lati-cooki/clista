@@ -7,10 +7,24 @@ deployed to **app.clista.ai**.
 
 > Here's a yes — now trace its shape.
 
-## Status: Phase 2/3 — cockpit wired to the live engine
+## Status: Phase 4 — participant identity
 
-Phases 0–3 are in place: the design renders from **real projected event-log state**,
-and the UI emits real validated ClisTa events.
+Phases 0–4 are in place: the design renders from **real projected event-log state**,
+the UI emits real validated ClisTa events, and every event's `actor_id` is a real,
+server-resolved participant identity.
+
+**Identity (Phase 4)** — `worker/identity.js` resolves the caller:
+- **Production:** Cloudflare Access. The edge injects a signed `Cf-Access-Jwt-Assertion`
+  that the Worker verifies against the team JWKS (RS256, issuer + audience checks).
+  Set `ACCESS_TEAM_DOMAIN` and `ACCESS_AUD` in `wrangler.jsonc`.
+- **Local dev:** an `X-Clista-Email` header, honored only when `DEV_IDENTITY=true`
+  (`.dev.vars`, gitignored — see `.dev.vars.example`). Off by default in production.
+
+The resolved `actor_id` (`par_<email-slug>`) is **server-authoritative** — clients
+never set their own. Writes require authentication (401 otherwise). A signed-in user
+who isn't yet a participant of a thread sees a fail-closed **Join thread** affordance
+that appends a `ParticipantDeclared` event; only then do their contributions validate.
+`GET /api/me` backs the topbar identity.
 
 **Front-end** — Vite + React 19 renders the cockpit design (imported from the
 `app.clista.ai` Claude Design project, `ClisTa Cockpit.dc.html`), now **sourced from
@@ -43,8 +57,8 @@ ClisTa CLI / `expected-state.json` — same decision, object IDs, preserved obje
 minority report, and 23-event audit — both in the Node parity test and live in `workerd`.
 Tampering a stored event breaks the chain. The full plan: [`docs/PLAN.md`](docs/PLAN.md).
 
-Next: Phase 4 — real participant identity on every event's `actor_id` (Cloudflare
-Access / OAuth), replacing the demo `x-clista-actor` header; then Phase 5 cut-over.
+Next: Phase 5 — deploy `app.clista.ai` (new Pages/Worker project + wildcard
+subdomain + Cloudflare Access app), then cut `cli.clista.ai`'s mock over to it.
 
 ## Run it
 
@@ -76,22 +90,25 @@ curl localhost:8787/api/threads/thd_scenario_demo/validate
 - `worker/index.js` — Worker router (`/api/threads`, `/api/threads/:id/{state,summary,audit,validate,append,ingest,seed-demo}`)
 - `worker/thread-do.js` — `ThreadDO`: SQLite event store, validate-before-trust append, projection
 - `worker/index-do.js` — `IndexDO`: thread_id → card ledger for the index
+- `worker/identity.js` — Cloudflare Access JWT verification + gated dev fallback → `actor_id`
 - `worker/engine/` — vendored ClisTa engine (pure modules; `integrity.js` + `events.js` adapted)
 - `test/engine-parity.test.js` — scenario-demo parity + integrity proof
 - `wrangler.jsonc` — DO binding, SQLite migration, static-asset (SPA) serving
 
 ## API
 
-| Method | Route | Purpose |
-| --- | --- | --- |
-| `GET` | `/api/threads` | List threads from the index ledger |
-| `POST` | `/api/threads/:id/seed-demo` | Seed an empty thread with the bundled scenario log |
-| `POST` | `/api/threads/:id/ingest` | Seed an empty thread with a chained event batch |
-| `POST` | `/api/threads/:id/append` | Append one event (validate-before-trust; 422 fail-closed) |
-| `GET` | `/api/threads/:id/state` | Projected thread state (`clista.threadState.v0`) |
-| `GET` | `/api/threads/:id/summary` | Decision answer-view (`clista.decisionSummary.v0`) |
-| `GET` | `/api/threads/:id/audit` | Append-only audit view (`clista.audit.v0`) |
-| `GET` | `/api/threads/:id/validate` | Re-validate stored chain (integrity + validation) |
+| Method | Route | Auth | Purpose |
+| --- | --- | --- | --- |
+| `GET` | `/api/me` | — | Resolved caller identity (Access or dev) |
+| `POST` | `/api/threads/:id/join` | ✓ | Declare the caller as a participant |
+| `GET` | `/api/threads` | — | List threads from the index ledger |
+| `POST` | `/api/threads/:id/seed-demo` | ✓ | Seed an empty thread with the bundled scenario log |
+| `POST` | `/api/threads/:id/ingest` | ✓ | Seed an empty thread with a chained event batch |
+| `POST` | `/api/threads/:id/append` | ✓ | Append one event (validate-before-trust; 422 fail-closed) |
+| `GET` | `/api/threads/:id/state` | — | Projected thread state (`clista.threadState.v0`) |
+| `GET` | `/api/threads/:id/summary` | — | Decision answer-view (`clista.decisionSummary.v0`) |
+| `GET` | `/api/threads/:id/audit` | — | Append-only audit view (`clista.audit.v0`) |
+| `GET` | `/api/threads/:id/validate` | — | Re-validate stored chain (integrity + validation) |
 
 ## What this becomes
 
