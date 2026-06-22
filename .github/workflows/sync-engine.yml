@@ -1,0 +1,78 @@
+name: Sync ClisTa engine
+
+# Re-vendor worker/engine/ from lati-club/ClisTa-Protocol. The engine is the
+# app's trust anchor, so upstream changes never auto-deploy — this workflow
+# opens a PR when the vendored engine drifts, and a human reviews it. Merging
+# the PR (touching worker/**) then triggers deploy-app.yml.
+#
+# Runs weekly, on manual dispatch (optionally pinning a ref), or when the
+# protocol repo pings us via repository_dispatch {type: clista-protocol-release}.
+
+on:
+  schedule:
+    - cron: "0 7 * * 1" # Mondays 07:00 UTC
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "ClisTa-Protocol git ref (tag/branch/sha). Blank = latest release tag."
+        required: false
+        default: ""
+  repository_dispatch:
+    types: [clista-protocol-release]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Clone ClisTa-Protocol (public)
+        run: |
+          git clone --quiet https://github.com/lati-club/ClisTa-Protocol.git ../ClisTa-Protocol
+          REF="${{ github.event.inputs.ref || github.event.client_payload.ref }}"
+          if [ -z "$REF" ]; then
+            REF="$(git -C ../ClisTa-Protocol describe --tags --abbrev=0 2>/dev/null || echo main)"
+          fi
+          git -C ../ClisTa-Protocol checkout --quiet "$REF"
+          echo "SYNCED_REF=$REF" >> "$GITHUB_ENV"
+          echo "SYNCED_SHA=$(git -C ../ClisTa-Protocol rev-parse --short HEAD)" >> "$GITHUB_ENV"
+
+      - run: npm ci
+
+      # Re-vendor. Exits non-zero (fails the run) if an adapted port drifted
+      # upstream and needs a manual re-port — that is the intended signal.
+      - name: Re-vendor engine
+        run: node scripts/vendor-engine.mjs --from ../ClisTa-Protocol
+
+      - name: Parity test (engine replays identically to the CLI)
+        run: npm test
+
+      - name: Open PR on drift
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: sync/clista-engine
+          base: main
+          add-paths: |
+            worker/engine/**
+          commit-message: "Sync ClisTa engine from upstream (${{ env.SYNCED_REF }} @ ${{ env.SYNCED_SHA }})"
+          title: "Sync ClisTa engine from upstream (${{ env.SYNCED_REF }})"
+          body: |
+            Automated re-vendor of `worker/engine/` from
+            **lati-club/ClisTa-Protocol@${{ env.SYNCED_REF }}** (`${{ env.SYNCED_SHA }}`).
+
+            - Verbatim modules copied from upstream `src/`.
+            - Hand-adapted ports (`integrity.js`, `events.js`) left untouched and guarded.
+            - Parity test passed (engine replays identically to the CLI).
+
+            **Trust anchor — review the engine diff before merging.** Merging
+            (touches `worker/**`) triggers `deploy-app.yml` → app.clista.ai.
+          labels: engine-sync

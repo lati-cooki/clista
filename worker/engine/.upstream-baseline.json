@@ -1,0 +1,29 @@
+{
+  "source": "lati-club/ClisTa-Protocol",
+  "ref": "ref: refs/heads/main",
+  "files": {
+    "adaptation.js": "sha256:93c3dfabd499e0f4c3bd70d0d5e1572528077a908c264f6add35139320c0b8e4",
+    "amendments.js": "sha256:fa9cabbe7126a7b70311ee5e91bf457b240615d23ed4130bcd4c29dc773d0f7f",
+    "attribution.js": "sha256:0b92a388694044df1c152755cee22e5142713dd27877371d5950db8a6edf8776",
+    "compatibility.js": "sha256:9a8b9ecf90f9fdef5c089e58685696561fe447f962f5a2d0d689bd53b07eacea",
+    "delegation.js": "sha256:21cf5727cdba3b891ae2f76ba154c3112d0e7ec5757bdbb3be2065061cb1b00c",
+    "events.js": "sha256:081ccf0ded2bc0bdb9e50f82ed8a5c3f6798b55ef99147b560323edf39ff0f83",
+    "execution.js": "sha256:a7142c9f7edd4434aef017476c2724cc9def037a300ce91da83edc3388f08d8c",
+    "federation.js": "sha256:3abe255191630acd5a821a18e370fc34b9748be84aaade0f3844daa0cf94dcb5",
+    "governance.js": "sha256:d7b449e0b25db041d1a4e051111bff14e41223813cd535c57d5cd065065209dd",
+    "identity.js": "sha256:a71fb3a89b7523a8453111d04c59519ef06c1730fa345071b944cb8c8163e4e9",
+    "integrity.js": "sha256:1d63059a299010612951d39f328f0a87139c885feefcb31618182ebabe67e16b",
+    "interoperability.js": "sha256:4fc4ef9d5b8f05ce735429da4e50bb8a26ea53c00b0ed2bef33a9eddcabab43d",
+    "learning.js": "sha256:5eb7d9fd5fa8d6e8289d666ef6cefa4eb5022b460b52d80f1fa90c14cae07803",
+    "merges.js": "sha256:4c817637f6066896c9e5022f228953fc6ee89e9702e986105bc931d906296677",
+    "negotiation.js": "sha256:e5529ceb1daa2b61bd33b6c9c873eed13f8e2bc633bce517578bfb458c24ee9d",
+    "outcome-learning.js": "sha256:85c0edbd7b2363b3622029fdb4cde44b45db8354de8f423f5b07ec0dfcf8a447",
+    "outcome.js": "sha256:79e124005ed7dcbf7d80a4438bf9a17039583c0aeff9db2be7955891b1b2cc3f",
+    "projector.js": "sha256:b7e821ee31dad92585619e8c63038cdbedce1eb037a9134659565d767b24166a",
+    "provenance.js": "sha256:205cae7e35db6c89a1a3b9f8b052e8f43c9a4b27266f4905bcc87fc8565ddcbc",
+    "recovery.js": "sha256:04cb76198af446e925e051abae645a72b28a5a1885708681bec76e40384de09c",
+    "review.js": "sha256:4d57a345d35f9c0bb72e37aa6c65bb29f9d9b2c69d398b9be833311c7aa84717",
+    "utils.js": "sha256:ddb0e6804a28b15313f93dad2b0ee9dfdc04eca20ea92b975a8b82f6b654c1f2",
+    "validator.js": "sha256:bd20b28a55b16bc6f6a03549cbafb9afb82ae2732f50eaefa3c010a9f6f93b6e"
+  }
+}
