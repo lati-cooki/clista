@@ -4,43 +4,85 @@ import { Svg } from '../lib/Svg.jsx';
 import { Hoverable } from '../lib/Hoverable.jsx';
 import { ico } from '../icons.js';
 import { filterStyle } from '../styles.js';
-import { composeTargets } from '../data.js';
+import { api } from '../api.js';
+import { useThread } from '../useThread.js';
 
 const MONO = "font-family:'JetBrains Mono',monospace;";
 const SEVERITIES = ['minor', 'major', 'blocking'];
 const fieldLabel = "display:block; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#6a6a6a; margin-bottom:8px;";
 const inputBase = "width:100%; padding:11px 13px; font-family:'JetBrains Mono',monospace; font-size:12.5px; color:#1a1a1a; background:#fcfcfb; border:1px solid #d8d8d6; border-radius:5px; outline:none;";
 
-// rid() — short random id, mirrors the design's event-id generator.
-function rid(prefix, n) {
-  const h = '0123456789abcdef';
-  let s = '';
-  for (let i = 0; i < n; i++) s += h[Math.floor(Math.random() * 16)];
-  return prefix + s;
+// The challenger raises objections in this demo; a known participant is required
+// for validate-before-trust to accept the append (Phase 4 wires real identity).
+const ACTOR = 'par_privacy';
+
+function objectionId() {
+  const buf = new Uint8Array(4);
+  crypto.getRandomValues(buf);
+  return 'obj_' + Array.from(buf, (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-export function Compose({ go }) {
+export function Compose({ threadId, go }) {
+  const { vm } = useThread(threadId);
   const [target, setTarget] = useState('');
   const [statement, setStatement] = useState('');
   const [basis, setBasis] = useState('');
   const [severity, setSeverity] = useState('major');
   const [result, setResult] = useState(null);
+  const [busy, setBusy] = useState(false);
 
-  const clearResult = (setter) => (e) => {
+  const targets = (vm && vm.composeTargets) || [{ v: '', label: '— select what this challenges —' }];
+
+  const clear = (setter) => (e) => {
     setter(e && e.target ? e.target.value : e);
     setResult(null);
   };
 
-  const submit = () => {
+  const submit = async () => {
+    // Client-side guard mirrors the engine's rules for a fast local rejection.
     if (!target) {
-      setResult({ ok: false, id: rid('evt_', 4), reason: 'objection.target is required — every objection must attach to a claim or the decision. Append rejected; reasoning state unchanged.' });
+      setResult({ ok: false, id: '—', reason: 'objection.target is required — every objection must attach to a claim or the decision. Append rejected; reasoning state unchanged.' });
       return;
     }
     if (statement.trim().length < 12) {
-      setResult({ ok: false, id: rid('evt_', 4), reason: 'objection.statement must state precisely what is challenged (min 12 chars). Append rejected; reasoning state unchanged.' });
+      setResult({ ok: false, id: '—', reason: 'objection.statement must state precisely what is challenged (min 12 chars). Append rejected; reasoning state unchanged.' });
       return;
     }
-    setResult({ ok: true, evt: rid('evt_', 4), obj: rid('obj_', 4), target });
+    const objId = objectionId();
+    const isDecision = /^(dcr|dec)/.test(target);
+    const event = {
+      event_type: 'ObjectionRaised',
+      actor_id: ACTOR,
+      payload: {
+        objection: {
+          id: objId,
+          object: 'objection',
+          threadId,
+          participantId: ACTOR,
+          targetObjectId: target,
+          targetObjectType: isDecision ? 'decision' : 'claim',
+          text: statement.trim(),
+          status: 'open',
+          raisedAt: new Date().toISOString(),
+          ...(basis ? { assumption: basis } : {}),
+        },
+      },
+    };
+
+    setBusy(true);
+    const res = await api.append(threadId, event, ACTOR);
+    setBusy(false);
+
+    if (res.ok && res.data.ok) {
+      setResult({ ok: true, evt: res.data.event.event_id, obj: objId, target });
+    } else {
+      const reasons = res.data.reasons || [];
+      setResult({
+        ok: false,
+        id: res.data.event_id || '—',
+        reason: reasons.length ? reasons.map((r) => r.reason).join(' · ') : res.data.error || 'append rejected, fail-closed.',
+      });
+    }
   };
 
   const reset = () => {
@@ -54,7 +96,7 @@ export function Compose({ go }) {
   return (
     <div className="clista-screen" style={css('max-width:760px; margin:0 auto; padding:28px 40px 64px;')}>
       <div style={css('display:flex; align-items:center; gap:10px; margin-bottom:22px;')}>
-        <Hoverable onClick={go('cockpit')} base={css(MONO + ' font-size:11px; color:#8a8a8a; background:none; border:none; cursor:pointer; letter-spacing:0.04em; padding:0;')} hover={css('color:#0a0a0a;')}>th_8f3ac1</Hoverable>
+        <Hoverable onClick={go('cockpit')} base={css(MONO + ' font-size:11px; color:#8a8a8a; background:none; border:none; cursor:pointer; letter-spacing:0.04em; padding:0;')} hover={css('color:#0a0a0a;')}>{threadId}</Hoverable>
         <span style={css('color:#c4c4c2; ' + MONO + ' font-size:11px;')}>/</span>
         <span style={css(MONO + ' font-size:11px; color:#4a4a4a; letter-spacing:0.04em;')}>append</span>
       </div>
@@ -72,8 +114,8 @@ export function Compose({ go }) {
         <div style={css('margin-bottom:20px;')}>
           <label style={css(fieldLabel)}>objection.target <span style={css('color:#b3343c;')}>*</span></label>
           <div style={css('position:relative;')}>
-            <select value={target} onChange={clearResult(setTarget)} style={css('appearance:none; ' + inputBase + ' padding:11px 38px 11px 13px; cursor:pointer;')}>
-              {composeTargets.map((tg) => (
+            <select value={target} onChange={clear(setTarget)} style={css('appearance:none; ' + inputBase + ' padding:11px 38px 11px 13px; cursor:pointer;')}>
+              {targets.map((tg) => (
                 <option key={tg.v} value={tg.v}>{tg.label}</option>
               ))}
             </select>
@@ -85,7 +127,7 @@ export function Compose({ go }) {
           <label style={css(fieldLabel)}>objection.statement <span style={css('color:#b3343c;')}>*</span></label>
           <textarea
             value={statement}
-            onChange={clearResult(setStatement)}
+            onChange={clear(setStatement)}
             placeholder="State precisely what this objection challenges, and what would retire it."
             rows={4}
             style={css("width:100%; resize:vertical; padding:12px 13px; font-family:'Inter Tight',sans-serif; font-size:14px; line-height:1.55; color:#1a1a1a; background:#fcfcfb; border:1px solid #d8d8d6; border-radius:5px; outline:none;")}
@@ -94,7 +136,7 @@ export function Compose({ go }) {
         {/* basis */}
         <div style={css('margin-bottom:20px;')}>
           <label style={css(fieldLabel)}>objection.basis <span style={css('color:#a5a5a5; font-weight:500;')}>optional</span></label>
-          <input value={basis} onChange={clearResult(setBasis)} placeholder="evd_… reference, if grounded in evidence" style={css(inputBase)} />
+          <input value={basis} onChange={clear(setBasis)} placeholder="evd_… reference, if grounded in evidence" style={css(inputBase)} />
         </div>
         {/* severity */}
         <div style={css('margin-bottom:24px;')}>
@@ -107,12 +149,12 @@ export function Compose({ go }) {
         </div>
 
         <div style={css('display:flex; align-items:center; gap:12px; padding-top:20px; border-top:1px solid #ededeb;')}>
-          <Hoverable onClick={submit} base={css('display:inline-flex; align-items:center; gap:8px; padding:11px 18px; background:#0a0a0a; color:#fff; border:none; border-radius:5px; ' + MONO + ' font-size:12px; font-weight:500; letter-spacing:0.04em; cursor:pointer;')} hover={css('background:#2a2a2a;')}>
-            <Svg html={ico('checkArrow', { size: 14, sw: 1.9 })} />Append objection
+          <Hoverable onClick={busy ? undefined : submit} base={css('display:inline-flex; align-items:center; gap:8px; padding:11px 18px; background:#0a0a0a; color:#fff; border:none; border-radius:5px; ' + MONO + ' font-size:12px; font-weight:500; letter-spacing:0.04em; cursor:' + (busy ? 'default' : 'pointer') + '; opacity:' + (busy ? '0.6' : '1') + ';')} hover={css('background:#2a2a2a;')}>
+            <Svg html={ico('checkArrow', { size: 14, sw: 1.9 })} />{busy ? 'Appending…' : 'Append objection'}
           </Hoverable>
           <Hoverable onClick={reset} base={css('padding:11px 16px; background:none; color:#6a6a6a; border:1px solid #d8d8d6; border-radius:5px; ' + MONO + ' font-size:12px; cursor:pointer;')} hover={css('border-color:#0a0a0a; color:#0a0a0a;')}>Reset</Hoverable>
           <div style={css('flex:1;')} />
-          <span style={css(MONO + ' font-size:10.5px; color:#a5a5a5;')}>fail-closed · validated before append</span>
+          <span style={css(MONO + ' font-size:10.5px; color:#a5a5a5;')}>fail-closed · validated before append · as {ACTOR}</span>
         </div>
       </div>
 
@@ -142,7 +184,7 @@ export function Compose({ go }) {
               <span style={css('color:#6a9a82;')}>event.id</span><span>{result.evt}</span>
               <span style={css('color:#6a9a82;')}>attached.to</span><span>{result.target}</span>
             </div>
-            <p style={css('margin:8px 0 0; font-size:12.5px; color:#3a6a52;')}>Reasoning state updated. The objection is now part of the thread's shape and will be re-evaluated at decision time.</p>
+            <p style={css('margin:8px 0 0; font-size:12.5px; color:#3a6a52;')}>Reasoning state updated and re-chained. Open the cockpit to see this objection in the thread's shape.</p>
           </div>
         </div>
       )}

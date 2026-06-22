@@ -8,6 +8,7 @@ import { Cockpit } from './screens/Cockpit.jsx';
 import { ThreadIndex } from './screens/ThreadIndex.jsx';
 import { Compose } from './screens/Compose.jsx';
 import { Kit } from './screens/Kit.jsx';
+import { DEMO_THREAD_ID } from './api.js';
 
 const NAV = [
   { key: 'cockpit', label: 'Thread Cockpit', count: '', icon: ico('cockpit', { size: 18 }) },
@@ -18,7 +19,12 @@ const NAV = [
 
 export function App() {
   const [screen, setScreen] = useState('cockpit');
+  const [threadId, setThreadId] = useState(DEMO_THREAD_ID);
   const go = (next) => () => setScreen(next);
+  const openThread = (id) => {
+    setThreadId(id);
+    setScreen('cockpit');
+  };
 
   return (
     <div
@@ -99,9 +105,9 @@ export function App() {
           'grid-row:2 / 3; overflow-y:auto; background:#e7e6e3; background-image:radial-gradient(circle at 1px 1px, rgba(10,10,10,0.045) 1px, transparent 0); background-size:24px 24px;'
         )}
       >
-        {screen === 'cockpit' && <Cockpit go={go} />}
-        {screen === 'index' && <ThreadIndex go={go} />}
-        {screen === 'compose' && <Compose go={go} />}
+        {screen === 'cockpit' && <Cockpit threadId={threadId} go={go} />}
+        {screen === 'index' && <ThreadIndex openThread={openThread} go={go} />}
+        {screen === 'compose' && <Compose threadId={threadId} go={go} />}
         {screen === 'kit' && <Kit />}
       </main>
     </div>

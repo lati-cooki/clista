@@ -7,15 +7,27 @@ deployed to **app.clista.ai**.
 
 > Here's a yes — now trace its shape.
 
-## Status: Phase 1 — engine ported, trust anchor proven
+## Status: Phase 2/3 — cockpit wired to the live engine
 
-Phase 0 (the surface) and Phase 1 (the real engine) are both in place.
+Phases 0–3 are in place: the design renders from **real projected event-log state**,
+and the UI emits real validated ClisTa events.
 
-**Front-end** — Vite + React 19 renders the full cockpit design (imported from the
-`app.clista.ai` Claude Design project, `ClisTa Cockpit.dc.html`). Four screens are
-live: **Thread Cockpit** (decided + degraded, surviving-objection panel, provenance
-traces, collapsible audit terminal), **Thread Index** (filterable ledger),
-**Compose / Append** (fail-closed objection form), and the **Component Kit**.
+**Front-end** — Vite + React 19 renders the cockpit design (imported from the
+`app.clista.ai` Claude Design project, `ClisTa Cockpit.dc.html`), now **sourced from
+the Durable Object**, not fixtures:
+- **Thread Cockpit** projects a thread's state from `/state` + `/audit` + `/validate`
+  (question, participants, decision record, surviving objection, evidence with real
+  confidence/hashes, assumptions, claims, reviews, minority report, residual risks
+  derived from preserved objections, and the audit terminal showing the real chained
+  events + head hash). Verified/degraded is driven by the real validation result.
+- **Thread Index** lists threads from the `IndexDO` ledger.
+- **Compose / Append** posts a real `ObjectionRaised` event to `/append` — validated
+  before trust, hash-chained, and reflected back (server-minted `event_id`, or a
+  fail-closed rejection with the reason).
+- **Component Kit** documents the primitives.
+
+The projection→view-model mapping lives in `src/adapt.js`; data loading in
+`src/useThread.js`; the API client in `src/api.js`.
 
 **Back-end** — the real ClisTa engine, ported. The pure modules from
 [`lati-club/ClisTa-Protocol`](https://github.com/lati-club/ClisTa-Protocol) are
@@ -31,8 +43,8 @@ ClisTa CLI / `expected-state.json` — same decision, object IDs, preserved obje
 minority report, and 23-event audit — both in the Node parity test and live in `workerd`.
 Tampering a stored event breaks the chain. The full plan: [`docs/PLAN.md`](docs/PLAN.md).
 
-Next: Phase 2/3 — wire the cockpit screens to the DO's projected state and real
-appended events (replacing `src/data.js`), then Phase 4 identity.
+Next: Phase 4 — real participant identity on every event's `actor_id` (Cloudflare
+Access / OAuth), replacing the demo `x-clista-actor` header; then Phase 5 cut-over.
 
 ## Run it
 
@@ -59,10 +71,11 @@ curl localhost:8787/api/threads/thd_scenario_demo/validate
 
 - `src/App.jsx` — app shell (topbar, sidebar nav, screen routing)
 - `src/screens/` — `Cockpit`, `ThreadIndex`, `Compose`, `Kit`
-- `src/data.js` — sample "support-assistant beta" thread (Phase 2/3 replaces with DO state)
+- `src/api.js` / `src/useThread.js` / `src/adapt.js` — API client, thread loader, projection→view-model
 - `src/styles.js` / `src/icons.js` / `src/lib/` — design tokens, icons, `css()`/`<Svg>`/`<Hoverable>`
-- `worker/index.js` — Worker router (`/api/threads/:id/{state,summary,audit,validate,append,ingest}`)
+- `worker/index.js` — Worker router (`/api/threads`, `/api/threads/:id/{state,summary,audit,validate,append,ingest,seed-demo}`)
 - `worker/thread-do.js` — `ThreadDO`: SQLite event store, validate-before-trust append, projection
+- `worker/index-do.js` — `IndexDO`: thread_id → card ledger for the index
 - `worker/engine/` — vendored ClisTa engine (pure modules; `integrity.js` + `events.js` adapted)
 - `test/engine-parity.test.js` — scenario-demo parity + integrity proof
 - `wrangler.jsonc` — DO binding, SQLite migration, static-asset (SPA) serving
@@ -71,6 +84,8 @@ curl localhost:8787/api/threads/thd_scenario_demo/validate
 
 | Method | Route | Purpose |
 | --- | --- | --- |
+| `GET` | `/api/threads` | List threads from the index ledger |
+| `POST` | `/api/threads/:id/seed-demo` | Seed an empty thread with the bundled scenario log |
 | `POST` | `/api/threads/:id/ingest` | Seed an empty thread with a chained event batch |
 | `POST` | `/api/threads/:id/append` | Append one event (validate-before-trust; 422 fail-closed) |
 | `GET` | `/api/threads/:id/state` | Projected thread state (`clista.threadState.v0`) |

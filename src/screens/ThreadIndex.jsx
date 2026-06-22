@@ -1,19 +1,36 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { css } from '../lib/css.js';
 import { Svg } from '../lib/Svg.jsx';
 import { Hoverable } from '../lib/Hoverable.jsx';
 import { ico } from '../icons.js';
 import { badgeFor, filterStyle } from '../styles.js';
-import { threadsAll } from '../data.js';
+import { api } from '../api.js';
+import { relativeTime } from '../adapt.js';
 
 const MONO = "font-family:'JetBrains Mono',monospace;";
 const FILTERS = ['all', 'active', 'decided', 'degraded', 'failed'];
 const colHead = "font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#a5a5a5;";
 const GRID = 'grid-template-columns:1fr 132px 130px 96px 60px; gap:16px;';
 
-export function ThreadIndex({ go }) {
+export function ThreadIndex({ openThread, go }) {
   const [filter, setFilter] = useState('all');
-  const threads = threadsAll.filter((t) => filter === 'all' || t.status === filter);
+  const [rows, setRows] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let live = true;
+    api.listThreads().then((res) => {
+      if (!live) return;
+      if (res.ok) setRows(res.data.threads || []);
+      else setError(res.data.error || 'failed to load index');
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  const threads = (rows || []).filter((t) => filter === 'all' || t.status === filter);
+  const attention = (rows || []).filter((t) => t.status === 'degraded' || t.status === 'failed').length;
 
   return (
     <div className="clista-screen" style={css('max-width:1080px; margin:0 auto; padding:28px 40px 64px;')}>
@@ -22,7 +39,9 @@ export function ThreadIndex({ go }) {
           <div style={css(MONO + ' font-size:11px; font-weight:500; letter-spacing:0.16em; text-transform:uppercase; color:#9a9a9a; margin-bottom:9px;')}>Thread Index</div>
           <h1 style={css("margin:0; font-family:'Inter Tight',sans-serif; font-size:28px; font-weight:600; letter-spacing:-0.015em; color:#0a0a0a;")}>Decision threads</h1>
         </div>
-        <span style={css(MONO + ' font-size:12px; color:#9a9a9a; padding-bottom:5px;')}>6 total · 1 needs attention</span>
+        <span style={css(MONO + ' font-size:12px; color:#9a9a9a; padding-bottom:5px;')}>
+          {rows ? `${rows.length} total · ${attention} need${attention === 1 ? 's' : ''} attention` : 'loading…'}
+        </span>
         <div style={css('flex:1;')} />
         <Hoverable
           onClick={go('compose')}
@@ -56,29 +75,34 @@ export function ThreadIndex({ go }) {
             <Hoverable
               key={t.id}
               as="button"
-              onClick={go('cockpit')}
+              onClick={() => openThread(t.id)}
               base={css('display:grid; ' + GRID + ' align-items:center; width:100%; text-align:left; padding:15px 22px; border:none; border-bottom:1px solid #f0f0ee; background:#fff; cursor:pointer;')}
               hover={css('background:#fafaf9;')}
             >
               <span className="clista-ledger-grid" style={css('display:flex; align-items:center; gap:12px; min-width:0;')}>
                 <span style={css(MONO + ' font-size:11px; color:#b0b0b0; flex:none;')}>{t.id}</span>
-                <span style={css('font-size:14px; font-weight:500; color:#1a1a1a; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;')}>{t.q}</span>
+                <span style={css('font-size:14px; font-weight:500; color:#1a1a1a; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;')}>{t.question || t.title}</span>
               </span>
               <span><span style={b.badge}><span style={b.dot} />{t.status}</span></span>
               <span style={css('font-size:13px; color:#4a4a4a;')}>{t.owner}</span>
-              <span style={css(MONO + ' font-size:11.5px; color:#8a8a8a;')}>{t.last}</span>
+              <span style={css(MONO + ' font-size:11.5px; color:#8a8a8a;')}>{relativeTime(t.last)}</span>
               <span style={css(MONO + ' font-size:12px; color:#6a6a6a; text-align:right;')}>{t.events}</span>
             </Hoverable>
           );
         })}
-        {threads.length === 0 && (
+        {rows && threads.length === 0 && (
           <div style={css('padding:56px 22px; text-align:center;')}>
             <div style={css('display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border:1px solid #e0e0de; border-radius:50%; color:#b0b0b0; margin-bottom:14px;')}>
               <Svg html={ico('index', { size: 20, sw: 1.6 })} />
             </div>
-            <p style={css('margin:0 0 5px; ' + MONO + ' font-size:13px; color:#6a6a6a;')}>No threads in this state.</p>
+            <p style={css('margin:0 0 5px; ' + MONO + ' font-size:13px; color:#6a6a6a;')}>
+              {rows.length === 0 ? 'No threads yet.' : 'No threads in this state.'}
+            </p>
             <p style={css('margin:0; font-size:13px; color:#9a9a9a;')}>Nothing to show — the ledger only records what has actually happened.</p>
           </div>
+        )}
+        {error && (
+          <div style={css('padding:32px 22px; text-align:center; ' + MONO + ' font-size:13px; color:#b3343c;')}>index unavailable — {error}</div>
         )}
       </div>
       <p style={css('margin:16px 2px 0; ' + MONO + ' font-size:11px; color:#a5a5a5;')}>// the index is a ledger of recorded threads, not a feed. each row is an append-only event chain.</p>

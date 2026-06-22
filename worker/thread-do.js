@@ -104,6 +104,31 @@ export class ThreadDO extends DurableObject {
     return engine.selectAudit(engine.projectEvents(this._readAll()), threadId);
   }
 
+  // Lightweight card for the thread index (derived from projected state).
+  indexCard() {
+    const events = this._readAll();
+    if (!events.length) return null;
+    const state = engine.selectThreadState(engine.projectEvents(events));
+    const thread = state.thread || {};
+    const participants = (state.identityState && state.identityState.participants) || [];
+    const decision = state.decisionStatus && state.decisionStatus.decisionRecord;
+    const ownerId =
+      (decision && decision.decidedByParticipantId) ||
+      (participants.find((p) => /owner/.test(p.role || '')) || participants[0] || {}).id;
+    const ownerName = (participants.find((p) => p.id === ownerId) || {}).name || ownerId || 'unknown';
+    const last = thread.updatedAt || events.at(-1)?.timestamp || null;
+    return {
+      id: thread.id || null,
+      title: thread.title || null,
+      question: thread.question || null,
+      status: thread.status || 'active',
+      owner: ownerName,
+      events: events.length,
+      last,
+      updated_ms: last ? Date.parse(last) : 0,
+    };
+  }
+
   // Re-validate the stored chain: structural validation + hash-chain integrity.
   validate() {
     const events = this._readAll();
