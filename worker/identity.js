@@ -75,7 +75,24 @@ function identityFor(email, source) {
     .filter(Boolean)
     .map((w) => w[0].toUpperCase() + w.slice(1))
     .join(' ');
-  return { authenticated: true, email, name: name || local, actorId: `par_${slug(local) || 'participant'}`, source };
+  return { authenticated: true, email, name: name || local, actorId: `par_${slug(local) || 'participant'}`, kind: 'human', source };
+}
+
+// Service-token (machine) identity. Access verifies the CF-Access-Client-Id /
+// CF-Access-Client-Secret pair at the edge and issues a JWT with NO email but a
+// `common_name` = the service token's name. The agent becomes a first-class,
+// server-authoritative participant: par_agent_<token-name>.
+function identityForAgent(payload) {
+  const raw = payload.common_name || payload.sub || 'agent';
+  const name = String(raw).replace(/\.access$/i, '');
+  return {
+    authenticated: true,
+    email: null,
+    name,
+    actorId: `par_agent_${slug(name) || 'agent'}`,
+    kind: 'agent',
+    source: 'service-token',
+  };
 }
 
 // Resolve the caller's identity → { authenticated, email, name, actorId, source }.
@@ -87,13 +104,17 @@ export async function resolveIdentity(request, env) {
   if (team && aud && jwt) {
     try {
       const payload = await verifyAccessJwt(jwt, team, aud);
-      return identityFor(payload.email || payload.sub || 'unknown', 'access');
+      // A human Access JWT always carries an email; a service-token JWT does not.
+      return payload.email ? identityFor(payload.email, 'access') : identityForAgent(payload);
     } catch (err) {
       return { authenticated: false, reason: String(err.message || err) };
     }
   }
 
   if (env.DEV_IDENTITY === 'true') {
+    // Local dev can impersonate an agent too: X-Clista-Agent overrides the email path.
+    const agent = request.headers.get('x-clista-agent');
+    if (agent) return identityForAgent({ common_name: agent });
     const email = request.headers.get('x-clista-email') || env.DEV_EMAIL || 'demo@clista.local';
     return identityFor(email, 'dev');
   }
