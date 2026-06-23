@@ -79,24 +79,47 @@ self-hosted app in the `laticooki` Zero Trust org. Local repo:
   "service-token"`) from its `common_name`; human path unchanged. `/join` declares the
   participant with `identity.kind`. `scripts/agent-post.mjs` is the client (`CF-Access-Client-
   Id/Secret` → ingest/join/append/validate). Dev: `X-Clista-Agent: <name>` header impersonates
-  an agent when `DEV_IDENTITY=true`. Setup in **`docs/AGENTS.md`** (owner makes the token +
-  a Service Auth policy on the app.clista.ai Access app — no `wrangler.jsonc` change). **Code
-  is DEPLOYED to prod** (Version `1ad9b759`); inert until a service token exists.
+  an agent when `DEV_IDENTITY=true`. Cloudflare puts the token's **Client ID** (not its
+  dashboard name) in the JWT, so `wrangler.jsonc` `AGENT_NAMES` ("`<clientId>:<name>`") maps it
+  to a friendly actor — `398a39…:clistahermes` → `par_agent_clistahermes`. Setup in
+  **`docs/AGENTS.md`** (owner makes the token + a **Service Auth** policy on the app.clista.ai
+  Access app). **LIVE & PROVEN in prod:** `par_agent_clistahermes` ingested the CSV-CLI log +
+  posted moltbook findings (see the agent loop below). Service-token gotcha: the token MUST be
+  created in the SAME account as the Access app (the `laticooki` Zero Trust org / account
+  `1c0cdbfbea…`), else Access returns `service_token_status:false` and it won't show in the
+  app's policy selector.
+- **Orphan purge (admin cleanup).** Durable Objects can't be deleted externally, so
+  `POST /api/threads/:id/purge` (auth required) clears an **orphan** thread — one with no
+  `ThreadCreated`, hence never registered in the index (junk/malformed DOs). **Refuses any
+  registered thread (409)** so legitimate logs stay append-only. `ThreadDO.purge()` +
+  `IndexDO.remove()`; `scripts/agent-post.mjs <id> purge`. Used once to remove a stray
+  join-only DO from a pre-fix agent write.
 
-## Immediate next step — service token, then the moltbook prod write
-Launch + cut-over are DONE. The only open thread:
-1. **[owner]** Create the `clistahermes` **Access service token** + add a **Service Auth**
-   policy to the `app.clista.ai` Access app (`docs/AGENTS.md §1–2`). I have no Access/Zero
-   Trust API scope, so this is owner-only.
-2. Then push the **moltbook test to prod**: ingest `ClisTa-Protocol/examples/clista-csv-cli-
-   build.ndjson` as a thread + append its 3 comments as findings (2× ObjectionRaised, 1×
-   EvidenceCommitted), via `node scripts/agent-post.mjs` as `par_agent_clistahermes`. This
-   **already passed locally** (`wrangler dev`: 29-event chain, integrity+validation true;
-   `scripts/moltbook-test.mjs` is the validator harness). The moltbook post is u/clistahermes'
-   CSV-CLI thread; "findings" = `EvidenceCommitted.finding` / objections.
-Gotcha from the deploy: the **AUD the owner first pasted was wrong** (belonged to a different
-field/app); the correct AUD is in the live Access login redirect's `kid` param (and the app's
-Overview tab). If sign-in/agent-write 401s with "audience mismatch", re-check it.
+## The agent loop (moltbook ⇄ ClisTa) — the current operating pattern
+Launch, cut-over, AND the first agent write are DONE. `clistahermes` (the Nous **Hermes
+Agent** at `/Users/troylatimer/hermes-agent`, persona `par_agent_clistahermes`) now runs this
+loop; its memory (`~/.hermes/memories/MEMORY.md`) carries the context so heartbeats/cron can
+do it autonomously. The pattern, per engagement:
+1. A moltbook ClisTa post gets comments/questions (e.g. post `5a649ad8-…`, m/general).
+2. Capture each as accountable state in the **live** app thread via `scripts/agent-post.mjs`
+   (auth = the Access service token): `ingest` a protocol `.ndjson` log → `join` → `append`
+   each comment as `ObjectionRaised` / `EvidenceCommitted` (objections carried forward, never
+   dropped) → `validate` (integrity + validation true).
+3. Reply on moltbook summarizing what entered accountable state (Hermes' moltbook skill +
+   creds under `~/.hermes/` / `~/.config/moltbook/`; NOT in any repo).
+4. **Attest** the post back into the SAME live thread (`EvidenceCommitted`, `source:
+   "moltbook u/clistahermes — reply comment <id>"`) so app.clista.ai and moltbook stay synced.
+
+**Done so far (live, replayable):** thread `thd_csv_cli_build_moltbook` — 30 events: the
+CSV-CLI log (25) + monty's pandas-fallback question → `ObjectionRaised`/`clm_parser_p2` +
+globalwall's scaling question → `ObjectionRaised`/`clm_pandas_p2` + the fallback→DRQ handoff →
+`EvidenceCommitted` + the post attestation (`examples/moltbook-attestation-evidence.json`).
+moltbook reply = comment `6884f3ea-…`. NOTE the live app thread id is `thd_csv_cli_build_moltbook`
+(the engine log's internal id `thd_csv_cli_build_consensus_mqa0yqno_…` was rebased so the DO
+URL = the events' `thread_id`, which the cockpit needs). `scripts/moltbook-test.mjs` is the
+local engine-validation harness for this. Gotcha: append events must set the nested
+`participantId`/`committedByParticipantId` to the actual joined actor (`par_agent_clistahermes`),
+not a stray id — the server only forces top-level `actor_id`, so a wrong nested id fails-closed (422).
 
 ## How to run / verify locally
 - `npm install`
@@ -129,7 +152,8 @@ Overview tab). If sign-in/agent-write 401s with "audience mismatch", re-check it
 
 ## API (all same-origin)
 `GET /api/me` · `GET /api/threads` · per-thread `GET …/{state,summary,audit,validate}` ·
-`POST …/{append,ingest,seed-demo,join}` (writes require auth → 401; fail-closed → 422).
+`POST …/{append,ingest,seed-demo,join,purge}` (writes require auth → 401; fail-closed → 422;
+`purge` removes orphan threads only, refusing registered ones → 409).
 Writes authenticate as a **human** (Access login JWT → `par_<email>`) or an **agent**
 (Access service token `CF-Access-Client-Id/Secret` → `par_agent_<name>`); `actor_id` is
 always server-set, never client-supplied.
