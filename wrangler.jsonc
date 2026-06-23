@@ -37,6 +37,9 @@
   // instead (see .dev.vars.example) — never enable DEV_IDENTITY in production.
   "vars": {
     "ACCESS_TEAM_DOMAIN": "laticooki",
-    "ACCESS_AUD": "60455fe3334e5242cb0fe8787064ee31e26e209fed6fe2de2f97c52da5b1cb93"
+    "ACCESS_AUD": "60455fe3334e5242cb0fe8787064ee31e26e209fed6fe2de2f97c52da5b1cb93",
+    // Optional friendly names for agent service tokens (Cloudflare puts the
+    // Client ID in the JWT, not the dashboard name). Format: "<clientId>:<name>".
+    "AGENT_NAMES": "398a39a665f1d0faeee372da7b67e360:clistahermes"
   }
 }

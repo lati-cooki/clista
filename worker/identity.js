@@ -78,13 +78,26 @@ function identityFor(email, source) {
   return { authenticated: true, email, name: name || local, actorId: `par_${slug(local) || 'participant'}`, kind: 'human', source };
 }
 
+// Optional friendly names for service tokens. Cloudflare puts the token's
+// Client ID (not its dashboard name) in the JWT, so map it here if you want a
+// readable actor. Format: "<clientId>:<name>,<clientId>:<name>" in env.AGENT_NAMES.
+function agentNameMap(env) {
+  const out = {};
+  for (const pair of String((env && env.AGENT_NAMES) || '').split(',')) {
+    const [id, name] = pair.split(':').map((s) => s && s.trim());
+    if (id && name) out[id] = name;
+  }
+  return out;
+}
+
 // Service-token (machine) identity. Access verifies the CF-Access-Client-Id /
-// CF-Access-Client-Secret pair at the edge and issues a JWT with NO email but a
-// `common_name` = the service token's name. The agent becomes a first-class,
-// server-authoritative participant: par_agent_<token-name>.
-function identityForAgent(payload) {
-  const raw = payload.common_name || payload.sub || 'agent';
-  const name = String(raw).replace(/\.access$/i, '');
+// CF-Access-Client-Secret pair at the edge and issues a JWT with NO email; its
+// `common_name`/`sub` is the token's Client ID. The agent becomes a first-class,
+// server-authoritative participant: par_agent_<name> (friendly via AGENT_NAMES,
+// else the Client ID).
+function identityForAgent(payload, env) {
+  const clientId = String(payload.common_name || payload.sub || 'agent').replace(/\.access$/i, '');
+  const name = agentNameMap(env)[clientId] || clientId;
   return {
     authenticated: true,
     email: null,
@@ -92,6 +105,7 @@ function identityForAgent(payload) {
     actorId: `par_agent_${slug(name) || 'agent'}`,
     kind: 'agent',
     source: 'service-token',
+    clientId,
   };
 }
 
@@ -105,7 +119,7 @@ export async function resolveIdentity(request, env) {
     try {
       const payload = await verifyAccessJwt(jwt, team, aud);
       // A human Access JWT always carries an email; a service-token JWT does not.
-      return payload.email ? identityFor(payload.email, 'access') : identityForAgent(payload);
+      return payload.email ? identityFor(payload.email, 'access') : identityForAgent(payload, env);
     } catch (err) {
       return { authenticated: false, reason: String(err.message || err) };
     }
@@ -114,7 +128,7 @@ export async function resolveIdentity(request, env) {
   if (env.DEV_IDENTITY === 'true') {
     // Local dev can impersonate an agent too: X-Clista-Agent overrides the email path.
     const agent = request.headers.get('x-clista-agent');
-    if (agent) return identityForAgent({ common_name: agent });
+    if (agent) return identityForAgent({ common_name: agent }, env);
     const email = request.headers.get('x-clista-email') || env.DEV_EMAIL || 'demo@clista.local';
     return identityFor(email, 'dev');
   }

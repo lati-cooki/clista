@@ -63,12 +63,15 @@ async function call(method, path, body) {
 
 function loadEvents(file) {
   const raw = readFileSync(file, "utf8").trim();
-  // events.json ({events:[...]} or [...]) or raw ndjson
-  if (raw[0] === "{" || raw[0] === "[") {
+  // Whole-file JSON first — events.json ([...] / {events:[...]}) or a single
+  // event object ({event_type:…}). ndjson starts with `{` too, so detect it by
+  // the JSON.parse failing (multiple top-level objects) and fall back to lines.
+  try {
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : parsed.events || [];
+    return Array.isArray(parsed) ? parsed : parsed.events || [parsed];
+  } catch {
+    return raw.split(/\r?\n/).filter((l) => l.trim()).map((l) => JSON.parse(l));
   }
-  return raw.split(/\r?\n/).filter((l) => l.trim()).map((l) => JSON.parse(l));
 }
 
 const out = (r) => console.log(JSON.stringify(r.data, null, 1));
@@ -92,7 +95,7 @@ try {
     });
     out(await call("POST", `${base}/ingest`, { events }));
   } else if (action === "append") {
-    out(await call("POST", `${base}/append`, { event: loadEvents(c)[0] ?? JSON.parse(readFileSync(c, "utf8")) }));
+    out(await call("POST", `${base}/append`, { event: loadEvents(c)[0] }));
   } else if (action === "join") {
     out(await call("POST", `${base}/join`, c ? { role: c } : {}));
   } else {
