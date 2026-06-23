@@ -25,6 +25,7 @@ const postJson = (path, body) => req(path, { method: 'POST', headers: { 'content
 export const api = {
   me: () => req('/api/me'),
   listThreads: () => req('/api/threads'),
+  createThread: (title, question) => postJson('/api/threads', { title, question }),
   state: (id) => req(`/api/threads/${enc(id)}/state`),
   summary: (id) => req(`/api/threads/${enc(id)}/summary`),
   audit: (id) => req(`/api/threads/${enc(id)}/audit`),

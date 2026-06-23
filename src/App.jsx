@@ -114,7 +114,7 @@ export function App() {
         )}
       >
         {screen === 'cockpit' && <Cockpit threadId={threadId} me={me} go={go} />}
-        {screen === 'index' && <ThreadIndex openThread={openThread} go={go} />}
+        {screen === 'index' && <ThreadIndex openThread={openThread} me={me} />}
         {screen === 'compose' && <Compose threadId={threadId} me={me} go={go} />}
         {screen === 'kit' && <Kit />}
       </main>

@@ -2,6 +2,7 @@ import { ThreadDO } from './thread-do.js';
 import { IndexDO } from './index-do.js';
 import { scenarioDemoEvents } from './scenario-demo.js';
 import { resolveIdentity } from './identity.js';
+import * as engine from './engine/index.js';
 
 export { ThreadDO, IndexDO };
 
@@ -36,6 +37,68 @@ export default {
         // GET /api/threads — the index/ledger
         if (parts[1] === 'threads' && !parts[2] && request.method === 'GET') {
           return json(await indexStub(env).list());
+        }
+
+        // POST /api/threads — open a new thread. The creator becomes its first
+        // participant (decision owner). Server mints the thread id and the
+        // canonical two-event genesis log (ParticipantDeclared → ThreadCreated)
+        // and ingests it atomically into a fresh DO. actor_id is identity-bound.
+        if (parts[1] === 'threads' && !parts[2] && request.method === 'POST') {
+          const identity = await resolveIdentity(request, env);
+          if (!identity.authenticated) {
+            return json({ error: 'unauthenticated', reason: identity.reason || 'sign in required' }, 401);
+          }
+          const body = await request.json().catch(() => ({}));
+          const title = String(body.title || '').trim();
+          const question = String(body.question || '').trim();
+          if (question.length < 12) {
+            return json({ error: 'invalid', reason: 'a thread needs a question (min 12 chars) — the decision it exists to answer' }, 422);
+          }
+          const threadId = engine.newId('thd', question);
+          const at = engine.nowIso();
+          // ingest() chains + validates but (unlike append) does not mint ids, so
+          // the genesis events carry their own event_id.
+          const genesis = [
+            {
+              event_id: engine.newId('evt', 'ParticipantDeclared'),
+              event_type: 'ParticipantDeclared',
+              thread_id: threadId,
+              actor_id: identity.actorId,
+              timestamp: at,
+              payload: {
+                participant: {
+                  id: identity.actorId,
+                  object: 'participant',
+                  kind: identity.kind || 'human',
+                  name: identity.name,
+                  role: 'decision owner',
+                },
+              },
+            },
+            {
+              event_id: engine.newId('evt', 'ThreadCreated'),
+              event_type: 'ThreadCreated',
+              thread_id: threadId,
+              actor_id: identity.actorId,
+              timestamp: at,
+              payload: {
+                thread: {
+                  id: threadId,
+                  object: 'thread',
+                  title: title || question,
+                  question,
+                  status: 'active',
+                  participantIds: [identity.actorId],
+                  createdAt: at,
+                  updatedAt: at,
+                },
+              },
+            },
+          ];
+          const stub = threadStub(env, threadId);
+          const result = await stub.ingest(genesis);
+          if (result.ok) await registerThread(env, stub);
+          return json({ ...result, id: threadId }, result.ok ? 200 : 422);
         }
 
         if (parts[1] === 'threads' && parts[2]) {
