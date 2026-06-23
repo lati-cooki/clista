@@ -123,9 +123,17 @@ not a stray id — the server only forces top-level `actor_id`, so a wrong neste
 
 ## How to run / verify locally
 - `npm install`
-- `npm test` → engine parity + integrity (6/6; proves scenario-demo projects identically
-  to the ClisTa CLI / `test/fixtures/scenario-demo.expected-state.json`, and js-sha256 is
-  byte-identical, tamper breaks the chain).
+- `npm test` → engine parity + integrity on `node:test` (`test/*.test.js`; proves
+  scenario-demo projects identically to the ClisTa CLI, js-sha256 byte-identical, tamper
+  breaks the chain, and the New-thread genesis log validates/projects).
+- `npm run test:workers` → **in-runtime DO tests** (`vitest` + `@cloudflare/vitest-pool-
+  workers`, `test/workers/**`). Runs the real Worker + ThreadDO/IndexDO SQLite inside
+  workerd via `SELF.fetch` (+ one direct `runInDurableObject`): create→validate→index,
+  validate-before-trust (422, log unchanged), append-only chain growth, ingest-refuses-
+  non-empty, purge-refuses-registered/removes-orphan. `npm run test:all` runs both. Dev
+  identity comes from `miniflare.bindings` in `vitest.config.js`, so it works without
+  `.dev.vars` (CI-safe). NOTE: pool-workers 0.16/vitest 4 use the `cloudflareTest()` Vite
+  plugin, not the old `defineWorkersConfig`.
 - `npx wrangler dev` → full stack (Worker + DO + SPA) at `localhost:8787`; loads
   `.dev.vars`. (Plain `npm run dev` = front-end only, /api won't exist.)
 - **Create `.dev.vars`** (gitignored) to drive writes locally:
@@ -187,8 +195,9 @@ always server-set, never client-supplied.
   unresolvable references fail closed (422). The composer does NOT create evidence
   (`EvidenceCommitted` stays an ingest/agent path) — so the decision-request evidence
   picker is empty unless the thread already carries evidence.
-- A `vitest`-pool-workers integration test exercising the DO in-runtime (today's DO proof
-  is via `wrangler dev` + curl/browser; engine proof is the Node parity test).
+- **DONE — `vitest`-pool-workers in-runtime DO tests.** `npm run test:workers` exercises
+  ThreadDO/IndexDO inside workerd (see "How to run / verify locally"). The DO is no longer
+  proven only by `wrangler dev` + curl.
 - v1 object-model scope = the bundled scenario's shape; federation/delegation/negotiation/
   learning are out of v1 (still vendored so the projector/validator imports resolve).
 
