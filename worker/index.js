@@ -92,6 +92,21 @@ export default {
               return json(result, result.ok ? 200 : 422);
             }
 
+            // Purge an ORPHAN thread (no ThreadCreated → not registered). Refuses
+            // registered threads to keep legitimate logs append-only.
+            if (action === 'purge') {
+              const card = await stub.indexCard();
+              if (card && card.id) {
+                return json(
+                  { error: 'refused', reason: 'registered thread is append-only; purge only removes orphan threads' },
+                  409
+                );
+              }
+              const result = await stub.purge();
+              await indexStub(env).remove(threadId);
+              return json(result);
+            }
+
             if (action === 'append') {
               // Server-authoritative actor: identity decides actor_id, never the client.
               const event = { ...(body.event || body) };

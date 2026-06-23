@@ -98,6 +98,8 @@ try {
     out(await call("POST", `${base}/append`, { event: loadEvents(c)[0] }));
   } else if (action === "join") {
     out(await call("POST", `${base}/join`, c ? { role: c } : {}));
+  } else if (action === "purge") {
+    out(await call("POST", `${base}/purge`));
   } else {
     console.error(`unknown action: ${action}`);
     process.exit(2);

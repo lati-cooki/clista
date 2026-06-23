@@ -42,6 +42,12 @@ export class IndexDO extends DurableObject {
     return { ok: true };
   }
 
+  remove(id) {
+    if (!id) return { ok: false };
+    this.sql.exec('DELETE FROM threads WHERE id = ?', id);
+    return { ok: true };
+  }
+
   list() {
     const threads = this.sql
       .exec('SELECT id, title, question, status, owner, events, last FROM threads ORDER BY updated_ms DESC')

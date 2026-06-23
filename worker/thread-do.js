@@ -129,6 +129,15 @@ export class ThreadDO extends DurableObject {
     };
   }
 
+  // Purge this thread's log. The router only calls this for ORPHAN threads
+  // (no ThreadCreated → never registered in the index), so append-only integrity
+  // for legitimate threads is preserved — this is cleanup for malformed/junk DOs.
+  purge() {
+    const had = this._readAll().length;
+    this.sql.exec('DELETE FROM events');
+    return { ok: true, purged: true, removed_events: had };
+  }
+
   // Re-validate the stored chain: structural validation + hash-chain integrity.
   validate() {
     const events = this._readAll();
