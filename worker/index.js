@@ -68,7 +68,7 @@ export default {
                   participant: {
                     id: identity.actorId,
                     object: 'participant',
-                    kind: 'human',
+                    kind: identity.kind || 'human',
                     name: identity.name,
                     role: body.role || 'contributor',
                   },
