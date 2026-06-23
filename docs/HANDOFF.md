@@ -19,8 +19,19 @@ self-hosted app in the `laticooki` Zero Trust org. Local repo:
   (ThreadDO/IndexDO, migrations v1/v2 applied). Identity vars in `wrangler.jsonc`:
   `ACCESS_TEAM_DOMAIN=laticooki`, `ACCESS_AUD=60455fe3334e5242cb0fe8787064ee31e26e209fed6fe2de2f97c52da5b1cb93`
   (the AUD is public — appears in the Access login redirect — so it's safe to commit).
-  `DEV_IDENTITY` is unset in prod (correct). Redeploy: `npm run build && npx wrangler deploy`.
-  Edge verification passed (`/`→302 Access login, JWKS 200, advertised AUD matches deployed).
+  `DEV_IDENTITY` is unset in prod (correct). Edge verification passed (`/`→302 Access login,
+  JWKS 200, advertised AUD matches deployed).
+- **Deploy paths:** (1) **CI — now live.** `.github/workflows/deploy-app.yml` deploys on every
+  push to `main` touching `src/** worker/** index.html vite.config.js wrangler.jsonc
+  package*.json` (or via Actions → *Run workflow*). It gates on two repo secrets, both **set
+  on `lati-club/clista-ai-app`** (2026-06-23): `CLOUDFLARE_API_TOKEN` (an "Edit Cloudflare
+  Workers" token scoped to account `troylati` + the `clista.ai` zone) and
+  `CLOUDFLARE_ACCOUNT_ID` (`1c0cdbfbea…`). Set/rotate with
+  `gh secret set <NAME> --repo lati-club/clista-ai-app` (feed the token via stdin/file, never
+  argv). First green run: dispatch `28041740718` → version `9ad5b780-…` (matched the live
+  deployment). To rotate the token: regenerate in the Cloudflare dashboard, re-`gh secret set`.
+  (2) **Manual** (no GitHub needed): `npm run build && npx wrangler deploy` from a wrangler-
+  authed shell. Both target the same Worker/account.
 - **Post-launch — DONE:** (a) authenticated browser smoke **passed** (verified server-side
   via `wrangler tail`: `/api/me` 200 with Access JWT, auto-seed, `POST /join` 200, every
   request ok — proved the AUD fix). (b) Phase 6 **cut-over shipped**: `cli.clista.ai` now
