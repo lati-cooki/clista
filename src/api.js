@@ -33,6 +33,9 @@ export const api = {
   seedDemo: (id) => req(`/api/threads/${enc(id)}/seed-demo`, { method: 'POST' }),
   join: (id, role) => postJson(`/api/threads/${enc(id)}/join`, { role }),
   append: (id, event) => postJson(`/api/threads/${enc(id)}/append`, { event }),
+  // Ask the autonomous agent (clistahermes) to deliberate this thread.
+  requestAgent: (id) => postJson(`/api/threads/${enc(id)}/request-agent`, {}),
+  agentStatus: (id) => req(`/api/threads/${enc(id)}/agent-status`),
 };
 
 export const DEMO_THREAD_ID = 'thd_scenario_demo';

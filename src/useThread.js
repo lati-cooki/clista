@@ -6,7 +6,7 @@ import { adaptCockpit } from './adapt.js';
 // cockpit view model. Auto-seeds the bundled scenario log into the demo thread
 // the first time it's opened empty.
 export function useThread(threadId) {
-  const [s, setS] = useState({ loading: true, error: null, vm: null, empty: false });
+  const [s, setS] = useState({ loading: true, error: null, vm: null, empty: false, agent: { requested: false } });
 
   const load = useCallback(async () => {
     setS((p) => ({ ...p, loading: true, error: null }));
@@ -16,13 +16,14 @@ export function useThread(threadId) {
         await api.seedDemo(threadId);
         v = await api.validate(threadId);
       }
-      const [st, au] = await Promise.all([api.state(threadId), api.audit(threadId)]);
+      const [st, au, ag] = await Promise.all([api.state(threadId), api.audit(threadId), api.agentStatus(threadId)]);
       if (!st.ok) throw new Error(st.data.error || 'failed to load thread state');
       const empty = !v.data.event_count;
       const vm = empty ? null : adaptCockpit(st.data, au.data, v.data);
-      setS({ loading: false, error: null, vm, empty });
+      const agent = ag.ok ? ag.data : { requested: false };
+      setS({ loading: false, error: null, vm, empty, agent });
     } catch (e) {
-      setS({ loading: false, error: String(e.message || e), vm: null, empty: false });
+      setS({ loading: false, error: String(e.message || e), vm: null, empty: false, agent: { requested: false } });
     }
   }, [threadId]);
 

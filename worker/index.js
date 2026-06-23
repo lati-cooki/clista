@@ -34,6 +34,19 @@ export default {
           return json(id);
         }
 
+        // GET /api/agent/queue — threads humans flagged for autonomous
+        // deliberation. Agent-only (the clistahermes service token polls this).
+        if (parts[1] === 'agent' && parts[2] === 'queue' && request.method === 'GET') {
+          const identity = await resolveIdentity(request, env);
+          if (!identity.authenticated) {
+            return json({ error: 'unauthenticated', reason: identity.reason || 'sign in required' }, 401);
+          }
+          if (identity.kind !== 'agent') {
+            return json({ error: 'forbidden', reason: 'agent service token required' }, 403);
+          }
+          return json(await indexStub(env).listFlags());
+        }
+
         // GET /api/threads — the index/ledger
         if (parts[1] === 'threads' && !parts[2] && request.method === 'GET') {
           return json(await indexStub(env).list());
@@ -111,6 +124,14 @@ export default {
             if (action === 'summary') return json(await stub.summary(threadId));
             if (action === 'audit') return json(await stub.audit(threadId));
             if (action === 'validate') return json(await stub.validate());
+            // Has this thread been flagged for agent deliberation? (cockpit poll)
+            if (action === 'agent-status') {
+              const identity = await resolveIdentity(request, env);
+              if (!identity.authenticated) {
+                return json({ error: 'unauthenticated', reason: identity.reason || 'sign in required' }, 401);
+              }
+              return json(await indexStub(env).flagStatus(threadId));
+            }
           }
 
           if (request.method === 'POST') {
@@ -168,6 +189,31 @@ export default {
               const result = await stub.purge();
               await indexStub(env).remove(threadId);
               return json(result);
+            }
+
+            // Flag this thread for autonomous agent deliberation. Human-only —
+            // an agent shouldn't queue work for itself. Requires the thread to
+            // exist (be registered) so we don't queue orphans.
+            if (action === 'request-agent') {
+              if (identity.kind !== 'human') {
+                return json({ error: 'forbidden', reason: 'only a human participant can request the agent' }, 403);
+              }
+              const card = await stub.indexCard();
+              if (!card || !card.id) {
+                return json({ error: 'not found', reason: 'no such thread' }, 404);
+              }
+              const result = await indexStub(env).flagForAgent(threadId, identity.actorId, engine.nowIso());
+              return json(result, result.ok ? 200 : 422);
+            }
+
+            // Agent acknowledges / clears a flag (after picking it up or
+            // recording a decision). Agent-only.
+            if (action === 'agent-ack') {
+              if (identity.kind !== 'agent') {
+                return json({ error: 'forbidden', reason: 'agent service token required' }, 403);
+              }
+              const result = await indexStub(env).clearFlag(threadId);
+              return json(result, result.ok ? 200 : 422);
             }
 
             if (action === 'append') {
