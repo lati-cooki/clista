@@ -8,7 +8,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test 'test/**/*.test.js'"
+    "test": "node --test 'test/**/*.test.js'",
+    "sync:engine": "node scripts/vendor-engine.mjs",
+    "sync:engine:check": "node scripts/vendor-engine.mjs --check"
   },
   "dependencies": {
     "js-sha256": "^0.11.1",
