@@ -177,11 +177,16 @@ always server-set, never client-supplied.
   401 unauth. The index **New thread** button opens a modal (question + optional title) →
   jumps to the new cockpit. `test/create-thread.test.js` proves the log validates/chains/
   projects + that a `thread.id`/`thread_id` mismatch fails closed.
-- **DONE — more Compose event types.** Compose has an event-type selector wiring
-  `ObjectionRaised` (existing) + `AssumptionDeclared` + `ClaimCreated`; per-kind builders
-  set the nested participant id to the joined actor. Still unwired (need reference pickers):
-  `ReviewSubmitted` (→ a decisionRequest), `DecisionRequestOpened`, `PositionTaken` (→ a
-  claim/decision target like objections already use `composeTargets`).
+- **DONE — Compose covers the append types.** Event-type selector wiring all six:
+  `ObjectionRaised`, `AssumptionDeclared`, `ClaimCreated`, `PositionTaken` (stance on a
+  claim), `DecisionRequestOpened` (proposal + multi-select supporting claims/evidence/
+  assumptions/objections, moves the thread to review), `ReviewSubmitted` (verdict +
+  conditions on the open request). Pickers populate from `adapt.js`'s `vm.refLists`
+  (claims/evidence/assumptions/objections) + `vm.decisionRequest` (the projection's
+  `currentProposal`). Per-kind builders set the nested participant id to the joined actor;
+  unresolvable references fail closed (422). The composer does NOT create evidence
+  (`EvidenceCommitted` stays an ingest/agent path) — so the decision-request evidence
+  picker is empty unless the thread already carries evidence.
 - A `vitest`-pool-workers integration test exercising the DO in-runtime (today's DO proof
   is via `wrangler dev` + curl/browser; engine proof is the Node parity test).
 - v1 object-model scope = the bundled scenario's shape; federation/delegation/negotiation/
