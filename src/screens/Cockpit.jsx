@@ -30,6 +30,80 @@ function Boundary() {
   );
 }
 
+// Decision-rooted provenance trace panel — the engine's `provenance trace`,
+// rendered as a tree. Shows how the decision rests on claims, and how each
+// claim is grounded (evidence/assumptions) and contested (objections).
+const provChip = (color) =>
+  css(
+    'display:inline-flex; align-items:center; ' +
+      MONO +
+      ' font-size:9px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:' +
+      color +
+      '; border:1px solid ' +
+      color +
+      '40; background:' +
+      color +
+      '12; border-radius:3px; padding:1px 6px; flex:none;'
+  );
+const provRow = 'display:flex; align-items:baseline; gap:9px; padding:3px 0; flex-wrap:wrap;';
+const provConn = css(MONO + ' font-size:12px; color:#c4c4c2; flex:none;');
+const provId = (color) => css(MONO + ' font-size:12px; color:' + color + '; flex:none;');
+const provText = css('font-size:12px; color:#6a6a6a; text-wrap:pretty;');
+
+function ProvTrace({ prov }) {
+  if (!prov) return null;
+  return (
+    <section style={css('background:#fff; border:1px solid #dcdcda; border-radius:7px; box-shadow:0 1px 2px rgba(10,10,10,0.03); margin-bottom:18px; overflow:hidden;')}>
+      <div style={css('display:flex; align-items:center; gap:11px; padding:16px 22px; border-bottom:1px solid #ededeb; background:#fcfcfb;')}>
+        <Svg html={ico('fork')} style={css(medallion)} />
+        <span style={css(eyebrow)}>Provenance Trace</span>
+        <span style={css(MONO + ' font-size:11px; color:#a5a5a5;')}>·</span>
+        <span style={css(MONO + ' font-size:11px; color:#9a9a9a;')}>{prov.decisionId}</span>
+      </div>
+      <div style={css('padding:18px 22px;')}>
+        <div style={css(provRow)}>
+          <span style={provId('#1c7a4f')}>{prov.decisionId}</span>
+          <span style={provChip('#1c7a4f')}>decision</span>
+          <span style={css('font-size:13px; color:#2a2a2a; text-wrap:pretty;')}>{prov.answer}</span>
+        </div>
+        {prov.claims.map((c, ci) => {
+          const lastClaim = ci === prov.claims.length - 1;
+          const kids = [
+            ...c.evidence.map((e) => ({ ...e, kind: 'evidence', color: '#2c5f96' })),
+            ...c.assumptions.map((a) => ({ ...a, kind: 'assumption', color: '#8a8a8a' })),
+            ...c.objections.map((o) => ({ ...o, kind: 'objection', color: '#9a6b07' })),
+          ];
+          return (
+            <div key={c.id}>
+              <div style={css(provRow + ' padding-left:2px;')}>
+                <span style={provConn}>{lastClaim ? '└' : '├'}</span>
+                <span style={provId('#2a2a2a')}>{c.id}</span>
+                <span style={provChip('#6a6a6a')}>claim</span>
+                {c.status && <span style={provChip(c.status === 'contested' ? '#9a6b07' : '#5a5a5a')}>{c.status}</span>}
+                <span style={css('font-size:12.5px; color:#5a5a5a; text-wrap:pretty;')}>{c.text}</span>
+              </div>
+              <div style={css('padding-left:24px;')}>
+                {kids.map((k, ki) => (
+                  <div key={k.id} style={css(provRow)}>
+                    <span style={provConn}>{ki === kids.length - 1 ? '└' : '├'}</span>
+                    <span style={provId(k.color)}>{k.id}</span>
+                    <span style={provChip(k.color)}>{k.kind}</span>
+                    {k.survived && <span style={provChip('#9a6b07')}>survived</span>}
+                    <span style={provText}>{k.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+        <p style={css('margin:14px 0 0; ' + MONO + ' font-size:10.5px; color:#a5a5a5; letter-spacing:0.02em; text-wrap:pretty;')}>
+          provenance is not truth ranking — it traces how the decision rests on claims, their grounding, and the objections that survived.
+        </p>
+      </div>
+    </section>
+  );
+}
+
 function Notice({ children }) {
   return (
     <div className="clista-screen" style={css('max-width:1080px; margin:0 auto; padding:48px 40px;')}>
@@ -232,6 +306,9 @@ export function Cockpit({ threadId, me, go }) {
           </div>
         </div>
       </section>
+
+      {/* ── PROVENANCE TRACE ── */}
+      <ProvTrace prov={vm.provenance} />
 
       {/* ── SURVIVING OBJECTION (signature) ── */}
       {vm.objection && (

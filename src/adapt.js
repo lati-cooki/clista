@@ -25,6 +25,37 @@ const sigFor = (type) => {
   return null;
 };
 
+// Decision-rooted provenance tree (mirrors the engine's `provenance trace`):
+// decision → its supporting claims → each claim's grounding evidence/assumptions
+// and the objections targeting it. Built from projection links only.
+function buildProvenance(r, dec) {
+  const decisionId = dec.id || (r.decision && r.decision.id) || null;
+  if (!decisionId) return null;
+  const evById = Object.fromEntries((r.evidence || []).map((e) => [e.id, e]));
+  const asmById = Object.fromEntries((r.assumptions || []).map((a) => [a.id, a]));
+  const claimsById = Object.fromEntries((r.claims || []).map((c) => [c.id, c]));
+  const objections = r.objections || [];
+  const supportIds =
+    dec.supportingClaimIds && dec.supportingClaimIds.length
+      ? dec.supportingClaimIds
+      : (r.claims || []).map((c) => c.id);
+  const claims = supportIds
+    .map((cid) => claimsById[cid])
+    .filter(Boolean)
+    .map((c) => ({
+      id: c.id,
+      text: c.text,
+      status: c.status || '',
+      evidence: (c.evidenceIds || []).map((id) => ({ id, text: (evById[id] || {}).finding || '' })),
+      assumptions: (c.assumptionIds || []).map((id) => ({ id, text: (asmById[id] || {}).text || '' })),
+      objections: objections
+        .filter((o) => o.targetObjectId === c.id)
+        .map((o) => ({ id: o.id, text: o.text, status: o.status, survived: o.status === 'preserved' })),
+    }));
+  if (!claims.length) return null;
+  return { decisionId, answer: dec.summary || (r.decision && r.decision.summary) || '', claims };
+}
+
 export function adaptCockpit(state, audit, validate) {
   const r = state.reasoningState || {};
   const ds = state.decisionStatus || {};
@@ -122,6 +153,8 @@ export function adaptCockpit(state, audit, validate) {
       : null,
 
     risks,
+
+    provenance: buildProvenance(r, dec),
 
     audit: {
       count: (audit && audit.auditTrail && audit.auditTrail.length) || (validate && validate.event_count) || 0,
