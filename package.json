@@ -8,7 +8,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test 'test/**/*.test.js'",
+    "test": "node --test 'test/*.test.js'",
+    "test:workers": "vitest run",
+    "test:all": "npm test && npm run test:workers",
     "sync:engine": "node scripts/vendor-engine.mjs",
     "sync:engine:check": "node scripts/vendor-engine.mjs --check"
   },
@@ -18,7 +20,9 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.16.18",
     "@vitejs/plugin-react": "^4.3.4",
-    "vite": "^6.0.7"
+    "vite": "^6.0.7",
+    "vitest": "^4.1.9"
   }
 }
