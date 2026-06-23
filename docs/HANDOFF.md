@@ -151,7 +151,8 @@ not a stray id — the server only forces top-level `actor_id`, so a wrong neste
   `docs/AGENTS.md` (agent service-token setup), this file.
 
 ## API (all same-origin)
-`GET /api/me` · `GET /api/threads` · per-thread `GET …/{state,summary,audit,validate}` ·
+`GET /api/me` · `GET /api/threads` · `POST /api/threads` (create a thread → genesis log,
+401 unauth / 422 if question < 12 chars) · per-thread `GET …/{state,summary,audit,validate}` ·
 `POST …/{append,ingest,seed-demo,join,purge}` (writes require auth → 401; fail-closed → 422;
 `purge` removes orphan threads only, refusing registered ones → 409).
 Writes authenticate as a **human** (Access login JWT → `par_<email>`) or an **agent**
@@ -169,9 +170,18 @@ always server-set, never client-supplied.
 - `lati-club/clista-ai-app` (this repo).
 
 ## Open follow-ups (optional, not blocking deploy)
-- More Compose event types (AssumptionDeclared, ClaimCreated, ReviewSubmitted,
-  DecisionRequested/Recorded) — currently only ObjectionRaised is wired.
-- Wire the index's **New thread** button (ThreadCreated + first ParticipantDeclared).
+- **DONE — New thread creation.** `POST /api/threads` mints the genesis log
+  (`ParticipantDeclared` → `ThreadCreated`, ids minted in the Worker since `ingest()`
+  doesn't) and ingests it atomically into a fresh DO; the creator becomes the first
+  participant / decision owner, `actor_id` identity-bound, question ≥ 12 chars (422 else),
+  401 unauth. The index **New thread** button opens a modal (question + optional title) →
+  jumps to the new cockpit. `test/create-thread.test.js` proves the log validates/chains/
+  projects + that a `thread.id`/`thread_id` mismatch fails closed.
+- **DONE — more Compose event types.** Compose has an event-type selector wiring
+  `ObjectionRaised` (existing) + `AssumptionDeclared` + `ClaimCreated`; per-kind builders
+  set the nested participant id to the joined actor. Still unwired (need reference pickers):
+  `ReviewSubmitted` (→ a decisionRequest), `DecisionRequestOpened`, `PositionTaken` (→ a
+  claim/decision target like objections already use `composeTargets`).
 - A `vitest`-pool-workers integration test exercising the DO in-runtime (today's DO proof
   is via `wrangler dev` + curl/browser; engine proof is the Node parity test).
 - v1 object-model scope = the bundled scenario's shape; federation/delegation/negotiation/
