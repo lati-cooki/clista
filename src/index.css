@@ -10,6 +10,28 @@ body {
 ::selection { background: #0a0a0a; color: #fff; }
 
 @keyframes clistaPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+@keyframes clistaLivePulse {
+  0%   { box-shadow: 0 0 0 0 rgba(28,122,79,0.5); }
+  70%  { box-shadow: 0 0 0 5px rgba(28,122,79,0); }
+  100% { box-shadow: 0 0 0 0 rgba(28,122,79,0); }
+}
+
+/* Global cross-surface menu in the topbar (mirrors the clista.ai site header) */
+.clista-surface-nav { display: flex; align-items: center; gap: 18px; }
+.clista-surface-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: 'Inter Tight', system-ui, sans-serif;
+  font-size: 13px; font-weight: 500; color: #6a6a6a;
+  text-decoration: none; white-space: nowrap;
+  transition: color 0.15s ease;
+}
+.clista-surface-link:hover { color: #0a0a0a; }
+.clista-surface-link.is-active { color: #0a0a0a; font-weight: 600; }
+.clista-surface-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #1c7a4f; box-shadow: 0 0 0 0 rgba(28,122,79,0.5);
+  animation: clistaLivePulse 2s ease-out infinite;
+}
 @keyframes clistaScan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
 @keyframes clistaFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
@@ -33,7 +55,7 @@ button { font-family: inherit; }
   .clista-shell aside nav { flex-direction: row !important; gap: 6px !important; flex: none; }
   .clista-shell aside nav button { width: auto !important; white-space: nowrap; padding: 8px 12px !important; }
   .clista-shell aside nav button > span:last-child { display: none !important; }
-  .clista-shell [data-topbar-tag] { display: none !important; }
+  .clista-shell .clista-surface-nav { display: none !important; }
   .clista-shell main h1 { font-size: 23px !important; }
   .clista-shell .clista-screen { padding: 20px 16px 48px !important; }
   .clista-shell .clista-grid-2 { grid-template-columns: 1fr !important; }

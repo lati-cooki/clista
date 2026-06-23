@@ -19,6 +19,17 @@ const NAV = [
   { key: 'kit', label: 'Component Kit', count: '', icon: ico('kit', { size: 18 }) },
 ];
 
+// Global cross-surface menu — mirrors the clista.ai site header so you can hop
+// between surfaces from inside the app. Cockpit (this surface) is active + live.
+const SURFACE_NAV = [
+  { label: 'Home', href: 'https://clista.ai/' },
+  { label: 'Cockpit', href: 'https://app.clista.ai/', active: true, live: true },
+  { label: 'CLI', href: 'https://cli.clista.ai/' },
+  { label: 'Docs', href: 'https://docs.clista.ai/' },
+  { label: 'The gate', href: 'https://gate.clista.ai/' },
+  { label: 'Learn', href: 'https://learn.clista.ai/' },
+];
+
 export function App() {
   const [screen, setScreen] = useState('cockpit');
   const [threadId, setThreadId] = useState(DEMO_THREAD_ID);
@@ -55,9 +66,14 @@ export function App() {
         <div style={css('width:1px; height:24px; background:#e5e5e5; margin:0 4px;')} />
         <div style={css("font-family:'JetBrains Mono',monospace; font-size:11.5px; color:#8a8a8a; letter-spacing:0.02em;")}>app.clista.ai</div>
         <div style={css('flex:1;')} />
-        <div data-topbar-tag style={css("font-family:'JetBrains Mono',monospace; font-size:10.5px; color:#9a9a9a; letter-spacing:0.06em; text-transform:uppercase;")}>
-          Conversation is input · Reasoning state is output
-        </div>
+        <nav className="clista-surface-nav" aria-label="ClisTa surfaces">
+          {SURFACE_NAV.map((s) => (
+            <a key={s.label} href={s.href} className={'clista-surface-link' + (s.active ? ' is-active' : '')} aria-current={s.active ? 'page' : undefined}>
+              {s.label}
+              {s.live && <span className="clista-surface-dot" aria-hidden="true" />}
+            </a>
+          ))}
+        </nav>
         <div style={css('width:1px; height:24px; background:#e5e5e5; margin:0 8px;')} />
         <div style={css('display:flex; align-items:center; gap:8px;')} title={me && me.authenticated ? `${me.email} · ${me.actorId} · via ${me.source}` : 'not signed in'}>
           <span style={css("display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border:1px solid #e0e0de; border-radius:50%; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600; color:#0a0a0a;")}>
