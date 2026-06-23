@@ -9,6 +9,8 @@ import { useThread } from '../useThread.js';
 
 const MONO = "font-family:'JetBrains Mono',monospace;";
 const SEVERITIES = ['minor', 'major', 'blocking'];
+const STANCES = ['support', 'oppose', 'neutral'];
+const REVIEW_STATUSES = ['approve', 'approve_with_conditions', 'request_changes', 'reject'];
 const CONFIDENCE = [
   { v: 0.6, label: 'tentative' },
   { v: 0.75, label: 'working' },
@@ -35,6 +37,21 @@ const KINDS = {
     h1: 'Create a claim',
     desc: 'A claim is an interpretation built from evidence and assumptions. State it precisely so others can support it, object to it, or ground it.',
   },
+  position: {
+    label: 'position', event: 'PositionTaken', idPrefix: 'pos', icon: 'checkSquare', color: '#6a4ca5',
+    h1: 'Take a position',
+    desc: 'A position records where you stand on a claim — support, oppose, or neutral — and why. It does not decide; it shows the distribution of stances.',
+  },
+  decisionRequest: {
+    label: 'decision request', event: 'DecisionRequestOpened', idPrefix: 'drq', icon: 'flag', color: '#9a6b07',
+    h1: 'Open a decision request',
+    desc: 'A decision request proposes what to decide and gathers the claims, evidence, assumptions, and objections it must answer. It moves the thread into review.',
+  },
+  review: {
+    label: 'review', event: 'ReviewSubmitted', idPrefix: 'rev', icon: 'fileCheck', color: '#3a6ea5',
+    h1: 'Submit a review',
+    desc: "A review is a reviewer's verdict on the open decision request — approve, approve with conditions, request changes, or reject — with conditions and comment recorded.",
+  },
 };
 
 function rid(prefix) {
@@ -42,6 +59,8 @@ function rid(prefix) {
   crypto.getRandomValues(buf);
   return prefix + '_' + Array.from(buf, (b) => b.toString(16).padStart(2, '0')).join('');
 }
+
+const emptyRefs = () => ({ claims: [], evidence: [], assumptions: [], objections: [] });
 
 export function Compose({ threadId, me, go }) {
   const { vm, reload } = useThread(threadId);
@@ -51,12 +70,18 @@ export function Compose({ threadId, me, go }) {
   const [basis, setBasis] = useState('');
   const [severity, setSeverity] = useState('major');
   const [confidence, setConfidence] = useState(0.75);
+  const [stance, setStance] = useState('support');
+  const [reviewStatus, setReviewStatus] = useState('approve_with_conditions');
+  const [conditions, setConditions] = useState('');
+  const [refs, setRefs] = useState(emptyRefs());
   const [result, setResult] = useState(null);
   const [busy, setBusy] = useState(false);
   const [joining, setJoining] = useState(false);
 
   const k = KINDS[kind];
   const targets = (vm && vm.composeTargets) || [{ v: '', label: '— select what this challenges —' }];
+  const refLists = (vm && vm.refLists) || { claims: [], evidence: [], assumptions: [], objections: [] };
+  const decisionRequest = vm && vm.decisionRequest;
   const actorId = me && me.authenticated ? me.actorId : null;
   const isParticipant = !!(actorId && vm && (vm.participantIds || []).includes(actorId));
 
@@ -75,6 +100,14 @@ export function Compose({ threadId, me, go }) {
 
   const pickKind = (next) => {
     setKind(next);
+    setResult(null);
+  };
+
+  const toggleRef = (bucket, id) => {
+    setRefs((prev) => {
+      const has = prev[bucket].includes(id);
+      return { ...prev, [bucket]: has ? prev[bucket].filter((x) => x !== id) : [...prev[bucket], id] };
+    });
     setResult(null);
   };
 
@@ -108,24 +141,77 @@ export function Compose({ threadId, me, go }) {
         },
       };
     }
+    if (kind === 'claim') {
+      return {
+        event_type: 'ClaimCreated',
+        payload: {
+          claim: {
+            id, object: 'claim', threadId, text: statement.trim(),
+            status: 'proposed', createdByParticipantId: actorId, createdAt: at,
+          },
+        },
+      };
+    }
+    if (kind === 'position') {
+      return {
+        event_type: 'PositionTaken',
+        payload: {
+          position: {
+            id, object: 'position', threadId, participantId: actorId,
+            targetObjectId: target, targetObjectType: 'claim', stance,
+            reason: statement.trim(), takenAt: at,
+          },
+        },
+      };
+    }
+    if (kind === 'decisionRequest') {
+      return {
+        event_type: 'DecisionRequestOpened',
+        payload: {
+          decisionRequest: {
+            id, object: 'decisionRequest', threadId, proposal: statement.trim(), status: 'review',
+            supportingEvidenceIds: refs.evidence,
+            supportingClaimIds: refs.claims,
+            supportingAssumptionIds: refs.assumptions,
+            objectionIds: refs.objections,
+            openedByParticipantId: actorId, openedAt: at,
+          },
+        },
+      };
+    }
+    // review
+    const conds = conditions.split('\n').map((c) => c.trim()).filter(Boolean);
     return {
-      event_type: 'ClaimCreated',
+      event_type: 'ReviewSubmitted',
       payload: {
-        claim: {
-          id, object: 'claim', threadId, text: statement.trim(),
-          status: 'proposed', createdByParticipantId: actorId, createdAt: at,
+        review: {
+          id, object: 'review', threadId,
+          decisionRequestId: decisionRequest && decisionRequest.id,
+          reviewerParticipantId: actorId, status: reviewStatus,
+          conditions: conds, comment: statement.trim(), reviewedAt: at,
         },
       },
     };
   };
 
   const submit = async () => {
-    // Client-side guard mirrors the engine's rules for a fast local rejection.
+    // Client-side guards mirror the engine's rules for a fast local rejection.
     if (kind === 'objection' && !target) {
       setResult({ ok: false, id: '—', reason: 'objection.target is required — every objection must attach to a claim or the decision. Append rejected; reasoning state unchanged.' });
       return;
     }
-    if (statement.trim().length < 12) {
+    if (kind === 'position' && !target) {
+      setResult({ ok: false, id: '—', reason: 'position.target is required — a position attaches to the claim it stands on. Append rejected; reasoning state unchanged.' });
+      return;
+    }
+    if (kind === 'review' && !(decisionRequest && decisionRequest.id)) {
+      setResult({ ok: false, id: '—', reason: 'no open decision request to review — open one first. Append rejected; reasoning state unchanged.' });
+      return;
+    }
+    // Free text is the recorded substance for everything except position (reason)
+    // and review (comment), where it is optional.
+    const textRequired = kind !== 'position' && kind !== 'review';
+    if (textRequired && statement.trim().length < 12) {
       setResult({ ok: false, id: '—', reason: `${k.label}.text must state precisely what is recorded (min 12 chars). Append rejected; reasoning state unchanged.` });
       return;
     }
@@ -137,7 +223,11 @@ export function Compose({ threadId, me, go }) {
     setBusy(false);
 
     if (res.ok && res.data.ok) {
-      setResult({ ok: true, kind, evt: res.data.event.event_id, obj: objId, target: kind === 'objection' ? target : null });
+      const rel =
+        kind === 'objection' || kind === 'position' ? { label: 'attached.to', value: target }
+          : kind === 'review' ? { label: 'reviewed', value: decisionRequest && decisionRequest.id }
+            : null;
+      setResult({ ok: true, kind, evt: res.data.event.event_id, obj: objId, rel });
     } else {
       const reasons = res.data.reasons || [];
       setResult({
@@ -154,7 +244,41 @@ export function Compose({ threadId, me, go }) {
     setBasis('');
     setSeverity('major');
     setConfidence(0.75);
+    setStance('support');
+    setReviewStatus('approve_with_conditions');
+    setConditions('');
+    setRefs(emptyRefs());
     setResult(null);
+  };
+
+  // A compact toggle-chip multi-select over a projection reference list.
+  const refGroup = (title, bucket) => {
+    const items = refLists[bucket] || [];
+    return (
+      <div style={css('margin-bottom:16px;')}>
+        <label style={css(fieldLabel)}>{title} <span style={css('color:#a5a5a5; font-weight:500;')}>{refs[bucket].length ? `${refs[bucket].length} selected` : 'optional'}</span></label>
+        {items.length ? (
+          <div style={css('display:flex; flex-wrap:wrap; gap:7px;')}>
+            {items.map((it) => (
+              <button key={it.id} onClick={() => toggleRef(bucket, it.id)} title={it.text} style={filterStyle(refs[bucket].includes(it.id))}>{it.id}</button>
+            ))}
+          </div>
+        ) : (
+          <p style={css('margin:0; ' + MONO + ' font-size:11px; color:#b0b0b0;')}>// none in this thread yet</p>
+        )}
+      </div>
+    );
+  };
+
+  const textLabel = kind === 'position' ? 'position.reason' : kind === 'decisionRequest' ? 'decisionRequest.proposal' : kind === 'review' ? 'review.comment' : `${k.label}.text`;
+  const textRequired = kind !== 'position' && kind !== 'review';
+  const placeholders = {
+    objection: 'State precisely what this objection challenges, and what would retire it.',
+    assumption: 'State the premise you are taking as given — what must hold for this to stand.',
+    claim: 'State the interpretation precisely — what it asserts, drawn from what.',
+    position: 'Why do you stand here? (optional, but recorded)',
+    decisionRequest: 'State the proposal precisely — what is being decided, and on what terms.',
+    review: 'Your verdict in words (optional, but recorded).',
   };
 
   return (
@@ -166,7 +290,7 @@ export function Compose({ threadId, me, go }) {
       </div>
 
       {/* event-type selector */}
-      <div style={css('display:flex; align-items:center; gap:8px; margin-bottom:20px;')}>
+      <div style={css('display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:20px;')}>
         <span style={css(MONO + ' font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:#a5a5a5; margin-right:4px;')}>event</span>
         {Object.keys(KINDS).map((key) => (
           <button key={key} onClick={() => pickKind(key)} style={filterStyle(kind === key)}>{KINDS[key].event}</button>
@@ -182,35 +306,48 @@ export function Compose({ threadId, me, go }) {
       </div>
 
       <div style={css('background:#fff; border:1px solid #dcdcda; border-radius:7px; padding:24px;')}>
-        {/* target — objection only */}
-        {kind === 'objection' && (
+        {/* target — objection (claim/decision) + position (claim) */}
+        {(kind === 'objection' || kind === 'position') && (
           <div style={css('margin-bottom:20px;')}>
-            <label style={css(fieldLabel)}>objection.target <span style={css('color:#b3343c;')}>*</span></label>
+            <label style={css(fieldLabel)}>{k.label}.target <span style={css('color:#b3343c;')}>*</span></label>
             <div style={css('position:relative;')}>
               <select value={target} onChange={clear(setTarget)} style={css('appearance:none; ' + inputBase + ' padding:11px 38px 11px 13px; cursor:pointer;')}>
-                {targets.map((tg) => (
-                  <option key={tg.v} value={tg.v}>{tg.label}</option>
-                ))}
+                {kind === 'objection'
+                  ? targets.map((tg) => (<option key={tg.v} value={tg.v}>{tg.label}</option>))
+                  : [{ v: '', label: '— select the claim you stand on —' }, ...refLists.claims.map((c) => ({ v: c.id, label: `${c.id} · ${c.text}` }))].map((tg) => (<option key={tg.v} value={tg.v}>{tg.label}</option>))}
               </select>
               <span style={css('position:absolute; right:13px; top:50%; transform:translateY(-50%); pointer-events:none; color:#8a8a8a; ' + MONO + ' font-size:11px;')}>▾</span>
             </div>
           </div>
         )}
+
+        {/* review target — the open decision request (read-only) */}
+        {kind === 'review' && (
+          <div style={css('margin-bottom:20px;')}>
+            <label style={css(fieldLabel)}>review.decisionRequest <span style={css('color:#b3343c;')}>*</span></label>
+            {decisionRequest ? (
+              <div style={css(inputBase + ' display:flex; flex-direction:column; gap:4px; cursor:default;')}>
+                <span style={css(MONO + ' font-size:11.5px; color:#3a6ea5;')}>{decisionRequest.id} · {decisionRequest.status}</span>
+                <span style={css("font-family:'Inter Tight',sans-serif; font-size:13px; color:#3a3a3a; line-height:1.45;")}>{decisionRequest.proposal}</span>
+              </div>
+            ) : (
+              <p style={css('margin:0; ' + MONO + ' font-size:12px; color:#b3343c;')}>// no open decision request in this thread — open one first</p>
+            )}
+          </div>
+        )}
+
         {/* statement / text */}
         <div style={css('margin-bottom:20px;')}>
-          <label style={css(fieldLabel)}>{k.label}.text <span style={css('color:#b3343c;')}>*</span></label>
+          <label style={css(fieldLabel)}>{textLabel} {textRequired ? <span style={css('color:#b3343c;')}>*</span> : <span style={css('color:#a5a5a5; font-weight:500;')}>optional</span>}</label>
           <textarea
             value={statement}
             onChange={clear(setStatement)}
-            placeholder={
-              kind === 'objection' ? 'State precisely what this objection challenges, and what would retire it.'
-                : kind === 'assumption' ? 'State the premise you are taking as given — what must hold for this to stand.'
-                : 'State the interpretation precisely — what it asserts, drawn from what.'
-            }
+            placeholder={placeholders[kind]}
             rows={4}
             style={css("width:100%; resize:vertical; padding:12px 13px; font-family:'Inter Tight',sans-serif; font-size:14px; line-height:1.55; color:#1a1a1a; background:#fcfcfb; border:1px solid #d8d8d6; border-radius:5px; outline:none;")}
           />
         </div>
+
         {/* basis — objection only */}
         {kind === 'objection' && (
           <div style={css('margin-bottom:20px;')}>
@@ -239,6 +376,49 @@ export function Compose({ threadId, me, go }) {
               ))}
             </div>
           </div>
+        )}
+        {/* stance — position only */}
+        {kind === 'position' && (
+          <div style={css('margin-bottom:24px;')}>
+            <label style={css(fieldLabel)}>position.stance</label>
+            <div style={css('display:flex; gap:8px;')}>
+              {STANCES.map((sv) => (
+                <button key={sv} onClick={() => { setStance(sv); setResult(null); }} style={filterStyle(stance === sv)}>{sv}</button>
+              ))}
+            </div>
+          </div>
+        )}
+        {/* support sets — decision request only */}
+        {kind === 'decisionRequest' && (
+          <div style={css('margin-bottom:8px; padding-top:4px;')}>
+            {refGroup('supporting claims', 'claims')}
+            {refGroup('supporting evidence', 'evidence')}
+            {refGroup('supporting assumptions', 'assumptions')}
+            {refGroup('objections it must answer', 'objections')}
+          </div>
+        )}
+        {/* review verdict — review only */}
+        {kind === 'review' && (
+          <>
+            <div style={css('margin-bottom:20px;')}>
+              <label style={css(fieldLabel)}>review.status</label>
+              <div style={css('display:flex; flex-wrap:wrap; gap:8px;')}>
+                {REVIEW_STATUSES.map((sv) => (
+                  <button key={sv} onClick={() => { setReviewStatus(sv); setResult(null); }} style={filterStyle(reviewStatus === sv)}>{sv.replace(/_/g, ' ')}</button>
+                ))}
+              </div>
+            </div>
+            <div style={css('margin-bottom:24px;')}>
+              <label style={css(fieldLabel)}>review.conditions <span style={css('color:#a5a5a5; font-weight:500;')}>optional · one per line</span></label>
+              <textarea
+                value={conditions}
+                onChange={clear(setConditions)}
+                placeholder={'Use only redacted sample tickets\nExport state after the beta for audit'}
+                rows={3}
+                style={css(inputBase + ' resize:vertical; line-height:1.6;')}
+              />
+            </div>
+          </>
         )}
 
         <div style={css('display:flex; align-items:center; gap:12px; padding-top:20px; border-top:1px solid #ededeb;')}>
@@ -286,7 +466,7 @@ export function Compose({ threadId, me, go }) {
             <div style={css(MONO + ' display:grid; grid-template-columns:auto 1fr; gap:5px 14px; font-size:12px; color:#2a5a44;')}>
               <span style={css('color:#6a9a82;')}>{KINDS[result.kind].label}.id</span><span>{result.obj}</span>
               <span style={css('color:#6a9a82;')}>event.id</span><span>{result.evt}</span>
-              {result.target && (<><span style={css('color:#6a9a82;')}>attached.to</span><span>{result.target}</span></>)}
+              {result.rel && result.rel.value && (<><span style={css('color:#6a9a82;')}>{result.rel.label}</span><span>{result.rel.value}</span></>)}
             </div>
             <p style={css('margin:8px 0 0; font-size:12.5px; color:#3a6a52;')}>Reasoning state updated and re-chained. Open the cockpit to see this {KINDS[result.kind].label} in the thread's shape.</p>
           </div>

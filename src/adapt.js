@@ -143,6 +143,19 @@ export function adaptCockpit(state, audit, validate) {
       ...(r.claims || []).map((c) => ({ v: c.id, label: `${c.id} · ${c.text}` })),
       ...(dec.id ? [{ v: dec.id, label: `${dec.id} · the decision itself` }] : []),
     ],
+
+    // Reference lists for the Compose pickers (position target, decision-request
+    // support sets, review target). Each is { id, text } drawn from the projection.
+    refLists: {
+      claims: (r.claims || []).map((c) => ({ id: c.id, text: c.text })),
+      evidence: (r.evidence || []).map((e) => ({ id: e.id, text: e.finding })),
+      assumptions: (r.assumptions || []).map((a) => ({ id: a.id, text: a.text })),
+      objections: (r.objections || []).map((o) => ({ id: o.id, text: o.text })),
+    },
+    // The open decision request a review attaches to (latest opened, if any).
+    decisionRequest: state.currentProposal
+      ? { id: state.currentProposal.id, proposal: state.currentProposal.proposal, status: state.currentProposal.status }
+      : null,
   };
 }
 
