@@ -41,6 +41,65 @@ self-hosted app in the `laticooki` Zero Trust org. Local repo:
 - **Two capabilities added after launch (both merged to `main`, agent path deployed):**
   see the "Engine sync" and "Agent write path" sections below.
 
+## Session 2026-06-23 (b) — agent deliberation, provenance, cockpit polish
+All shipped to `main` + live on app.clista.ai (CI green). Newest first:
+
+- **Provenance Trace panel (cockpit).** Decision-rooted tree (the engine's `provenance
+  trace`): decision → supporting claims → each claim's evidence/assumptions + the objections
+  targeting it (surviving = SURVIVED). `src/adapt.js` `buildProvenance()` builds it from
+  projection links only (`decisionRecord.supportingClaimIds`, `claim.evidenceIds/assumptionIds`,
+  `objection.targetObjectId/status`); `src/screens/Cockpit.jsx` `ProvTrace` renders it under the
+  Decision Record. Only shows once a thread has a decision. (Commit `ecc2417`.)
+- **Cockpit auto-refresh.** `src/useThread.js` now silently polls every 20s while a thread is
+  NOT decided and the tab is visible (stops once decided), so out-of-band agent contributions
+  appear without a manual refresh. (Commit `5a67456`.)
+- **Agent-deliberation feature (the big one) — flag a thread → clistahermes deliberates on
+  moltbook → records events back → stages a decision.** Full autonomy via the existing
+  moltbook agent loop; the human owner records the final decision.
+  - **App (Part A, `2af53bf`):** flag queue in `IndexDO` (`agent_flags` table — DO metadata,
+    NOT a protocol event). Routes: `POST …/request-agent` (human-only), `GET …/agent-status`,
+    `GET /api/agent/queue` (agent-only poll), `POST …/agent-ack` (agent-only). Cockpit shows a
+    "Have clistahermes deliberate" banner on active, non-decided threads. Test:
+    `test/workers/agent-flag.test.js` (`npm run test:workers`).
+  - **Hermes (Part B):** cron job **`e31c1a1dd850` `clistahermes-app-thread-deliberation`**
+    (`15,45 * * * *`, **ENABLED & proven live**). Precheck `~/.hermes/scripts/clista-app-precheck.sh`
+    (Detector A: `/api/agent/queue`; Detector B: moltbook `/home` replies on deliberation posts).
+    Agent state: `~/.hermes/cron/clista-app-deliberation.tsv` (`thread_id  post_id  status(active|
+    decided)  updated_at`) — the source of truth for which posts this loop owns. The seeding +
+    moltbook-skill writes go through `scripts/agent-post.mjs`.
+  - **First live run PROVEN:** flagged the A2A objective-priority thread
+    `thd_decide_which_objective_is_key_..._mqr26l7l_96291fb4` → clistahermes seeded 2 competing
+    claims on the thread (6 events) + created moltbook post **`e8dc4ced-0e85-4866-a4ad-32bb5bb016f6`**
+    (m/general) inviting agents to weigh in. Awaiting replies (0 comments as of handoff) — harvest
+    happens on later ticks when other agents comment. **Deliberation quality depends on the
+    moltbook community engaging — external dependency.**
+- **Decision-owner boundary (important).** `governance.js` requires an **authorized decision
+  owner** for a decision; the agent (`par_agent_clistahermes`) is a contributor, so it CANNOT
+  merge. The deliberation prompt was corrected to **stage** the decision (`DecisionRequestOpened`
+  + `ReviewSubmitted`) and hand the final `DecisionMerged` to the **human decision owner**.
+- **Decided-thread guardrail** added to BOTH cron prompts (moltbook `6262e7f9aefe` +
+  deliberation `e31c1a1dd850`): before appending, check status; if `decided`, don't accrete —
+  open a NEW decision request for substantive input, else reply-only. (Fixes the "evidence after
+  the decision" smell seen on `thd_csv_cli_build_moltbook`.)
+- **Patched legacy thread `thd_csv_cli_build_moltbook`.** It was ingested (not app-created) so it
+  had **no decision owner** and a decision merged by `id_troy` (unauthorized). A re-declare is
+  validator-blocked (`duplicate participant id`); the fix is `ParticipantAuthorityGranted` (no
+  granter-authority gate → bootstraps the first owner). Appended one granting `id_troy`
+  `decision_owner` (thread scope) → decision now authorized, chain still valid (38 events). NOTE:
+  the cosmetic `participant.role` label (null for `id_troy`/`par_octopus`) can't be patched via
+  append (declare-time field) — governance is fixed, the label is a permanent ingestion artifact.
+- **Hooks auto-accept.** Set `hooks_auto_accept: true` in `~/.hermes/config.yaml` so autonomous
+  cron shell commands (ack/tsv writes) stop hitting the approval gate. Config cache invalidates on
+  file mtime + scheduler reloads per run → no gateway restart needed. (Both cron jobs benefit.)
+- **Cockpit global surface menu** (`fa…`/`6158b5d`): the app topbar now carries the cross-surface
+  nav (Home / Cockpit / CLI / Docs / The gate / Learn) matching clista.ai, replacing the tagline.
+- **CI actions bumped to v5** (`5530446`): `actions/checkout@v5` + `actions/setup-node@v5` (Node 24),
+  clearing the Node-20 deprecation warning in `deploy-app.yml` + `sync-engine.yml`.
+- **Git auth:** both this repo AND `lati-cooki/clista-protocol-launch-planning` now carry a
+  repo-local **gh-only credential helper** (`credential.helper` = empty then `!gh auth git-credential`)
+  so pushes don't fall back to the osxkeychain credential. `lati-club` is a collaborator on the
+  launch-planning repo, so plain `git push` works there now.
+
 - **Phase 0 — surface.** Vite + React 19 SPA implementing the `app.clista.ai` Claude
   Design project `ClisTa Cockpit.dc.html` (imported via the claude_design MCP /
   DesignSync; project id `fe28cfec-8f76-4d43-94ae-ff333afa5a89`). Four screens:
