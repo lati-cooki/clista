@@ -21,6 +21,66 @@ async function registerThread(env, stub) {
   if (card && card.id) await indexStub(env).upsert(card);
 }
 
+// Open a new thread: mint the canonical two-event genesis log
+// (ParticipantDeclared → ThreadCreated) and ingest it atomically into a fresh
+// DO. The caller becomes the thread's first participant (decision owner) — so
+// who calls this is who OWNS the thread. Used by both POST /api/threads and the
+// triage-inbox approve path (so an approved proposal/submission is owned by the
+// approving human, never the agent/submitter). Returns { ok, id, ... } or
+// { ok:false, reason } when the question is too short.
+async function createThread(env, identity, { question, title } = {}) {
+  const q = String(question || '').trim();
+  if (q.length < 12) {
+    return { ok: false, reason: 'a thread needs a question (min 12 chars) — the decision it exists to answer' };
+  }
+  const threadId = engine.newId('thd', q);
+  const at = engine.nowIso();
+  const t = String(title || '').trim();
+  // ingest() chains + validates but (unlike append) does not mint ids, so the
+  // genesis events carry their own event_id.
+  const genesis = [
+    {
+      event_id: engine.newId('evt', 'ParticipantDeclared'),
+      event_type: 'ParticipantDeclared',
+      thread_id: threadId,
+      actor_id: identity.actorId,
+      timestamp: at,
+      payload: {
+        participant: {
+          id: identity.actorId,
+          object: 'participant',
+          kind: identity.kind || 'human',
+          name: identity.name,
+          role: 'decision owner',
+        },
+      },
+    },
+    {
+      event_id: engine.newId('evt', 'ThreadCreated'),
+      event_type: 'ThreadCreated',
+      thread_id: threadId,
+      actor_id: identity.actorId,
+      timestamp: at,
+      payload: {
+        thread: {
+          id: threadId,
+          object: 'thread',
+          title: t || q,
+          question: q,
+          status: 'active',
+          participantIds: [identity.actorId],
+          createdAt: at,
+          updatedAt: at,
+        },
+      },
+    },
+  ];
+  const stub = threadStub(env, threadId);
+  const result = await stub.ingest(genesis);
+  if (result.ok) await registerThread(env, stub);
+  return { ...result, id: threadId };
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -47,6 +107,98 @@ export default {
           return json(await indexStub(env).listFlags());
         }
 
+        // POST /api/agent/intake — the emergent meta-thread seeder proposes a
+        // canonical thread into the triage inbox. Agent-only. The agent does NOT
+        // create the thread (it would become decision owner and the decision
+        // could never be merged) — it proposes; a human approves and owns it.
+        if (parts[1] === 'agent' && parts[2] === 'intake' && request.method === 'POST') {
+          const identity = await resolveIdentity(request, env);
+          if (!identity.authenticated) {
+            return json({ error: 'unauthenticated', reason: identity.reason || 'sign in required' }, 401);
+          }
+          if (identity.kind !== 'agent') {
+            return json({ error: 'forbidden', reason: 'agent service token required' }, 403);
+          }
+          const body = await request.json().catch(() => ({}));
+          const question = String(body.question || '').trim();
+          if (question.length < 12) {
+            return json({ error: 'invalid', reason: 'a thread proposal needs a question (min 12 chars)' }, 422);
+          }
+          const result = await indexStub(env).enqueueIntake({
+            id: engine.newId('itk', question),
+            source: 'agent',
+            kind: 'thread_proposal',
+            title: String(body.title || '').trim() || null,
+            question,
+            body: typeof body.body === 'string' ? body.body : null,
+            payload: { useCases: body.useCases ?? [], tradeoffs: body.tradeoffs ?? null },
+            provenance: body.provenance ?? body.sourceSignals ?? null,
+            submitter: identity.actorId,
+            at: engine.nowIso(),
+          });
+          return json(result, result.ok ? 200 : 422);
+        }
+
+        // /api/intake — the owner's triage inbox. Phase 1: entirely behind
+        // Access (human-only). The public submission route is a separate,
+        // strictly-guarded surface added in a later phase.
+        if (parts[1] === 'intake') {
+          const identity = await resolveIdentity(request, env);
+          if (!identity.authenticated) {
+            return json({ error: 'unauthenticated', reason: identity.reason || 'sign in required' }, 401);
+          }
+          if (identity.kind !== 'human') {
+            return json({ error: 'forbidden', reason: 'human triage only' }, 403);
+          }
+
+          // GET /api/intake — list pending items for the cockpit inbox.
+          if (!parts[2] && request.method === 'GET') {
+            return json(await indexStub(env).listIntake('pending'));
+          }
+
+          // POST /api/intake/:id/{approve,dismiss} — triage actions.
+          if (parts[2] && request.method === 'POST') {
+            const intakeId = decodeURIComponent(parts[2]);
+            const op = parts[3] || '';
+            const item = await indexStub(env).getIntake(intakeId);
+            if (!item) {
+              return json({ error: 'not found', reason: 'no such intake item' }, 404);
+            }
+            if (item.status !== 'pending') {
+              return json({ error: 'conflict', reason: `intake item already ${item.status}` }, 409);
+            }
+            const body = await request.json().catch(() => ({}));
+            const at = engine.nowIso();
+
+            if (op === 'dismiss') {
+              const status = body.spam ? 'spam' : 'dismissed';
+              const result = await indexStub(env).resolveIntake(intakeId, { status, at });
+              return json({ ...result, status }, result.ok ? 200 : 422);
+            }
+
+            if (op === 'approve') {
+              // thread_proposal / decision → create a thread OWNED BY THE
+              // APPROVING HUMAN (the governance keystone), optionally handing it
+              // to the deliberation cron.
+              if (item.kind === 'thread_proposal' || item.kind === 'decision') {
+                const created = await createThread(env, identity, { question: item.question, title: item.title });
+                if (!created.ok) {
+                  return json({ error: 'invalid', reason: created.reason || 'could not create thread from intake item' }, 422);
+                }
+                if (body.flag) await indexStub(env).flagForAgent(created.id, identity.actorId, at);
+                await indexStub(env).resolveIntake(intakeId, { status: 'approved', threadId: created.id, at });
+                return json({ ok: true, status: 'approved', id: created.id, flagged: !!body.flag });
+              }
+              // contribution / run_report approval lands in later phases.
+              return json({ error: 'unsupported', reason: `approve not yet implemented for kind '${item.kind}'` }, 422);
+            }
+
+            return json({ error: 'not found' }, 404);
+          }
+
+          return json({ error: 'not found' }, 404);
+        }
+
         // GET /api/threads — the index/ledger
         if (parts[1] === 'threads' && !parts[2] && request.method === 'GET') {
           return json(await indexStub(env).list());
@@ -62,56 +214,11 @@ export default {
             return json({ error: 'unauthenticated', reason: identity.reason || 'sign in required' }, 401);
           }
           const body = await request.json().catch(() => ({}));
-          const title = String(body.title || '').trim();
-          const question = String(body.question || '').trim();
-          if (question.length < 12) {
-            return json({ error: 'invalid', reason: 'a thread needs a question (min 12 chars) — the decision it exists to answer' }, 422);
+          const created = await createThread(env, identity, { question: body.question, title: body.title });
+          if (created.ok === false && created.reason && !created.id) {
+            return json({ error: 'invalid', reason: created.reason }, 422);
           }
-          const threadId = engine.newId('thd', question);
-          const at = engine.nowIso();
-          // ingest() chains + validates but (unlike append) does not mint ids, so
-          // the genesis events carry their own event_id.
-          const genesis = [
-            {
-              event_id: engine.newId('evt', 'ParticipantDeclared'),
-              event_type: 'ParticipantDeclared',
-              thread_id: threadId,
-              actor_id: identity.actorId,
-              timestamp: at,
-              payload: {
-                participant: {
-                  id: identity.actorId,
-                  object: 'participant',
-                  kind: identity.kind || 'human',
-                  name: identity.name,
-                  role: 'decision owner',
-                },
-              },
-            },
-            {
-              event_id: engine.newId('evt', 'ThreadCreated'),
-              event_type: 'ThreadCreated',
-              thread_id: threadId,
-              actor_id: identity.actorId,
-              timestamp: at,
-              payload: {
-                thread: {
-                  id: threadId,
-                  object: 'thread',
-                  title: title || question,
-                  question,
-                  status: 'active',
-                  participantIds: [identity.actorId],
-                  createdAt: at,
-                  updatedAt: at,
-                },
-              },
-            },
-          ];
-          const stub = threadStub(env, threadId);
-          const result = await stub.ingest(genesis);
-          if (result.ok) await registerThread(env, stub);
-          return json({ ...result, id: threadId }, result.ok ? 200 : 422);
+          return json(created, created.ok ? 200 : 422);
         }
 
         if (parts[1] === 'threads' && parts[2]) {

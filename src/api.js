@@ -36,6 +36,10 @@ export const api = {
   // Ask the autonomous agent (clistahermes) to deliberate this thread.
   requestAgent: (id) => postJson(`/api/threads/${enc(id)}/request-agent`, {}),
   agentStatus: (id) => req(`/api/threads/${enc(id)}/agent-status`),
+  // The owner's triage inbox: proposals/submissions awaiting judgement.
+  listIntake: () => req('/api/intake'),
+  approveIntake: (id, opts) => postJson(`/api/intake/${enc(id)}/approve`, opts || {}),
+  dismissIntake: (id, opts) => postJson(`/api/intake/${enc(id)}/dismiss`, opts || {}),
 };
 
 export const DEMO_THREAD_ID = 'thd_scenario_demo';
