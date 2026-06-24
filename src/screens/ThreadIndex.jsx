@@ -93,9 +93,9 @@ export function ThreadIndex({ openThread, me }) {
               base={css('display:grid; ' + GRID + ' align-items:center; width:100%; text-align:left; padding:15px 22px; border:none; border-bottom:1px solid #f0f0ee; background:#fff; cursor:pointer;')}
               hover={css('background:#fafaf9;')}
             >
-              <span className="clista-ledger-grid" style={css('display:flex; align-items:center; gap:12px; min-width:0;')}>
-                <span style={css(MONO + ' font-size:11px; color:#b0b0b0; flex:none;')}>{t.id}</span>
-                <span style={css('font-size:14px; font-weight:500; color:#1a1a1a; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;')}>{t.question || t.title}</span>
+              <span className="clista-ledger-grid" style={css('display:flex; align-items:baseline; gap:10px; min-width:0;')}>
+                <span style={css('flex:1 1 auto; min-width:0; font-size:14px; font-weight:500; color:#1a1a1a; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;')}>{t.question || t.title}</span>
+                <span style={css(MONO + ' flex:0 1 auto; min-width:0; max-width:240px; font-size:10.5px; color:#b0b0b0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;')}>{t.id}</span>
               </span>
               <span><span style={b.badge}><span style={b.dot} />{t.status}</span></span>
               <span style={css('font-size:13px; color:#4a4a4a;')}>{t.owner}</span>
