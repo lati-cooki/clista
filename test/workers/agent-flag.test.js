@@ -51,15 +51,18 @@ describe('agent deliberation flag queue', () => {
     const queue = await (await agentGet('/api/agent/queue')).json();
     expect(queue.flags.map((f) => f.threadId)).toContain(id);
 
-    // The agent acknowledges/clears the flag.
+    // The agent acks the flag — it's now dequeued (status 'claimed') but the
+    // row PERSISTS so the cockpit keeps showing live deliberation status.
     const ack = await agentPost(`/api/threads/${id}/agent-ack`, {});
     expect(ack.status).toBe(200);
 
-    // Queue is empty for this thread again.
-    const cleared = await (await humanGet(`/api/threads/${id}/agent-status`)).json();
-    expect(cleared.requested).toBe(false);
+    // No longer in the agent poll queue…
     const queue2 = await (await agentGet('/api/agent/queue')).json();
     expect(queue2.flags.map((f) => f.threadId)).not.toContain(id);
+    // …but agent-status still reports it (claimed), not wiped.
+    const claimed = await (await humanGet(`/api/threads/${id}/agent-status`)).json();
+    expect(claimed.requested).toBe(true);
+    expect(claimed.status).toBe('claimed');
   });
 
   it('agent reports deliberation progress → surfaced via agent-status; human cannot write it', async () => {
@@ -88,6 +91,14 @@ describe('agent deliberation flag queue', () => {
     expect(st.responders).toBe(3);
     expect(st.phase).toBe('harvesting');
     expect(st.detail).toBe('3 agents engaged');
+
+    // Acking dequeues but does NOT wipe the reported status (the bug the live
+    // Raft test caught: ack used to delete the row and lose the progress).
+    await agentPost(`/api/threads/${id}/agent-ack`, {});
+    const afterAck = await (await humanGet(`/api/threads/${id}/agent-status`)).json();
+    expect(afterAck.requested).toBe(true);
+    expect(afterAck.status).toBe('claimed');
+    expect(afterAck.channel).toBe('raft+moltbook');
 
     // A fresh re-flag clears prior deliberation status.
     await humanPost(`/api/threads/${id}/request-agent`, {});

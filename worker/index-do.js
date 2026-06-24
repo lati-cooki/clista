@@ -112,26 +112,29 @@ export class IndexDO extends DurableObject {
 
   // The agent reports live deliberation status back to the cockpit (which Raft
   // workspace / moltbook channel it used, how many peer agents engaged, phase).
-  // Updates an existing flag in place — a no-op if the thread isn't flagged
-  // (e.g. already acked). DO metadata only; never touches the append-only log.
+  // UPSERT (status 'claimed' on insert) so it's resilient: a progress report
+  // recreates the status row even if the flag was already acked/cleared — the
+  // agent reports progress on threads it is actively deliberating. DO metadata
+  // only; never touches the append-only log.
   recordAgentProgress(threadId, p = {}) {
     if (!threadId) return { ok: false };
     this.sql.exec(
-      `UPDATE agent_flags SET
-         channel = COALESCE(?, channel),
-         workspace_ref = COALESCE(?, workspace_ref),
-         responders = COALESCE(?, responders),
-         phase = COALESCE(?, phase),
-         detail = COALESCE(?, detail),
-         updated_at = ?
-       WHERE thread_id = ?`,
+      `INSERT INTO agent_flags (thread_id, status, channel, workspace_ref, responders, phase, detail, updated_at)
+       VALUES (?, 'claimed', ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(thread_id) DO UPDATE SET
+         channel = COALESCE(excluded.channel, channel),
+         workspace_ref = COALESCE(excluded.workspace_ref, workspace_ref),
+         responders = COALESCE(excluded.responders, responders),
+         phase = COALESCE(excluded.phase, phase),
+         detail = COALESCE(excluded.detail, detail),
+         updated_at = excluded.updated_at`,
+      threadId,
       p.channel ?? null,
       p.workspaceRef ?? null,
       typeof p.responders === 'number' ? p.responders : null,
       p.phase ?? null,
       p.detail ?? null,
-      p.at ?? null,
-      threadId
+      p.at ?? null
     );
     return { ok: true, ...this.flagStatus(threadId) };
   }
@@ -173,9 +176,13 @@ export class IndexDO extends DurableObject {
       : { requested: false };
   }
 
-  clearFlag(threadId) {
+  // The agent acks a flag: it has picked the thread up and is now deliberating.
+  // Dequeue it (status 'claimed' → listFlags only returns 'pending') but KEEP
+  // the row — it carries the live deliberation status the cockpit shows until
+  // the thread is decided. (Deleting here is what dropped the reported status.)
+  claimFlag(threadId) {
     if (!threadId) return { ok: false };
-    this.sql.exec('DELETE FROM agent_flags WHERE thread_id = ?', threadId);
-    return { ok: true, requested: false };
+    this.sql.exec("UPDATE agent_flags SET status = 'claimed' WHERE thread_id = ?", threadId);
+    return { ok: true, ...this.flagStatus(threadId) };
   }
 }

@@ -206,13 +206,14 @@ export default {
               return json(result, result.ok ? 200 : 422);
             }
 
-            // Agent acknowledges / clears a flag (after picking it up or
-            // recording a decision). Agent-only.
+            // Agent acks a flag (it has picked the thread up). Dequeues it but
+            // keeps the row so the cockpit keeps showing live deliberation
+            // status. Agent-only.
             if (action === 'agent-ack') {
               if (identity.kind !== 'agent') {
                 return json({ error: 'forbidden', reason: 'agent service token required' }, 403);
               }
-              const result = await indexStub(env).clearFlag(threadId);
+              const result = await indexStub(env).claimFlag(threadId);
               return json(result, result.ok ? 200 : 422);
             }
 
