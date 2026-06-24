@@ -625,6 +625,37 @@ export function Cockpit({ threadId, me, go }) {
         </section>
       </div>
 
+      {/* ── POSITIONS (stances on claims, with A2A channel provenance) ── */}
+      {vm.positions.length > 0 && (
+        <section style={css(sectionCard)}>
+          <div style={css('display:flex; align-items:center; gap:11px; padding:15px 22px; border-bottom:1px solid #ededeb;')}>
+            <Svg html={ico('checkSquare')} style={css(medallion)} />
+            <span style={css(eyebrow)}>Positions</span>
+            <span style={css('color:#cfcfcd;')}>·</span>
+            <span style={css(MONO + ' font-size:11px; color:#9a9a9a;')}>{vm.positions.length} stances taken</span>
+          </div>
+          <div>
+            {vm.positions.map((p) => (
+              <div key={p.id} style={css('padding:15px 22px; border-bottom:1px solid #f0f0ee;')}>
+                <div style={css('display:flex; gap:16px; align-items:flex-start;')}>
+                  <span style={css(MONO + ' font-size:11px; color:#6a4ca5; flex:none; padding-top:2px; min-width:42px;')}>{p.id}</span>
+                  <div style={css('flex:1;')}>
+                    <div style={css('display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:7px;')}>
+                      <span style={css('font-size:12.5px; font-weight:600; color:#1a1a1a;')}>{p.who}</span>
+                      {p.role && <span style={css(MONO + ' font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:#a5a5a5;')}>{p.role}</span>}
+                      {p.stance && <span style={css(MONO + ' font-size:9.5px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:#6a4ca5; border:1px solid #6a4ca540; background:#6a4ca512; border-radius:3px; padding:1px 6px;')}>{p.stance}</span>}
+                      {p.target && <span style={css(MONO + ' font-size:10.5px; color:#a5a5a5;')}>on {p.target}</span>}
+                      {p.channel && <ChannelBadge channel={p.channel} />}
+                    </div>
+                    {p.text && <p style={css('margin:0; font-size:13.5px; line-height:1.55; color:#2a2a2a; text-wrap:pretty;')}>{p.text}</p>}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* ── REVIEWS + MINORITY REPORT ── */}
       <div style={css('display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px;')} className="clista-grid-2">
         <section style={css('background:#fff; border:1px solid #dcdcda; border-radius:7px; overflow:hidden;')}>
