@@ -41,6 +41,37 @@ self-hosted app in the `laticooki` Zero Trust org. Local repo:
 - **Two capabilities added after launch (both merged to `main`, agent path deployed):**
   see the "Engine sync" and "Agent write path" sections below.
 
+## Session 2026-06-24 (g) — emergent meta-thread seeder authored (Phase 4, owner-installs)
+**AUTHORED on branch `hermes-emergent-seeder` (PR open) as reviewable files under
+`docs/hermes/`.** The third autonomous loop — but it only ever *proposes* into the intake inbox
+(`POST /api/agent/intake`); a human approves → the thread is created human-owned. It never posts
+to moltbook/Raft and never creates a thread (no feedback loop, no governance dead-end). The live
+`~/.hermes` runtime is UNTOUCHED until the owner installs it (cron-create + test-fire are
+classifier-gated for the assistant). Install steps in `docs/hermes/README.md`.
+
+- **`docs/hermes/clista-emergent-meta-precheck.sh`** — the wake-gate, modeled on
+  `clista-moltbook-precheck.sh` (fail-closed, `exit 0`, last-line JSON gate, control-byte
+  sanitize, bounded seen-file, cold-start baseline). **Cluster gate (load-bearing):** wakes ONLY
+  when ≥`CLUSTER_MIN` (2) *independent* fresh moltbook posts map to the SAME theme
+  (`THEME_TERMS` map), the theme isn't within `COOLDOWN_HOURS` (72), and the post isn't already in
+  `clista-app-deliberation.tsv`. Signals **accumulate** across ticks — a post is marked consumed
+  only when its theme actually wakes. A `PRECHECK_FAKE_CANDIDATES` test hook drives the gate
+  offline; **verified**: cold-start→silent, single hit→silent, cluster→wake, accumulation
+  (1 silent then 2 wakes), cooldown→silent, no-creds→fail-closed. `bash -n` clean.
+- **`docs/hermes/clista-emergent-meta-prompt.md`** — the cron prompt: per waking theme, judge if
+  it's a genuinely new canonical meta-topic; if so synthesize a grounded proposal
+  (question + 4–6 use-cases + pros/cons + source-signal provenance), `POST /api/agent/intake` via
+  the CF service-token curl, and append a `clista-emergent-themes.tsv` row (drives the cooldown).
+  Explicitly: no moltbook/Raft post, no thread creation, ≤1 proposal/theme/wake, `[SILENT]` if
+  nothing warrants it.
+- **`docs/hermes/clista-emergent-meta-job.json`** + **`README.md`** — the `jobs.json` entry
+  (prompts live inline in `~/.hermes/cron/jobs.json`) and a jq install snippet that slurps the
+  prompt; schedule `0 */4 * * *`; state files `clista-emergent-feed-seen.tsv` (consumed ids) +
+  `clista-emergent-themes.tsv` (agent-written, theme cooldown). De-confliction + rollback noted.
+- This completes the intake subsystem end to end: **public/agent propose → human approves & owns
+  → (optional) deliberation loop**. Owner actions remaining: install this cron; and for the public
+  route, the Access bypass + Turnstile (`docs/INTAKE.md`).
+
 ## Session 2026-06-24 (f) — intake approve-dispatch for run_report + contribution (Phase 3)
 **SHIPPED on branch `intake-approve-kinds` (stacked on `public-intake`/PR #10).** Completes the
 kind dispatch on `POST /api/intake/:id/approve` (previously only `thread_proposal`/`decision`
