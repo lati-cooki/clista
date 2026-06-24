@@ -3,10 +3,16 @@ import { css } from '../lib/css.js';
 import { Svg } from '../lib/Svg.jsx';
 import { Hoverable } from '../lib/Hoverable.jsx';
 import { ico, octopus } from '../icons.js';
-import { badgeFor, tabStyle, provBtnStyle, channelMeta, channelBadgeStyle } from '../styles.js';
+import { badgeFor, tabStyle, provBtnStyle, channelMeta, channelBadgeStyle, filterStyle } from '../styles.js';
 import { useThread } from '../useThread.js';
 import { channelLabel } from '../adapt.js';
 import { api } from '../api.js';
+import { InlineComposer } from '../lib/InlineComposer.jsx';
+import { RefGroup } from '../lib/RefGroup.jsx';
+import {
+  rid, SEVERITIES, STANCES, CONFIDENCE, REVIEW_STATUSES, guard,
+  buildObjection, buildAssumption, buildClaim, buildPosition, buildDecisionRequest, buildReview,
+} from '../events.js';
 
 const MONO = "font-family:'JetBrains Mono',monospace;";
 const eyebrow = "font-family:'JetBrains Mono',monospace; font-size:11.5px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:#3a3a3a;";
@@ -16,13 +22,6 @@ const provPanel = 'margin-top:13px; padding:14px 16px; background:#f7f7f6; borde
 const provLabel = "font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:#a5a5a5; margin-bottom:11px;";
 const audSig = { evidence: '#7f9cff', objection: '#d6a64a', decided: '#e8ebf2', ok: '#57c98a', fail: '#e0676d' };
 
-// Mint a client-side object id (the server mints the event_id; this is the
-// decisionRecord id, mirroring Compose's rid()).
-const rid = (prefix) => {
-  const buf = new Uint8Array(4);
-  crypto.getRandomValues(buf);
-  return prefix + '_' + Array.from(buf, (b) => b.toString(16).padStart(2, '0')).join('');
-};
 const mergeInput = "width:100%; padding:11px 13px; font-family:'Inter Tight',sans-serif; font-size:14px; line-height:1.55; color:#1a1a1a; background:#fcfcfb; border:1px solid #d8d8d6; border-radius:5px; outline:none; resize:vertical;";
 const mergeLabel = "display:block; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#6a6a6a; margin-bottom:7px;";
 
@@ -145,6 +144,9 @@ export function Cockpit({ threadId, me, go }) {
   const [mSummary, setMSummary] = useState('');
   const [mRationale, setMRationale] = useState('');
   const [mConditions, setMConditions] = useState('');
+  // Which inline contribute form is open (one at a time): 'obj:<id>' | 'pos:<id>'
+  // | 'add:assumption' | 'add:claim' | 'stage'. Mirrors the `prov` toggle idiom.
+  const [act, setAct] = useState(null);
 
   if (loading) return <Notice>projecting reasoning state from the event log…</Notice>;
   if (error) return <Notice><span style={css('color:#b3343c;')}>state could not be loaded — {error}</span></Notice>;
@@ -229,6 +231,97 @@ export function Cockpit({ threadId, me, go }) {
   const sb = badgeFor(isDecided ? (vm.status === 'decided' ? 'decided' : vm.status) : 'degraded');
   const statusLabel = isDecided ? (vm.status ? vm.status[0].toUpperCase() + vm.status.slice(1) : 'Active') : 'Degraded';
   const toggleProv = (id) => () => setProv((p) => (p === id ? null : id));
+
+  // ── Inline contribute affordances (objection/position/assumption/claim/stage) ──
+  // Any participant may contribute while the thread is undecided. A signed-in
+  // non-participant gets a join nudge instead of a dead, 422-bound form.
+  const toggleAct = (key) => () => setAct((a) => (a === key ? null : key));
+  const canContribute = isParticipant && vm.status !== 'decided';
+  const canJoinToAct = !!(me && me.authenticated && !isParticipant && vm.status !== 'decided');
+  // Stage-a-decision: any participant may open a proposal (DecisionRequestOpened)
+  // and submit a review (ReviewSubmitted); the final DecisionMerged stays the
+  // owner's (canMerge). Opening moves the thread to review and surfaces the
+  // owner's merge panel.
+  const canStageOpen = canContribute && !vm.decision.id && !vm.decisionRequest;
+  const canReview = canContribute && !vm.decision.id && !!vm.decisionRequest;
+  const onWrote = () => { setAct(null); reload(); };
+  const closeAct = () => setAct(null);
+
+  const miniLabel = 'display:block; ' + MONO + ' font-size:9.5px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:#8a8a8a; margin:0 0 6px;';
+  // A toggle-chip row over option values (strings, or {v,label} for confidence).
+  const chipRow = (options, value, onPick) => (
+    <div style={css('display:flex; flex-wrap:wrap; gap:7px;')}>
+      {options.map((o) => {
+        const v = typeof o === 'object' ? o.v : o;
+        const label = typeof o === 'object' ? o.label : o;
+        return <button key={String(v)} onClick={() => onPick(v)} style={filterStyle(value === v)}>{label}</button>;
+      })}
+    </div>
+  );
+  const draftArea = (d, set, ph) => (
+    <textarea value={d.text || ''} onChange={(e) => set('text', e.target.value)} rows={2} placeholder={ph} style={css(mergeInput)} />
+  );
+  // Per-kind compact form bodies for the InlineComposer render-prop.
+  const objectionBody = (d, set) => (
+    <>
+      {draftArea(d, set, 'State the objection precisely (min 12 chars).')}
+      <div style={css('margin-top:11px;')}><label style={css(miniLabel)}>severity</label>{chipRow(SEVERITIES, d.severity, (v) => set('severity', v))}</div>
+    </>
+  );
+  const positionBody = (d, set) => (
+    <>
+      <label style={css(miniLabel)}>stance</label>{chipRow(STANCES, d.stance, (v) => set('stance', v))}
+      <div style={css('margin-top:11px;')}>{draftArea(d, set, 'Why you stand here (optional).')}</div>
+    </>
+  );
+  const assumptionBody = (d, set) => (
+    <>
+      {draftArea(d, set, 'Declare the premise (min 12 chars).')}
+      <div style={css('margin-top:11px;')}><label style={css(miniLabel)}>confidence</label>{chipRow(CONFIDENCE, d.confidence, (v) => set('confidence', v))}</div>
+    </>
+  );
+  const claimBody = (d, set) => draftArea(d, set, 'State the claim precisely (min 12 chars).');
+
+  // The trigger link for an inline form (matches the "trace provenance" buttons).
+  const actLink = (label, key, icon) => (
+    <Hoverable onClick={toggleAct(key)} base={provBtnStyle(act === key)} hover={css('color:#0a0a0a;')}>
+      <Svg html={ico(icon, { size: 11 })} />{label}
+    </Hoverable>
+  );
+  const joinNudge = (
+    <Hoverable onClick={joining ? undefined : join} base={css(MONO + ' font-size:10.5px; color:#2c5f96; background:none; border:none; cursor:pointer; padding:0; display:inline-flex; align-items:center; gap:5px;')} hover={css('color:#0a0a0a;')}>
+      <Svg html={ico('plus', { size: 11 })} />{joining ? 'joining…' : 'join to act'}
+    </Hoverable>
+  );
+  // The objection + position contribute row shown under each claim. (Objecting to
+  // a recorded decision is intentionally not offered — a decided thread is closed;
+  // reopen with a new decision request rather than accreting onto the closed one.)
+  const objectionComposer = (target) => (
+    <InlineComposer threadId={threadId} accent="#9a6b07" initial={{ severity: 'major' }}
+      build={(d) => buildObjection({ threadId, actorId: me.actorId, target, text: d.text })}
+      validate={(d) => guard('objection', { target, text: d.text })}
+      submitLabel="raise objection" onDone={onWrote} onCancel={closeAct}>
+      {objectionBody}
+    </InlineComposer>
+  );
+  const claimContributeRow = (c) => (
+    <>
+      {(canContribute || canJoinToAct) && (
+        <div style={css('display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:9px;')}>
+          {canContribute ? (<>{actLink('take position', 'pos:' + c.id, 'checkSquare')}{actLink('raise objection', 'obj:' + c.id, 'shield')}</>) : joinNudge}
+        </div>
+      )}
+      {canContribute && act === 'pos:' + c.id && (
+        <InlineComposer threadId={threadId} accent="#6a4ca5" initial={{ stance: 'support' }}
+          build={(d) => buildPosition({ threadId, actorId: me.actorId, target: c.id, stance: d.stance || 'support', reason: d.text })}
+          validate={(d) => guard('position', { target: c.id, text: d.text })}
+          submitLabel="take position" onDone={onWrote} onCancel={closeAct}>
+          {positionBody}
+        </InlineComposer>
+      )}
+      {canContribute && act === 'obj:' + c.id && objectionComposer(c.id)}
+    </>
+  );
 
   return (
     <div className="clista-screen" style={css('max-width:1080px; margin:0 auto; padding:28px 40px 64px;')}>
@@ -338,6 +431,75 @@ export function Cockpit({ threadId, me, go }) {
           ))}
         </div>
       </div>
+
+      {/* ── STAGE A DECISION (any participant opens a proposal) ── */}
+      {canStageOpen && (
+        <section style={css('background:#fff; border:1px solid rgba(28,122,79,0.4); border-radius:7px; margin-bottom:18px; overflow:hidden; box-shadow:0 1px 2px rgba(10,10,10,0.03);')}>
+          <div style={css('display:flex; align-items:center; gap:11px; padding:16px 22px; border-bottom:1px solid #ededeb; background:#f6faf7;')}>
+            <Svg html={ico('flag')} style={css(medallion + ' border-color:rgba(28,122,79,0.35); color:#1c7a4f;')} />
+            <span style={css(eyebrow + ' color:#1c7a4f;')}>Stage a decision</span>
+            <div style={css('flex:1;')} />
+            <span style={css(MONO + ' font-size:10.5px; color:#a5a5a5;')}>opens a proposal for review → merge</span>
+          </div>
+          <div style={css('padding:18px 22px;')}>
+            <p style={css('margin:0 0 14px; font-size:12.5px; line-height:1.55; color:#6a6a6a; text-wrap:pretty;')}>Propose what to decide and gather the claims, evidence, assumptions, and objections it must answer. This moves the thread into review; the decision owner records the final merge.</p>
+            <InlineComposer threadId={threadId} accent="#1c7a4f" initial={{ claims: [], evidence: [], assumptions: [], objections: [] }}
+              build={(d) => buildDecisionRequest({ threadId, actorId: me.actorId, proposal: d.text, refs: { claims: d.claims, evidence: d.evidence, assumptions: d.assumptions, objections: d.objections } })}
+              validate={(d) => guard('decisionRequest', { text: d.text })}
+              submitLabel="open decision request" onDone={onWrote}>
+              {(d, set) => {
+                const toggle = (bucket, id) => { const cur = d[bucket] || []; set(bucket, cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]); };
+                return (
+                  <>
+                    <label style={css(miniLabel)}>proposal</label>
+                    <textarea value={d.text || ''} onChange={(e) => set('text', e.target.value)} rows={2} placeholder="State precisely what is to be decided (min 12 chars)." style={css(mergeInput)} />
+                    <div style={css('margin-top:14px;')}>
+                      <RefGroup title="supporting claims" items={vm.refLists.claims} selected={d.claims || []} onToggle={(id) => toggle('claims', id)} />
+                      <RefGroup title="supporting evidence" items={vm.refLists.evidence} selected={d.evidence || []} onToggle={(id) => toggle('evidence', id)} />
+                      <RefGroup title="supporting assumptions" items={vm.refLists.assumptions} selected={d.assumptions || []} onToggle={(id) => toggle('assumptions', id)} />
+                      <RefGroup title="objections it must answer" items={vm.refLists.objections} selected={d.objections || []} onToggle={(id) => toggle('objections', id)} />
+                    </div>
+                  </>
+                );
+              }}
+            </InlineComposer>
+          </div>
+        </section>
+      )}
+
+      {/* ── SUBMIT A REVIEW (open proposal, any participant) ── */}
+      {canReview && (
+        <section style={css('background:#fff; border:1px solid #dcdcda; border-radius:7px; margin-bottom:18px; overflow:hidden; box-shadow:0 1px 2px rgba(10,10,10,0.03);')}>
+          <div style={css('display:flex; align-items:center; gap:11px; padding:16px 22px; border-bottom:1px solid #ededeb; background:#fcfcfb;')}>
+            <Svg html={ico('fileCheck')} style={css(medallion)} />
+            <span style={css(eyebrow)}>Submit a review</span>
+            <span style={css(MONO + ' font-size:11px; color:#a5a5a5;')}>·</span>
+            <span style={css(MONO + ' font-size:11px; color:#9a9a9a;')}>{vm.decisionRequest.id}</span>
+          </div>
+          <div style={css('padding:18px 22px;')}>
+            <p style={css('margin:0 0 14px; font-size:13px; line-height:1.55; color:#4a4a4a; text-wrap:pretty;')}>{vm.decisionRequest.proposal}</p>
+            <InlineComposer threadId={threadId} accent="#3a6ea5" initial={{ status: 'approve_with_conditions' }}
+              build={(d) => buildReview({ threadId, actorId: me.actorId, decisionRequestId: vm.decisionRequest.id, status: d.status || 'approve_with_conditions', conditions: d.conditions, comment: d.text })}
+              validate={(d) => guard('review', { decisionRequest: vm.decisionRequest, text: d.text })}
+              submitLabel="submit review" onDone={onWrote}>
+              {(d, set) => (
+                <>
+                  <label style={css(miniLabel)}>verdict</label>
+                  {chipRow(REVIEW_STATUSES, d.status, (v) => set('status', v))}
+                  <div style={css('margin-top:11px;')}>
+                    <label style={css(miniLabel)}>comment <span style={css('color:#b0b0b0; font-weight:500;')}>optional</span></label>
+                    <textarea value={d.text || ''} onChange={(e) => set('text', e.target.value)} rows={2} placeholder="The verdict's reasoning." style={css(mergeInput)} />
+                  </div>
+                  <div style={css('margin-top:11px;')}>
+                    <label style={css(miniLabel)}>conditions <span style={css('color:#b0b0b0; font-weight:500;')}>optional · one per line</span></label>
+                    <textarea value={d.conditions || ''} onChange={(e) => set('conditions', e.target.value)} rows={2} placeholder="Carried-forward conditions, one per line." style={css(mergeInput)} />
+                  </div>
+                </>
+              )}
+            </InlineComposer>
+          </div>
+        </section>
+      )}
 
       {/* ── RECORD THE DECISION (decision owner, staged proposal) ── */}
       {canMerge && (
@@ -552,8 +714,20 @@ export function Cockpit({ threadId, me, go }) {
             <span style={css(eyebrow)}>Assumptions</span>
             <span style={css('color:#cfcfcd;')}>·</span>
             <span style={css(MONO + ' font-size:11px; color:#9a9a9a;')}>{vm.assumptions.length}</span>
+            <div style={css('flex:1;')} />
+            {canContribute && actLink('add', 'add:assumption', 'plus')}
           </div>
           <div>
+            {canContribute && act === 'add:assumption' && (
+              <div style={css('padding:14px 20px 4px;')}>
+                <InlineComposer threadId={threadId} accent="#3a6ea5" initial={{ confidence: 0.75 }}
+                  build={(d) => buildAssumption({ threadId, actorId: me.actorId, text: d.text, confidence: d.confidence ?? 0.75 })}
+                  validate={(d) => guard('assumption', { text: d.text })}
+                  submitLabel="declare assumption" onDone={onWrote} onCancel={closeAct}>
+                  {assumptionBody}
+                </InlineComposer>
+              </div>
+            )}
             {vm.assumptions.map((a) => {
               const open = prov === a.id;
               return (
@@ -588,8 +762,20 @@ export function Cockpit({ threadId, me, go }) {
             <span style={css(eyebrow)}>Claims</span>
             <span style={css('color:#cfcfcd;')}>·</span>
             <span style={css(MONO + ' font-size:11px; color:#9a9a9a;')}>{vm.claims.length}</span>
+            <div style={css('flex:1;')} />
+            {canContribute && actLink('add', 'add:claim', 'plus')}
           </div>
           <div>
+            {canContribute && act === 'add:claim' && (
+              <div style={css('padding:14px 20px 4px;')}>
+                <InlineComposer threadId={threadId} accent="#1c7a4f"
+                  build={(d) => buildClaim({ threadId, actorId: me.actorId, text: d.text })}
+                  validate={(d) => guard('claim', { text: d.text })}
+                  submitLabel="create claim" onDone={onWrote} onCancel={closeAct}>
+                  {claimBody}
+                </InlineComposer>
+              </div>
+            )}
             {vm.claims.map((c) => {
               const open = prov === c.id;
               return (
@@ -616,6 +802,7 @@ export function Cockpit({ threadId, me, go }) {
                           </div>
                         </div>
                       )}
+                      {claimContributeRow(c)}
                     </div>
                   </div>
                 </div>
