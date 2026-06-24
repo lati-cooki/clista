@@ -16,6 +16,16 @@ const provPanel = 'margin-top:13px; padding:14px 16px; background:#f7f7f6; borde
 const provLabel = "font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:#a5a5a5; margin-bottom:11px;";
 const audSig = { evidence: '#7f9cff', objection: '#d6a64a', decided: '#e8ebf2', ok: '#57c98a', fail: '#e0676d' };
 
+// Mint a client-side object id (the server mints the event_id; this is the
+// decisionRecord id, mirroring Compose's rid()).
+const rid = (prefix) => {
+  const buf = new Uint8Array(4);
+  crypto.getRandomValues(buf);
+  return prefix + '_' + Array.from(buf, (b) => b.toString(16).padStart(2, '0')).join('');
+};
+const mergeInput = "width:100%; padding:11px 13px; font-family:'Inter Tight',sans-serif; font-size:14px; line-height:1.55; color:#1a1a1a; background:#fcfcfb; border:1px solid #d8d8d6; border-radius:5px; outline:none; resize:vertical;";
+const mergeLabel = "display:block; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#6a6a6a; margin-bottom:7px;";
+
 function Boundary() {
   return (
     <>
@@ -130,6 +140,11 @@ export function Cockpit({ threadId, me, go }) {
   const [auditOpen, setAuditOpen] = useState(true);
   const [joining, setJoining] = useState(false);
   const [requesting, setRequesting] = useState(false);
+  const [merging, setMerging] = useState(false);
+  const [mergeResult, setMergeResult] = useState(null);
+  const [mSummary, setMSummary] = useState('');
+  const [mRationale, setMRationale] = useState('');
+  const [mConditions, setMConditions] = useState('');
 
   if (loading) return <Notice>projecting reasoning state from the event log…</Notice>;
   if (error) return <Notice><span style={css('color:#b3343c;')}>state could not be loaded — {error}</span></Notice>;
@@ -158,6 +173,55 @@ export function Cockpit({ threadId, me, go }) {
     await api.requestAgent(threadId);
     setRequesting(false);
     reload();
+  };
+
+  // Decision-owner merge: when a proposal is staged (reviewed) and no decision is
+  // recorded yet, the thread's decision owner records the DecisionMerged here.
+  // The agent stages (DecisionRequestOpened + ReviewSubmitted); the merge is the
+  // owner's — an agent contributor is governance-blocked from merging.
+  const myRole = (vm.participants.find((p) => p.id === (me && me.actorId)) || {}).role || '';
+  const isDecisionOwner = /decision owner/i.test(myRole);
+  const proposal = vm.decisionRequest;
+  const canMerge = isDecisionOwner && !!proposal && !vm.decision.id && vm.status !== 'decided';
+  // A decision requires supporting evidence + claims + assumptions (engine
+  // governance). If the staged proposal left a set empty, fall back to the
+  // thread's full substrate so a complete thread is still mergeable.
+  const fallback = (set, all) => (set && set.length ? set : all.map((x) => x.id));
+  const mergeMissingAssumptions = canMerge && !(proposal.supportingAssumptionIds.length || vm.assumptions.length);
+  const recordDecision = async () => {
+    if (mSummary.trim().length < 12) {
+      setMergeResult({ ok: false, reason: 'A decision needs a summary (min 12 chars) — state what was decided.' });
+      return;
+    }
+    const event = {
+      event_type: 'DecisionMerged',
+      payload: {
+        decisionRecord: {
+          id: rid('dcr'), object: 'decisionRecord', threadId,
+          decisionRequestId: proposal.id, status: 'approved',
+          summary: mSummary.trim(),
+          rationale: mRationale.trim(),
+          conditions: mConditions.split('\n').map((c) => c.trim()).filter(Boolean),
+          supportingClaimIds: fallback(proposal.supportingClaimIds, vm.claims),
+          supportingEvidenceIds: fallback(proposal.supportingEvidenceIds, vm.evidence),
+          supportingAssumptionIds: fallback(proposal.supportingAssumptionIds, vm.assumptions),
+          objectionIds: proposal.objectionIds,
+          reviewIds: proposal.reviewIds,
+          decidedByParticipantId: me.actorId,
+          decidedAt: new Date().toISOString(),
+        },
+      },
+    };
+    setMerging(true);
+    const res = await api.append(threadId, event);
+    setMerging(false);
+    if (res.ok && res.data.ok) {
+      setMergeResult({ ok: true });
+      reload();
+    } else {
+      const reasons = res.data.reasons || [];
+      setMergeResult({ ok: false, reason: reasons.length ? reasons.map((r) => r.reason).join(' · ') : res.data.error || 'merge rejected, fail-closed.' });
+    }
   };
 
   const isDegraded = !vm.verified || previewDegraded;
@@ -274,6 +338,60 @@ export function Cockpit({ threadId, me, go }) {
           ))}
         </div>
       </div>
+
+      {/* ── RECORD THE DECISION (decision owner, staged proposal) ── */}
+      {canMerge && (
+        <section style={css('background:#fff; border:1px solid rgba(28,122,79,0.4); border-radius:7px; margin-bottom:18px; overflow:hidden; box-shadow:0 1px 2px rgba(10,10,10,0.03);')}>
+          <div style={css('display:flex; align-items:center; gap:11px; padding:16px 22px; border-bottom:1px solid #ededeb; background:#f6faf7;')}>
+            <Svg html={ico('checkSquare')} style={css(medallion + ' border-color:rgba(28,122,79,0.35); color:#1c7a4f;')} />
+            <span style={css(eyebrow + ' color:#1c7a4f;')}>Record the decision</span>
+            <span style={css(MONO + ' font-size:11px; color:#a5a5a5;')}>·</span>
+            <span style={css(MONO + ' font-size:11px; color:#9a9a9a;')}>{proposal.id}</span>
+            <div style={css('flex:1;')} />
+            <span style={css(MONO + ' font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:#1c7a4f;')}>you · decision owner</span>
+          </div>
+          <div style={css('padding:20px 22px;')}>
+            <p style={css('margin:0 0 16px; font-size:13px; line-height:1.55; color:#4a4a4a; text-wrap:pretty;')}>
+              This proposal is reviewed and ready. The agent <span style={css(MONO + ' font-size:12px;')}>staged</span> it — recording the decision is yours alone. It merges the supporting claims, evidence, and the review into an accountable <span style={css(MONO + ' font-size:12px;')}>DecisionMerged</span>.
+            </p>
+            <div style={css('margin-bottom:14px; padding:11px 14px; background:#f7f7f6; border:1px solid #e8e8e6; border-radius:5px;')}>
+              <div style={css(mergeLabel + ' margin-bottom:5px;')}>proposal</div>
+              <p style={css('margin:0; font-size:13px; line-height:1.5; color:#2a2a2a; text-wrap:pretty;')}>{proposal.proposal}</p>
+            </div>
+            <div style={css('margin-bottom:16px;')}>
+              <label style={css(mergeLabel)}>decision.summary <span style={css('color:#b3343c;')}>*</span></label>
+              <textarea value={mSummary} onChange={(e) => { setMSummary(e.target.value); setMergeResult(null); }} rows={2} placeholder="State precisely what is decided." style={css(mergeInput)} />
+            </div>
+            <div style={css('margin-bottom:16px;')}>
+              <label style={css(mergeLabel)}>decision.rationale <span style={css('color:#a5a5a5; font-weight:500;')}>optional</span></label>
+              <textarea value={mRationale} onChange={(e) => { setMRationale(e.target.value); setMergeResult(null); }} rows={2} placeholder="Why this decision — what the claims, evidence, and review establish." style={css(mergeInput)} />
+            </div>
+            <div style={css('margin-bottom:18px;')}>
+              <label style={css(mergeLabel)}>decision.conditions <span style={css('color:#a5a5a5; font-weight:500;')}>optional · one per line</span></label>
+              <textarea value={mConditions} onChange={(e) => { setMConditions(e.target.value); setMergeResult(null); }} rows={2} placeholder={'Carried-forward conditions, one per line'} style={css(mergeInput)} />
+            </div>
+            {mergeMissingAssumptions && (
+              <div style={css('margin-bottom:14px; padding:11px 14px; background:#f7f2e8; border:1px solid rgba(154,107,7,0.28); border-radius:5px;')}>
+                <span style={css('font-size:12.5px; color:#7a5a07; line-height:1.5;')}>
+                  This thread has no declared assumption — a decision requires at least one (evidence + claims + assumptions). Declare one in <span style={css(MONO + ' font-size:11.5px;')}>Compose → AssumptionDeclared</span> first, or the merge will be rejected fail-closed.
+                </span>
+              </div>
+            )}
+            <div style={css('display:flex; align-items:center; gap:12px;')}>
+              <Hoverable onClick={merging ? undefined : recordDecision} base={css('display:inline-flex; align-items:center; gap:8px; padding:11px 18px; background:#1c7a4f; color:#fff; border:none; border-radius:5px; ' + MONO + ' font-size:12px; font-weight:500; letter-spacing:0.04em; cursor:' + (merging ? 'default' : 'pointer') + '; opacity:' + (merging ? '0.6' : '1') + ';')} hover={css('background:#176440;')}>
+                <Svg html={ico('check', { size: 14, sw: 2 })} />{merging ? 'Recording…' : 'Record decision (merge)'}
+              </Hoverable>
+              <span style={css(MONO + ' font-size:10.5px; color:#a5a5a5;')}>fail-closed · validated before append · as {me && me.actorId}</span>
+            </div>
+            {mergeResult && !mergeResult.ok && (
+              <div style={css('margin-top:14px; padding:12px 14px; background:#f8eeee; border:1px solid rgba(179,52,60,0.3); border-left:3px solid #b3343c; border-radius:5px;')}>
+                <span style={css(MONO + ' font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#b3343c;')}>Merge rejected</span>
+                <p style={css('margin:5px 0 0; font-size:13px; line-height:1.5; color:#7a3a3d; text-wrap:pretty;')}>{mergeResult.reason}</p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* ── DECISION RECORD ── */}
       <section style={css('background:#fff; border:1px solid #dcdcda; border-radius:7px; box-shadow:0 1px 2px rgba(10,10,10,0.03); margin-bottom:18px; overflow:hidden;')}>

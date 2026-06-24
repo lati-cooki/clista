@@ -213,9 +213,22 @@ export function adaptCockpit(state, audit, validate) {
       assumptions: (r.assumptions || []).map((a) => ({ id: a.id, text: a.text })),
       objections: (r.objections || []).map((o) => ({ id: o.id, text: o.text })),
     },
-    // The open decision request a review attaches to (latest opened, if any).
+    // The open decision request a review attaches to (latest opened, if any),
+    // carrying the support sets + the reviews on it so the decision owner can
+    // record (merge) the decision from the cockpit.
     decisionRequest: state.currentProposal
-      ? { id: state.currentProposal.id, proposal: state.currentProposal.proposal, status: state.currentProposal.status }
+      ? {
+          id: state.currentProposal.id,
+          proposal: state.currentProposal.proposal,
+          status: state.currentProposal.status,
+          supportingClaimIds: state.currentProposal.supportingClaimIds || [],
+          supportingEvidenceIds: state.currentProposal.supportingEvidenceIds || [],
+          supportingAssumptionIds: state.currentProposal.supportingAssumptionIds || [],
+          objectionIds: state.currentProposal.objectionIds || [],
+          reviewIds: (ds.reviews || [])
+            .filter((rv) => rv.decisionRequestId === state.currentProposal.id)
+            .map((rv) => rv.id),
+        }
       : null,
   };
 }
