@@ -55,6 +55,32 @@ describe('decision owner records (merges) a staged decision', () => {
     expect(v.validation.valid).toBe(true);
   });
 
+  it('reproduces the live thread: two open DRQs + assumption added after staging, merge the current proposal', async () => {
+    const id = (await (await post('/api/threads', { question: 'Does a merge survive a duplicate DRQ and a late assumption?' })).json()).id;
+    const claimId = 'clm_dup';
+    await append(id, { event_type: 'ClaimCreated', payload: { claim: { id: claimId, object: 'claim', threadId: id, text: 'The claim grounding the duplicate-DRQ decision.', status: 'proposed', createdByParticipantId: ACTOR, createdAt: iso() } } });
+    const evdId = 'evd_dup';
+    await append(id, { event_type: 'EvidenceCommitted', payload: { evidence: { id: evdId, object: 'evidence', threadId: id, source: 't', finding: 'Evidence grounding the duplicate-DRQ decision.', confidence: 0.85, committedByParticipantId: ACTOR, committedAt: iso() } } });
+    // Two decision requests opened (the race), each WITHOUT assumptions, each reviewed.
+    await append(id, { event_type: 'DecisionRequestOpened', payload: { decisionRequest: { id: 'drq_a', object: 'decisionRequest', threadId: id, proposal: 'First (orphan) proposal.', status: 'review', supportingClaimIds: [claimId], supportingEvidenceIds: [evdId], supportingAssumptionIds: [], objectionIds: [], openedByParticipantId: ACTOR, openedAt: iso() } } });
+    await append(id, { event_type: 'ReviewSubmitted', payload: { review: { id: 'rev_a', object: 'review', threadId: id, decisionRequestId: 'drq_a', reviewerParticipantId: ACTOR, status: 'approve_with_conditions', conditions: [], comment: 'ok', reviewedAt: iso() } } });
+    await append(id, { event_type: 'DecisionRequestOpened', payload: { decisionRequest: { id: 'drq_b', object: 'decisionRequest', threadId: id, proposal: 'Second (current) proposal.', status: 'review', supportingClaimIds: [claimId], supportingEvidenceIds: [evdId], supportingAssumptionIds: [], objectionIds: [], openedByParticipantId: ACTOR, openedAt: iso() } } });
+    await append(id, { event_type: 'ReviewSubmitted', payload: { review: { id: 'rev_b', object: 'review', threadId: id, decisionRequestId: 'drq_b', reviewerParticipantId: ACTOR, status: 'approve_with_conditions', conditions: [], comment: 'ok', reviewedAt: iso() } } });
+    // Assumption declared AFTER staging (as on the live thread).
+    const asmId = 'asm_dup';
+    await append(id, { event_type: 'AssumptionDeclared', payload: { assumption: { id: asmId, object: 'assumption', threadId: id, text: 'A premise declared after the requests were opened.', status: 'active', confidence: 0.75, declaredByParticipantId: ACTOR, declaredAt: iso() } } });
+
+    // Merge the CURRENT proposal (drq_b), pulling the assumption via fallback (DRQ had none).
+    const st0 = await (await get(`/api/threads/${id}/state`)).json();
+    const cur = st0.currentProposal.id;
+    const merge = await append(id, { event_type: 'DecisionMerged', payload: { decisionRecord: { id: 'dcr_dup', object: 'decisionRecord', threadId: id, decisionRequestId: cur, status: 'approved', summary: 'Merged the current proposal despite the duplicate request.', rationale: 'r', conditions: [], supportingClaimIds: [claimId], supportingEvidenceIds: [evdId], supportingAssumptionIds: [asmId], objectionIds: [], reviewIds: [cur === 'drq_b' ? 'rev_b' : 'rev_a'], decidedByParticipantId: ACTOR, decidedAt: iso() } } });
+    const mj = await merge.json();
+    if (!mj.ok) console.log('DUP MERGE REJECTED:', JSON.stringify(mj.reasons || mj, null, 1));
+    expect(merge.status).toBe(200);
+    const st = await (await get(`/api/threads/${id}/state`)).json();
+    expect(st.thread.status).toBe('decided');
+  });
+
   it('a non-decision-owner (agent) cannot merge — governance fail-closed', async () => {
     const id = (await (await post('/api/threads', { question: 'Does the merge governance boundary hold for an agent?' })).json()).id;
     const claimId = 'clm_x';
