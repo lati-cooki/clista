@@ -41,6 +41,43 @@ self-hosted app in the `laticooki` Zero Trust org. Local repo:
 - **Two capabilities added after launch (both merged to `main`, agent path deployed):**
   see the "Engine sync" and "Agent write path" sections below.
 
+## Session 2026-06-24 (b) — positions channel badge + live dual-channel seed re-proof
+Two things this session (both on branch `positions-channel-badge` → **PR #2**, open, not yet
+merged). Merge PR #2 to deploy the badge (`src/**` is in the `deploy-app.yml` trigger; HANDOFF.md
+is not, so it rides along without affecting the deploy).
+
+- **Positions now carry the via-Raft / via-moltbook badge (the last cosmetic gap).** A
+  `PositionTaken` harvested off an A2A channel (e.g. the owner's Raft `#all` reply attested as a
+  position, `source:"raft workspace #all:… — message …"`) used to render ONLY as a bare row in the
+  audit chain — the channel badge lived on evidence/objections/provenance but positions had no
+  badged section at all. Fixed: `src/adapt.js` adds `vm.positions` (stance/who/role/target/text +
+  `channel` via `channelFromSource`) from `reasoningState.positions`; `src/screens/Cockpit.jsx`
+  renders a **Positions** section (shown only when stances exist) with each stance's participant,
+  target claim, stance chip, and `ChannelBadge`. Display-only, additive — no engine/worker/
+  protocol-event change. Test `test/adapt-positions.test.js` proves a harvested Raft position
+  carries the `raft` channel and a directly-composed one carries none. `npm test` 11/11,
+  `npm run test:workers` 13/13, build clean.
+- **Live dual-channel SEED re-proven on a fresh thread** (`thd_should_agent_to_agent_deliberation_
+  use_a_shared__mqs86xkr_6a4cdccd`). Owner flagged it in the cockpit; fired the cron
+  (`hermes cron run e31c1a1dd850 --accept-hooks` — note: `--accept-hooks` auto-posts to external
+  surfaces, so it's an owner-authorized action, not auto-triggered). clistahermes seeded BOTH
+  channels: moltbook post `e01da668-23f8-4298-b4cf-43d5548593bb` (published, challenge solved
+  `32.00`) + Raft thread **`#all:a9942ddf`** (msg `a9942ddf-…`, seq `7660266`). App substrate: 1
+  ParticipantDeclared + 2 ClaimCreated + 1 AssumptionDeclared = 6 events, integrity+validation
+  true. Progress `{raft+moltbook · workspaceRef #all:a9942ddf · responders 0 · soliciting}`, then
+  `agent-ack` → status `claimed` with workspaceRef+phase **preserved** (the `b3863b4` status-
+  survives-ack fix held). Corroborated independently by `clista-app-deliberation.tsv` (row 3) +
+  `clista-app-raft.state.tsv` (row 4, Detector C now watching `#all:a9942ddf`). The full tick
+  report is at `~/.hermes/cron/output/e31c1a1dd850/2026-06-24_08-32-20.md`.
+  - **Harvest→stage→merge tail NOT re-run** (needs a real peer reply + a later tick — external
+    dependency); already proven end-to-end last session on `0bf0bb6f`. To also see the new badge on
+    LIVE data: the owner replies on Raft `#all:a9942ddf` with a stance → next tick harvests it as a
+    `PositionTaken` (source `raft workspace #all:a9942ddf — message …`) → via-Raft position to badge.
+  - **Op note:** I cannot fire the cron's `--accept-hooks` or read service-token creds without
+    explicit owner action — the classifier (correctly) gates outward A2A posts + credential reads.
+    The seed-verification reads (`~/.hermes/cron/*.tsv`, the tick output `.md`) are operational
+    state, allowed. The thread is live + `soliciting` on both channels as of this handoff.
+
 ## Session 2026-06-24 — Hermes Raft (raft.build) as the A2A deliberation channel
 **FULL LOOP PROVEN END-TO-END on a real thread** (`thd_should_agent_to_agent_runs…_0bf0bb6f`):
 `flag → seed on Raft #all + moltbook → harvest peers → agent stages → HUMAN merges → decided`.
