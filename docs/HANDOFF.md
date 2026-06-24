@@ -42,6 +42,37 @@ self-hosted app in the `laticooki` Zero Trust org. Local repo:
   see the "Engine sync" and "Agent write path" sections below.
 
 ## Session 2026-06-24 — Hermes Raft (raft.build) as the A2A deliberation channel
+**FULL LOOP PROVEN END-TO-END on a real thread** (`thd_should_agent_to_agent_runs…_0bf0bb6f`):
+`flag → seed on Raft #all + moltbook → harvest peers → agent stages → HUMAN merges → decided`.
+Final state: **decided**, decisionRecord `dcr_d49a75d2` (approved), `decidedBy par_lati`, 21
+events, integrity + validation true. The governance boundary held: the agent staged; only the
+human decision owner (`par_lati`) recorded the `DecisionMerged`.
+
+- **Decision-owner MERGE affordance (app, commit `3ac0fe7`, deployed) — NEW capability.** The
+  composer covered the six contributor events but NOT `DecisionMerged`, so a staged decision had
+  no in-app merge path (and the agent is governance-blocked from merging). Added a cockpit
+  **"Record the decision"** panel shown ONLY to the thread's decision owner when a proposal is
+  staged (reviewed) and undecided: summary/rationale/conditions → builds a `DecisionMerged`
+  referencing the current proposal. `src/screens/Cockpit.jsx` (`recordDecision`, `canMerge` via
+  the viewer's `decision owner` role) + `src/adapt.js` (`vm.decisionRequest` now carries the
+  proposal's support sets + its review ids). Test: `test/workers/decision-merge.test.js` (full
+  create→claim→evidence→assumption→DRQ→review→merge→decided, the agent-cannot-merge boundary,
+  AND the live thread's exact duplicate-DRQ + late-assumption shape). 13 worker tests green.
+- **Grounding-completeness rule (engine governance, learned the hard way).** A decision is
+  REJECTED fail-closed without ALL THREE of supporting **evidence + claims + assumptions**
+  (`worker/engine/governance.js:evaluateSupportRequirements`). The agent staged a proposal with
+  NO assumption → unmergeable. Fixes: (a) the merge UI falls back to the thread's full substrate
+  when the proposal left a set empty, + a note when the thread has no assumption; (b) added a
+  real `AssumptionDeclared` to the live thread; (c) **deliberation prompt `e31c1a1dd850` patched**
+  so staging FIRST ensures a claim + evidence + assumption all exist and the DRQ references all
+  three (future staged decisions are merge-ready).
+- **Duplicate-DRQ note (operational).** Staging the live thread, the manual stage RACED the
+  autonomous cron (both opened a DecisionRequest within ~20s → two open DRQs). Harmless: chain
+  valid, `currentProposal` projects to one, the merge targets it (regression-tested). LESSON:
+  before manually driving a deliberation thread, check whether the cron already did it
+  (`agent-status` / the `clista-app-deliberation.tsv` row) — the autonomous loop is live.
+
+### Background — the Raft channel itself (built earlier this session)
 Use Hermes **v0.17.0 "Reach Release"** Raft support as clistahermes's deliberation
 back-channel **alongside moltbook (dual-channel)** — fixing the moltbook-engagement
 bottleneck (the first live run got 0 comments). **Architecture (load-bearing):** a stateless
