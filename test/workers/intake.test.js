@@ -193,4 +193,47 @@ describe('public intake route', () => {
     }
     expect(last.status).toBe(429);
   });
+
+  it('run_report approve → a human-owned thread with the report attested as evidence', async () => {
+    const sub = await publicPost({
+      kind: 'run_report',
+      title: 'Our vendor run',
+      body: 'We ran the debate pack on a vendor decision; here are the artifacts and the outcome.',
+      handle: 'team@elsewhere.test',
+    });
+    const receipt = (await sub.json()).receipt;
+    const approve = await humanPost(`/api/intake/${receipt}/approve`, {});
+    expect(approve.status).toBe(200);
+    const body = await approve.json();
+    expect(body.attested).toBe(true);
+    expect(await ownerId(body.id)).toBe('par_troylati');
+    // The report landed as evidence with its external origin preserved (the
+    // append fails closed, so a present source proves it validated).
+    const state = await (await humanGet(`/api/threads/${body.id}/state`)).json();
+    expect(JSON.stringify(state)).toContain(`public run report ${receipt}`);
+  });
+
+  it('contribution approve → evidence appended onto the existing target thread', async () => {
+    const targetId = (await (await humanPost('/api/threads', { question: 'A target thread for an external contribution attestation' })).json()).id;
+    const sub = await publicPost({
+      kind: 'contribution',
+      targetThreadId: targetId,
+      body: 'An outside reviewer notes the staffing estimate omits on-call load.',
+    });
+    expect(sub.status).toBe(200);
+    const receipt = (await sub.json()).receipt;
+
+    const approve = await humanPost(`/api/intake/${receipt}/approve`, {});
+    expect(approve.status).toBe(200);
+    const body = await approve.json();
+    expect(body.id).toBe(targetId); // attaches to the target, creates no new thread
+    expect(body.attested).toBe(true);
+    const state = await (await humanGet(`/api/threads/${targetId}/state`)).json();
+    expect(JSON.stringify(state)).toContain(`public submission ${receipt}`);
+  });
+
+  it('rejects a public contribution to a non-existent thread (404)', async () => {
+    const res = await publicPost({ kind: 'contribution', targetThreadId: 'thd_nope', body: 'this should be refused at submit time' });
+    expect(res.status).toBe(404);
+  });
 });
