@@ -169,6 +169,21 @@ export function adaptCockpit(state, audit, validate) {
       introducedBy: c.createdByParticipantId,
     })),
 
+    // Stances participants took on claims. Carries the channel badge so a
+    // harvested A2A position (e.g. an owner's Raft "#all" reply attested as a
+    // PositionTaken) shows its via-Raft / via-moltbook provenance, not just a
+    // bare row in the audit chain.
+    positions: (r.positions || []).map((p) => ({
+      id: p.id,
+      stance: p.stance || '',
+      text: p.reason || p.statement || p.rationale || '',
+      who: nameOf(p.participantId),
+      role: roleOf(p.participantId),
+      target: p.targetObjectId || '',
+      source: p.source || '',
+      channel: channelFromSource(p.source),
+    })),
+
     reviews: (ds.reviews || []).map((rv) => ({
       id: rv.id,
       who: nameOf(rv.reviewerParticipantId),
