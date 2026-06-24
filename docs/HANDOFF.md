@@ -41,6 +41,62 @@ self-hosted app in the `laticooki` Zero Trust org. Local repo:
 - **Two capabilities added after launch (both merged to `main`, agent path deployed):**
   see the "Engine sync" and "Agent write path" sections below.
 
+## Session 2026-06-24 — Hermes Raft (raft.build) as the A2A deliberation channel
+Use Hermes **v0.17.0 "Reach Release"** Raft support as clistahermes's deliberation
+back-channel **alongside moltbook (dual-channel)** — fixing the moltbook-engagement
+bottleneck (the first live run got 0 comments). **Architecture (load-bearing):** a stateless
+Worker can't be a Raft node (Raft needs a persistent `raft` CLI + auto-spawned `raft agent
+bridge` + a localhost `/wake` endpoint), so **clistahermes IS the Raft bridge** and the app is
+the **accountable ledger + A2A provenance surface** over it. The app never talks to Raft
+directly. (`cloudflare/moltworker` — OpenClaw in Sandbox Containers — is the Phase 3 migration
+target for hosting the runtime on Cloudflare; design-only, not built.) Newest first:
+
+- **Phase 0 — Raft External Agent (DONE, owner-set-up).** Profile **`clista_agent`** (agentId
+  `7a538a89-31d0-49a4-b514-e68979960ff4`), channel **`#all`** in workspace `clista`
+  (`https://app.raft.build/s/clista/...`). `RAFT_PROFILE=clista_agent` in `~/.hermes/.env`;
+  Hermes gateway connected. **Namespace split (don't conflate):** Raft side = `clista_agent`;
+  ClisTa app side = `par_agent_clistahermes` (Access service token). Same Hermes agent.
+- **Phase 1 — app (SHIPPED, commit `d527621`, CI `28075241370` green, live).** The app records
+  what clistahermes reports; no Raft dependency in the Worker.
+  - `IndexDO.agent_flags` gained `channel/workspace_ref/responders/phase/detail/updated_at`
+    (PRAGMA-guarded back-fill); new `recordAgentProgress()`; `flagStatus()` returns them; a
+    fresh re-flag resets prior status. `worker/index-do.js`.
+  - **`POST /api/threads/:id/agent-progress`** (agent-only, 403 else) — DO metadata, NOT a
+    protocol event (chain stays clean). `GET …/agent-status` surfaces it; the existing 20s
+    cockpit poll (`useThread.js`) shows it live. `worker/index.js`.
+  - **Channel provenance:** `adapt.js` `channelFromSource()` parses the `source` convention
+    (`"raft workspace … — …"` / `"moltbook …"`) → a channel tag on evidence, the surviving
+    objection, and Provenance-Trace nodes; `Cockpit.jsx` renders **"via Raft" / "via moltbook"**
+    badges (`styles.js` `channelMeta`). `channelLabel()` drives the live banner
+    (*"clistahermes is deliberating via Raft + moltbook … — N agents engaged · phase"*).
+  - `scripts/agent-post.mjs` gained a **`progress`** subcommand; `docs/AGENTS.md` gained a
+    **"Raft deliberation channel"** section; `test/workers/agent-flag.test.js` extended
+    (progress agent-only + round-trips; `npm run test:workers` 10/10, `npm test` 9/9, build OK).
+- **Phase 2 — Hermes runtime (APPLIED, lives in `~/.hermes`, NOT this repo).** Backed up as
+  `*.bak.20260624-044111`. Decision: **(A) the cron is the SOLE drainer** of the `clista_agent`
+  Raft inbox.
+  - **Cron prompt `e31c1a1dd850`** (6678→9396 chars, 8 guarded replacements, job still
+    enabled @ `15,45`): dual-channel; a Raft ENVIRONMENT block (`#all`, `raft message
+    send --target '#all'` via stdin, `raft message check` to drain, `raft manual`/`raft server
+    info` to discover); 5-col state format; SEED solicits on Raft + reports `phase:"soliciting"`;
+    HARVEST drains Raft and attests with `source:"raft workspace <target> — message <id>"` +
+    reports `phase:"harvesting"`; CONVERGENCE reports `phase:"staged"` + posts the final summary
+    on BOTH channels. Decision-owner boundary + decided-thread guardrail unchanged.
+  - **Precheck `clista-app-precheck.sh`:** status-column fix (`$3→$4`) + **Detector C** — a
+    *non-draining* `raft message read --channel <target> --after <seq>` snapshot (state
+    `~/.hermes/cron/clista-app-raft.state.tsv`) that filters system/own messages and is
+    **inert until a real `#all:<thread>` target exists**. (`raft inbox check` is daemon-only —
+    unavailable to the external profile — hence the read-snapshot approach.) `bash -n` clean,
+    dry-run silent.
+  - **State tsv** `clista-app-deliberation.tsv` migrated to **5 columns**
+    (`thread_id ⇥ moltbook_post ⇥ raft_target ⇥ status ⇥ updated_at`); existing in-flight row
+    got `raft_target = -` (stays moltbook-only; only newly-flagged threads use the dual path).
+  - **No restart needed** — scheduler reloads `jobs.json` per run; precheck re-read each tick.
+- **Live proof PENDING (human action):** flagging is human-only, so the end-to-end Raft seed
+  needs the owner to flag a thread in the cockpit ("Have clistahermes deliberate"). On the next
+  `:15`/`:45` tick clistahermes seeds it onto Raft `#all` + moltbook and reports progress.
+  Rollback = restore the three `*.bak.20260624-044111` files.
+
 ## Session 2026-06-23 (b) — agent deliberation, provenance, cockpit polish
 All shipped to `main` + live on app.clista.ai (CI green). Newest first:
 
