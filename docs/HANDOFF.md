@@ -41,10 +41,10 @@ self-hosted app in the `laticooki` Zero Trust org. Local repo:
 - **Two capabilities added after launch (both merged to `main`, agent path deployed):**
   see the "Engine sync" and "Agent write path" sections below.
 
-## Session 2026-06-24 (b) — positions channel badge + live dual-channel seed re-proof
-Two things this session (both on branch `positions-channel-badge` → **PR #2**, open, not yet
-merged). Merge PR #2 to deploy the badge (`src/**` is in the `deploy-app.yml` trigger; HANDOFF.md
-is not, so it rides along without affecting the deploy).
+## Session 2026-06-24 (b) — positions channel badge + live dual-channel harvest re-proof
+All MERGED + DEPLOYED (PR #2 badge, PR #3 this handoff, PR #4 row-layout fix; PRs used because
+direct pushes to `main` are classifier-gated). The full A2A loop was re-proven LIVE end-to-end this
+session — seed → real peer harvest → via-Raft position badge confirmed in the cockpit by the owner.
 
 - **Positions now carry the via-Raft / via-moltbook badge (the last cosmetic gap).** A
   `PositionTaken` harvested off an A2A channel (e.g. the owner's Raft `#all` reply attested as a
@@ -76,7 +76,34 @@ is not, so it rides along without affecting the deploy).
   - **Op note:** I cannot fire the cron's `--accept-hooks` or read service-token creds without
     explicit owner action — the classifier (correctly) gates outward A2A posts + credential reads.
     The seed-verification reads (`~/.hermes/cron/*.tsv`, the tick output `.md`) are operational
-    state, allowed. The thread is live + `soliciting` on both channels as of this handoff.
+    state, allowed.
+- **HARVEST RE-PROVEN LIVE — the badge now confirmed on real data.** The owner replied on Raft
+  `#all:a9942ddf` and a **real second agent `@Clista`** (distinct from `clista_agent`/clistahermes)
+  also weighed in — arguing the two seeded claims are a false dichotomy and taking a *synthesis*
+  stance (a dedicated `#a2a-deliberation` channel WITH one thread per deliberation). clistahermes
+  harvested both into the live thread as **1 PositionTaken + 2 EvidenceCommitted**, each with a
+  `source:"raft workspace #all:a9942ddf — message <id>"` attribution:
+  `pos_clistahermes_raft_prethread_synthesis_e3b8d207` (supports the per-thread claim),
+  `evd_clistahermes_raft_seeding_pattern_e3b8d207`, `evd_clistahermes_raft_serendipity_92adca5c`
+  (folds in the owner's `#all` serendipity↔S/N point). The owner CONFIRMED the **"via Raft"** badge
+  renders on the position in the cockpit. So the thread is now claim+evidence+assumption+position
+  grounded (merge-ready), sitting in `harvesting` (no stage attempt yet — clistahermes stages on a
+  later tick by its own judgment, or the owner drives it; then the `3ac0fe7` "Record the decision"
+  panel merges).
+  - **Op lesson (who harvested):** the harvest produced a `clista_agent` reply on Raft (seq
+    `7661435`) but **no cron output report** — because the always-on MAIN Hermes gateway session
+    *shares the `clista_agent` profile* and harvested it outside the cron. So a harvest can come from
+    EITHER the cron tick OR the live gateway session; don't assume the cron did it. Verify by the
+    Raft channel content + the appended event ids, not the cron output dir.
+  - **Detector-C reminder (bit me):** the `:45` scheduled tick logged `wakeAgent=false` and the
+    raft-state seq still advanced (`7660266`→`7660913`→`7661435`) — Detector C advances the snapshot
+    every run incl. non-waking ones, and raft seqs are global (a jump ≠ a relevant new message). Read
+    the channel non-draining (`raft message read --channel '#all:<id>' --after <seq>`) to see actual
+    content; reset the `clista-app-raft.state.tsv` seq to re-expose an already-snapshotted message.
+- **Cockpit row-layout fix (PR #4, `bbccf58`, deployed).** Evidence/Assumptions/Claims/Positions
+  rows laid `id | content` side-by-side, squeezing findings off-screen on narrow widths. Flipped all
+  four to `flex-direction:column` (id above, content below, full width). `src/screens/Cockpit.jsx`,
+  display-only.
 
 ## Session 2026-06-24 — Hermes Raft (raft.build) as the A2A deliberation channel
 **FULL LOOP PROVEN END-TO-END on a real thread** (`thd_should_agent_to_agent_runs…_0bf0bb6f`):
