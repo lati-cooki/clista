@@ -2,20 +2,17 @@ import { useState } from 'react';
 import { css } from '../lib/css.js';
 import { Svg } from '../lib/Svg.jsx';
 import { Hoverable } from '../lib/Hoverable.jsx';
+import { RefGroup } from '../lib/RefGroup.jsx';
 import { ico } from '../icons.js';
 import { filterStyle } from '../styles.js';
 import { api } from '../api.js';
 import { useThread } from '../useThread.js';
+import {
+  rid, ID_PREFIX, SEVERITIES, STANCES, REVIEW_STATUSES, CONFIDENCE, guard,
+  buildObjection, buildAssumption, buildClaim, buildPosition, buildDecisionRequest, buildReview,
+} from '../events.js';
 
 const MONO = "font-family:'JetBrains Mono',monospace;";
-const SEVERITIES = ['minor', 'major', 'blocking'];
-const STANCES = ['support', 'oppose', 'neutral'];
-const REVIEW_STATUSES = ['approve', 'approve_with_conditions', 'request_changes', 'reject'];
-const CONFIDENCE = [
-  { v: 0.6, label: 'tentative' },
-  { v: 0.75, label: 'working' },
-  { v: 0.9, label: 'strong' },
-];
 const fieldLabel = "display:block; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#6a6a6a; margin-bottom:8px;";
 const inputBase = "width:100%; padding:11px 13px; font-family:'JetBrains Mono',monospace; font-size:12.5px; color:#1a1a1a; background:#fcfcfb; border:1px solid #d8d8d6; border-radius:5px; outline:none;";
 
@@ -53,12 +50,6 @@ const KINDS = {
     desc: "A review is a reviewer's verdict on the open decision request — approve, approve with conditions, request changes, or reject — with conditions and comment recorded.",
   },
 };
-
-function rid(prefix) {
-  const buf = new Uint8Array(4);
-  crypto.getRandomValues(buf);
-  return prefix + '_' + Array.from(buf, (b) => b.toString(16).padStart(2, '0')).join('');
-}
 
 const emptyRefs = () => ({ claims: [], evidence: [], assumptions: [], objections: [] });
 
@@ -111,108 +102,24 @@ export function Compose({ threadId, me, go }) {
     setResult(null);
   };
 
-  // Build the engine event for the selected kind. actor_id is set server-side
-  // from the authenticated identity; the nested participant id must also be the
-  // joined actor (the server only forces the top-level id) or the append fails.
+  // Build the engine event for the selected kind via the shared builders. actor_id
+  // is set server-side; the nested participant id is minted there too (the server
+  // only forces the top-level id) or the append fails closed.
   const buildEvent = (id) => {
-    const at = new Date().toISOString();
-    if (kind === 'objection') {
-      const isDecision = /^(dcr|dec)/.test(target);
-      return {
-        event_type: 'ObjectionRaised',
-        payload: {
-          objection: {
-            id, object: 'objection', threadId, participantId: actorId,
-            targetObjectId: target, targetObjectType: isDecision ? 'decision' : 'claim',
-            text: statement.trim(), status: 'open', raisedAt: at,
-            ...(basis ? { assumption: basis } : {}),
-          },
-        },
-      };
-    }
-    if (kind === 'assumption') {
-      return {
-        event_type: 'AssumptionDeclared',
-        payload: {
-          assumption: {
-            id, object: 'assumption', threadId, text: statement.trim(),
-            status: 'active', confidence, declaredByParticipantId: actorId, declaredAt: at,
-          },
-        },
-      };
-    }
-    if (kind === 'claim') {
-      return {
-        event_type: 'ClaimCreated',
-        payload: {
-          claim: {
-            id, object: 'claim', threadId, text: statement.trim(),
-            status: 'proposed', createdByParticipantId: actorId, createdAt: at,
-          },
-        },
-      };
-    }
-    if (kind === 'position') {
-      return {
-        event_type: 'PositionTaken',
-        payload: {
-          position: {
-            id, object: 'position', threadId, participantId: actorId,
-            targetObjectId: target, targetObjectType: 'claim', stance,
-            reason: statement.trim(), takenAt: at,
-          },
-        },
-      };
-    }
-    if (kind === 'decisionRequest') {
-      return {
-        event_type: 'DecisionRequestOpened',
-        payload: {
-          decisionRequest: {
-            id, object: 'decisionRequest', threadId, proposal: statement.trim(), status: 'review',
-            supportingEvidenceIds: refs.evidence,
-            supportingClaimIds: refs.claims,
-            supportingAssumptionIds: refs.assumptions,
-            objectionIds: refs.objections,
-            openedByParticipantId: actorId, openedAt: at,
-          },
-        },
-      };
-    }
-    // review
-    const conds = conditions.split('\n').map((c) => c.trim()).filter(Boolean);
-    return {
-      event_type: 'ReviewSubmitted',
-      payload: {
-        review: {
-          id, object: 'review', threadId,
-          decisionRequestId: decisionRequest && decisionRequest.id,
-          reviewerParticipantId: actorId, status: reviewStatus,
-          conditions: conds, comment: statement.trim(), reviewedAt: at,
-        },
-      },
-    };
+    const base = { threadId, actorId, id };
+    if (kind === 'objection') return buildObjection({ ...base, target, text: statement, basis });
+    if (kind === 'assumption') return buildAssumption({ ...base, text: statement, confidence });
+    if (kind === 'claim') return buildClaim({ ...base, text: statement });
+    if (kind === 'position') return buildPosition({ ...base, target, stance, reason: statement });
+    if (kind === 'decisionRequest') return buildDecisionRequest({ ...base, proposal: statement, refs });
+    return buildReview({ ...base, decisionRequestId: decisionRequest && decisionRequest.id, status: reviewStatus, conditions, comment: statement });
   };
 
   const submit = async () => {
-    // Client-side guards mirror the engine's rules for a fast local rejection.
-    if (kind === 'objection' && !target) {
-      setResult({ ok: false, id: '—', reason: 'objection.target is required — every objection must attach to a claim or the decision. Append rejected; reasoning state unchanged.' });
-      return;
-    }
-    if (kind === 'position' && !target) {
-      setResult({ ok: false, id: '—', reason: 'position.target is required — a position attaches to the claim it stands on. Append rejected; reasoning state unchanged.' });
-      return;
-    }
-    if (kind === 'review' && !(decisionRequest && decisionRequest.id)) {
-      setResult({ ok: false, id: '—', reason: 'no open decision request to review — open one first. Append rejected; reasoning state unchanged.' });
-      return;
-    }
-    // Free text is the recorded substance for everything except position (reason)
-    // and review (comment), where it is optional.
-    const textRequired = kind !== 'position' && kind !== 'review';
-    if (textRequired && statement.trim().length < 12) {
-      setResult({ ok: false, id: '—', reason: `${k.label}.text must state precisely what is recorded (min 12 chars). Append rejected; reasoning state unchanged.` });
+    // Client-side guard mirrors the engine's rules for a fast local rejection.
+    const reason = guard(kind, { target, text: statement, decisionRequest });
+    if (reason) {
+      setResult({ ok: false, id: '—', reason });
       return;
     }
     const objId = rid(k.idPrefix);
@@ -252,23 +159,9 @@ export function Compose({ threadId, me, go }) {
   };
 
   // A compact toggle-chip multi-select over a projection reference list.
-  const refGroup = (title, bucket) => {
-    const items = refLists[bucket] || [];
-    return (
-      <div style={css('margin-bottom:16px;')}>
-        <label style={css(fieldLabel)}>{title} <span style={css('color:#a5a5a5; font-weight:500;')}>{refs[bucket].length ? `${refs[bucket].length} selected` : 'optional'}</span></label>
-        {items.length ? (
-          <div style={css('display:flex; flex-wrap:wrap; gap:7px;')}>
-            {items.map((it) => (
-              <button key={it.id} onClick={() => toggleRef(bucket, it.id)} title={it.text} style={filterStyle(refs[bucket].includes(it.id))}>{it.id}</button>
-            ))}
-          </div>
-        ) : (
-          <p style={css('margin:0; ' + MONO + ' font-size:11px; color:#b0b0b0;')}>// none in this thread yet</p>
-        )}
-      </div>
-    );
-  };
+  const refGroup = (title, bucket) => (
+    <RefGroup title={title} items={refLists[bucket] || []} selected={refs[bucket]} onToggle={(id) => toggleRef(bucket, id)} />
+  );
 
   const textLabel = kind === 'position' ? 'position.reason' : kind === 'decisionRequest' ? 'decisionRequest.proposal' : kind === 'review' ? 'review.comment' : `${k.label}.text`;
   const textRequired = kind !== 'position' && kind !== 'review';
