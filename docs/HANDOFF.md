@@ -41,6 +41,53 @@ self-hosted app in the `laticooki` Zero Trust org. Local repo:
 - **Two capabilities added after launch (both merged to `main`, agent path deployed):**
   see the "Engine sync" and "Agent write path" sections below.
 
+## Session 2026-06-24 (d) — the triage inbox (Phase 1 of the unified intake subsystem)
+**SHIPPED on branch `intake-triage-inbox` (PR open), behind Access.** A new owner triage
+inbox: the autonomous seeder (and, in a later phase, outside submitters) *propose* into a
+quarantined queue; **a human triages every item and is the accountable creator/owner** of
+anything promoted. This resolves the governance dead-end the "emergent meta-thread seeder"
+idea hit — an agent that *creates* a thread becomes its `decision owner` and can never merge
+the decision (agents are governance-blocked). So **"agent stages, human merges" generalizes
+to "agent/public propose, human approves & owns."** The full design (incl. the public-intake
+phases 2–4) is in `~/.claude/plans/review-idea-another-plan-resilient-teacup.md`.
+
+- **What's in Phase 1 (all behind Cloudflare Access):**
+  - **`IndexDO.intake` table** (`worker/index-do.js`) modeled on `agent_flags` — DO metadata,
+    NOT a protocol event and NOT in the threads index, so a pending item is **quarantined**
+    (invisible as ledger state) until approved. Methods `enqueueIntake` / `listIntake` /
+    `getIntake` / `resolveIntake` + an `intakeRow()` projector. Columns: `id, source, kind,
+    status, title, question, body, target_thread_id, payload(JSON), provenance(JSON),
+    submitter, submitted_at, resolved_thread_id, updated_at`.
+  - **Routes** (`worker/index.js`): `POST /api/agent/intake` (agent-only feeder — the seeder
+    enqueues `source:'agent' kind:'thread_proposal'`), `GET /api/intake` (human-only list),
+    `POST /api/intake/:id/approve` (kind-dispatched), `POST /api/intake/:id/dismiss`. Approve
+    of `thread_proposal`/`decision` runs the **existing create path** so the *approving human*
+    is `decision owner`, optionally `flagForAgent`s it for the deliberation cron, and marks the
+    item `approved` with the new `thread_id`. (`contribution`/`run_report` approval is a later
+    phase → 422 for now.) Re-acting on a resolved item → 409.
+  - **Reuse, not duplication:** extracted **`createThread(env, identity, {question,title})`**
+    in `worker/index.js` (the genesis ParticipantDeclared→ThreadCreated mint + ingest +
+    register) so BOTH `POST /api/threads` and approve mint identical, human-owned genesis logs.
+  - **Cockpit** (`src/screens/ThreadIndex.jsx` + `src/api.js`): an owner-only **Triage inbox**
+    panel above the ledger (source/kind chips, use-cases, pros/cons, source-signals,
+    Approve→create with a "have clistahermes deliberate" toggle, Dismiss). Approve jumps to the
+    freshly-created cockpit (reuses the New-thread navigation). The panel only renders when
+    items are pending and the viewer is the owner (agents get 403 server-side).
+- **Tests + verification:** `test/workers/intake.test.js` (5 tests) — the governance keystone
+  (**approve creates a thread owned by the approving human, not the agent**), the agent-only/
+  human-only boundaries, quarantine (a proposal registers no thread), dismiss, 409 on
+  re-approve, 422 on short question. `npm run test:workers` **18/18**, `npm test` **15/15**,
+  build clean. **End-to-end against `wrangler dev`** (curl) + **browser** (Playwright via
+  `MCP_DOCKER`): agent proposes → owner sees the quarantined panel → Approve+flag → new cockpit
+  opens with **decision owner = par_troylati**, 2-event chain valid, banner "Handed to
+  clistahermes…".
+- **Next (owner-gated — Phase 2):** the **public `POST /api/intake`** (unauthenticated, the
+  perimeter break) with Turnstile + rate-limit + size cap + fail-closed validation, **strict
+  quarantine**. Needs owner config: a Cloudflare Access **bypass policy** scoped to
+  `/api/intake` (else Access blocks it before the Worker) + Turnstile keys (the `turnstile-spin`
+  skill provisions the widget). Then Phase 3 (`contribution`/`run_report` kinds) + Phase 4
+  (the Hermes emergent-seeder cron that fills `source:'agent'` rows — owner installs).
+
 ## Session 2026-06-24 (c) — inline contextual human-action affordances in the cockpit
 **SHIPPED + MERGED (PR #6, deployed).** The cockpit is now where humans contribute, not just the
 separate Compose screen — extending the "Record the decision" merge-panel pattern to the other

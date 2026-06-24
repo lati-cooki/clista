@@ -19,6 +19,17 @@ export function ThreadIndex({ openThread, me }) {
   const [rows, setRows] = useState(null);
   const [error, setError] = useState(null);
   const [creating, setCreating] = useState(false);
+  const [intake, setIntake] = useState([]);
+
+  const reload = () =>
+    api.listThreads().then((res) => {
+      if (res.ok) setRows(res.data.threads || []);
+      else setError(res.data.error || 'failed to load index');
+    });
+  // The triage inbox is owner-only server-side (agents get 403); a browser is a
+  // human, so just ask — render nothing when it's empty or unavailable.
+  const reloadIntake = () =>
+    api.listIntake().then((res) => setIntake((res.ok && res.data.intake) || []));
 
   useEffect(() => {
     let live = true;
@@ -26,6 +37,9 @@ export function ThreadIndex({ openThread, me }) {
       if (!live) return;
       if (res.ok) setRows(res.data.threads || []);
       else setError(res.data.error || 'failed to load index');
+    });
+    api.listIntake().then((res) => {
+      if (live) setIntake((res.ok && res.data.intake) || []);
     });
     return () => {
       live = false;
@@ -62,6 +76,25 @@ export function ThreadIndex({ openThread, me }) {
           onCreated={(id) => {
             setCreating(false);
             openThread(id);
+          }}
+        />
+      )}
+
+      {intake.length > 0 && (
+        <IntakePanel
+          items={intake}
+          onApprove={async (id, flag) => {
+            const res = await api.approveIntake(id, { flag });
+            if (res.ok && res.data.id) {
+              await reload();
+              openThread(res.data.id);
+            } else {
+              reloadIntake();
+            }
+          }}
+          onDismiss={async (id) => {
+            await api.dismissIntake(id, {});
+            reloadIntake();
           }}
         />
       )}
@@ -203,6 +236,127 @@ function NewThreadModal({ me, onClose, onCreated }) {
           <div style={css('flex:1;')} />
           <span style={css(MONO + ' font-size:10.5px; color:#a5a5a5;')}>genesis log · validated before append</span>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// The triage inbox: proposals (from the autonomous seeder) and submissions
+// awaiting the owner's judgement. Quarantined until acted on — approving CREATES
+// the thread (owned by the approving human), so this is where "agent/public
+// propose → human approves & owns" happens in the UI.
+function IntakePanel({ items, onApprove, onDismiss }) {
+  return (
+    <div style={css('margin-bottom:22px; background:#fff; border:1px solid #dcdcda; border-radius:7px; overflow:hidden;')}>
+      <div style={css('display:flex; align-items:center; gap:9px; padding:12px 22px; border-bottom:1px solid #e5e5e5; background:#fcfcfb;')}>
+        <Svg html={ico('index', { size: 14, sw: 1.7 })} style={css('color:#1c7a4f;')} />
+        <span style={css(MONO + ' font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#1c7a4f;')}>Triage inbox</span>
+        <span style={css(MONO + ' font-size:11px; color:#9a9a9a;')}>{items.length} awaiting your decision</span>
+        <div style={css('flex:1;')} />
+        <span style={css(MONO + ' font-size:10px; color:#a5a5a5;')}>quarantined — nothing is on the ledger until you approve</span>
+      </div>
+      {items.map((it) => (
+        <IntakeCard key={it.id} it={it} onApprove={onApprove} onDismiss={onDismiss} />
+      ))}
+    </div>
+  );
+}
+
+const KIND_LABEL = {
+  thread_proposal: 'thread proposal',
+  decision: 'decision',
+  contribution: 'contribution',
+  run_report: 'run report',
+};
+
+function IntakeCard({ it, onApprove, onDismiss }) {
+  const [busy, setBusy] = useState(false);
+  const [flag, setFlag] = useState(true);
+  const payload = it.payload || {};
+  const useCases = Array.isArray(payload.useCases) ? payload.useCases : [];
+  const tradeoffs = payload.tradeoffs || null;
+  const provenance = Array.isArray(it.provenance) ? it.provenance : [];
+  const creates = it.kind === 'thread_proposal' || it.kind === 'decision';
+
+  const act = (fn) => async () => {
+    setBusy(true);
+    await fn();
+    setBusy(false);
+  };
+
+  return (
+    <div style={css('padding:16px 22px; border-bottom:1px solid #f0f0ee;')}>
+      <div style={css('display:flex; align-items:center; gap:8px; margin-bottom:9px;')}>
+        <span style={css(MONO + ' font-size:9.5px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:#5a5a5a; background:#f1f1ef; border:1px solid #e2e2e0; border-radius:4px; padding:2px 7px;')}>{it.source}</span>
+        <span style={css(MONO + ' font-size:9.5px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:#1c5fa8; background:#eef3fa; border:1px solid #d6e3f3; border-radius:4px; padding:2px 7px;')}>{KIND_LABEL[it.kind] || it.kind}</span>
+        <span style={css(MONO + ' font-size:10.5px; color:#b0b0b0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;')}>{it.id}</span>
+        <div style={css('flex:1;')} />
+        <span style={css(MONO + ' font-size:10.5px; color:#a5a5a5;')}>{relativeTime(it.submittedAt)}</span>
+      </div>
+
+      <div style={css('font-size:14.5px; font-weight:500; color:#1a1a1a; line-height:1.5; margin-bottom:6px;')}>{it.question || it.title}</div>
+      {it.body && <p style={css('margin:0 0 10px; font-size:13px; color:#5a5a5a; line-height:1.55;')}>{it.body}</p>}
+
+      {useCases.length > 0 && (
+        <div style={css('margin:0 0 10px;')}>
+          <div style={css(MONO + ' font-size:9.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#a5a5a5; margin-bottom:5px;')}>use cases</div>
+          <ul style={css('margin:0; padding-left:18px;')}>
+            {useCases.map((u, i) => (
+              <li key={i} style={css('font-size:12.5px; color:#4a4a4a; line-height:1.5;')}>{typeof u === 'string' ? u : JSON.stringify(u)}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {tradeoffs && (tradeoffs.pros || tradeoffs.cons) && (
+        <div style={css('display:flex; gap:24px; margin:0 0 12px;')}>
+          {['pros', 'cons'].map((side) =>
+            Array.isArray(tradeoffs[side]) && tradeoffs[side].length ? (
+              <div key={side}>
+                <div style={css(MONO + ' font-size:9.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:' + (side === 'pros' ? '#1c7a4f' : '#b3343c') + '; margin-bottom:4px;')}>{side}</div>
+                <ul style={css('margin:0; padding-left:16px;')}>
+                  {tradeoffs[side].map((x, i) => (
+                    <li key={i} style={css('font-size:12px; color:#5a5a5a; line-height:1.5;')}>{x}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null
+          )}
+        </div>
+      )}
+
+      {provenance.length > 0 && (
+        <div style={css('margin:0 0 12px; padding:8px 11px; background:#fcfcfb; border:1px solid #ededeb; border-radius:5px;')}>
+          <div style={css(MONO + ' font-size:9.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#a5a5a5; margin-bottom:5px;')}>source signals</div>
+          {provenance.map((p, i) => (
+            <div key={i} style={css(MONO + ' font-size:11px; color:#7a7a7a; line-height:1.55;')}>
+              {(p.surface ? p.surface + ' · ' : '') + (p.ref || '') + (p.excerpt ? ' — ' + p.excerpt : '')}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={css('display:flex; align-items:center; gap:12px; padding-top:6px;')}>
+        <Hoverable
+          onClick={busy ? undefined : act(() => onApprove(it.id, creates && flag))}
+          base={css('display:inline-flex; align-items:center; gap:7px; padding:9px 15px; background:#1c7a4f; color:#fff; border:none; border-radius:5px; ' + MONO + ' font-size:11.5px; font-weight:500; letter-spacing:0.04em; cursor:' + (busy ? 'default' : 'pointer') + '; opacity:' + (busy ? '0.6' : '1') + ';')}
+          hover={css('background:#176540;')}
+        >
+          <Svg html={ico('checkArrow', { size: 13, sw: 1.9 })} />{creates ? 'Approve → create thread' : 'Approve'}
+        </Hoverable>
+        {creates && (
+          <label style={css('display:inline-flex; align-items:center; gap:6px; ' + MONO + ' font-size:11px; color:#6a6a6a; cursor:pointer;')}>
+            <input type="checkbox" checked={flag} onChange={(e) => setFlag(e.target.checked)} />
+            have clistahermes deliberate
+          </label>
+        )}
+        <Hoverable
+          onClick={busy ? undefined : act(() => onDismiss(it.id))}
+          base={css('padding:9px 14px; background:none; color:#6a6a6a; border:1px solid #d8d8d6; border-radius:5px; ' + MONO + ' font-size:11.5px; cursor:' + (busy ? 'default' : 'pointer') + ';')}
+          hover={css('border-color:#b3343c; color:#b3343c;')}
+        >
+          Dismiss
+        </Hoverable>
       </div>
     </div>
   );

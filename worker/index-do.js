@@ -53,6 +53,30 @@ export class IndexDO extends DurableObject {
     ]) {
       if (!cols.has(name)) this.sql.exec(`ALTER TABLE agent_flags ADD COLUMN ${name} ${decl}`);
     }
+    // The triage inbox: proposals/submissions awaiting the owner's judgement.
+    // The agent (emergent seeder) and — once the public route ships — outside
+    // submitters enqueue here; a human triages every row and is the accountable
+    // creator/owner of anything promoted. Strictly QUARANTINED: this is DO
+    // metadata, NOT a protocol event and NOT in the threads index, so nothing a
+    // non-owner submits is trusted or visible as ledger state until approved.
+    this.sql.exec(
+      `CREATE TABLE IF NOT EXISTS intake (
+        id TEXT PRIMARY KEY,
+        source TEXT,
+        kind TEXT,
+        status TEXT DEFAULT 'pending',
+        title TEXT,
+        question TEXT,
+        body TEXT,
+        target_thread_id TEXT,
+        payload TEXT,
+        provenance TEXT,
+        submitter TEXT,
+        submitted_at TEXT,
+        resolved_thread_id TEXT,
+        updated_at TEXT
+      )`
+    );
   }
 
   upsert(card) {
@@ -185,4 +209,88 @@ export class IndexDO extends DurableObject {
     this.sql.exec("UPDATE agent_flags SET status = 'claimed' WHERE thread_id = ?", threadId);
     return { ok: true, ...this.flagStatus(threadId) };
   }
+
+  // --- Triage inbox -------------------------------------------------------
+  // Enqueue a proposal/submission for the owner to triage. `payload` and
+  // `provenance` are arbitrary JSON (stored as text). Never touches the
+  // append-only log or the threads index — it sits quarantined until approved.
+  enqueueIntake(row) {
+    if (!row || !row.id) return { ok: false };
+    this.sql.exec(
+      `INSERT INTO intake (id, source, kind, status, title, question, body,
+         target_thread_id, payload, provenance, submitter, submitted_at, resolved_thread_id, updated_at)
+       VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)`,
+      row.id,
+      row.source ?? null,
+      row.kind ?? null,
+      row.title ?? null,
+      row.question ?? null,
+      row.body ?? null,
+      row.targetThreadId ?? null,
+      row.payload != null ? JSON.stringify(row.payload) : null,
+      row.provenance != null ? JSON.stringify(row.provenance) : null,
+      row.submitter ?? null,
+      row.at ?? null,
+      row.at ?? null
+    );
+    return { ok: true, id: row.id };
+  }
+
+  listIntake(status = 'pending') {
+    const intake = this.sql
+      .exec(`SELECT * FROM intake WHERE status = ? ORDER BY submitted_at DESC`, status)
+      .toArray()
+      .map(intakeRow);
+    return { intake };
+  }
+
+  getIntake(id) {
+    if (!id) return null;
+    const row = this.sql.exec(`SELECT * FROM intake WHERE id = ?`, id).toArray()[0];
+    return row ? intakeRow(row) : null;
+  }
+
+  // Resolve a triage item: 'approved' (carrying the created/targeted thread id),
+  // 'dismissed', or 'spam'. Idempotency is enforced by the caller (it refuses to
+  // act on a non-pending item).
+  resolveIntake(id, { status, threadId, at } = {}) {
+    if (!id) return { ok: false };
+    this.sql.exec(
+      `UPDATE intake SET status = ?, resolved_thread_id = COALESCE(?, resolved_thread_id), updated_at = ?
+       WHERE id = ?`,
+      status ?? 'approved',
+      threadId ?? null,
+      at ?? null,
+      id
+    );
+    return { ok: true };
+  }
+}
+
+// Project a raw intake SQLite row into the API shape (JSON fields parsed).
+function intakeRow(row) {
+  const parse = (v) => {
+    if (v == null) return null;
+    try {
+      return JSON.parse(v);
+    } catch {
+      return null;
+    }
+  };
+  return {
+    id: row.id,
+    source: row.source,
+    kind: row.kind,
+    status: row.status,
+    title: row.title,
+    question: row.question,
+    body: row.body,
+    targetThreadId: row.target_thread_id || null,
+    payload: parse(row.payload),
+    provenance: parse(row.provenance),
+    submitter: row.submitter,
+    submittedAt: row.submitted_at,
+    resolvedThreadId: row.resolved_thread_id || null,
+    updatedAt: row.updated_at,
+  };
 }
