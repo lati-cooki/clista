@@ -51,6 +51,34 @@ the **accountable ledger + A2A provenance surface** over it. The app never talks
 directly. (`cloudflare/moltworker` — OpenClaw in Sandbox Containers — is the Phase 3 migration
 target for hosting the runtime on Cloudflare; design-only, not built.) Newest first:
 
+- **LIVE END-TO-END PROOF (the dual-channel path works).** Flagged a NEW thread
+  `thd_should_agent_to_agent_runs_be_integrated_in_the__mqrlmyuh_0bf0bb6f` in the cockpit;
+  manually fired the cron (`hermes cron run e31c1a1dd850 --accept-hooks` — the gateway ticker
+  runs it within seconds). clistahermes seeded it on **both channels**: created Raft thread
+  **`#all:1800456c`** + moltbook post **`1ab5847f`**, added `ClaimCreated
+  clm_agent_runs_integration_feasible_…` substrate, wrote the 5-col tsv row with the real
+  `raft_target`, reported `progress` (raft+moltbook · responders 1 · soliciting), and acked.
+  (Flag the EXISTING already-seeded thread instead → the idempotent guard just re-acks, no
+  re-seed — confirmed on the prior tick.)
+- **BUG the live test caught → fixed + deployed (commit `b3863b4`, CI green).** `agent-status`
+  returned `{requested:false}` mid-deliberation: `agent-ack` **DELETED** the `agent_flags` row,
+  but that row carries the live status — and the agent acks right after seeding, so the cockpit
+  banner never lit. Fix: **`agent-ack` now `claimFlag()`** — marks the row `'claimed'`
+  (dequeued from `listFlags`, which filters `status='pending'`) instead of `DELETE`, so the row
+  + status persist until the thread is `decided`; **`recordAgentProgress()` now UPSERTs**
+  (status `'claimed'` on insert) so a progress report is resilient and recreates the row even
+  if cleared. Tests updated (`test/workers/agent-flag.test.js`: ack dequeues but status
+  survives), 10/10. Verified live: a service-token `agent-progress` call recreated the status →
+  `agent-status` now returns `claimed · raft+moltbook · #all:1800456c · responders 1 ·
+  soliciting`, so the cockpit banner renders the live line. (Service tokens are `kind:agent`,
+  so the owner can curl `agent-progress`/`agent-ack` directly.) NOTE `flagStatus().requested`
+  now means "in deliberation" (pending OR claimed), not "pending request" — the cockpit shows
+  the status block (not the request button) for the whole deliberation, hiding only when decided.
+- **Next:** reply on Raft `#all:1800456c` or the moltbook post as a peer → next tick clistahermes
+  `raft message check`s it, attests with a **"via Raft"** badge (`source:"raft workspace … —
+  message <id>"`), bumps phase to `harvesting`. The Hermes-side files were backed up
+  `*.bak.20260624-044111`; rollback = restore them.
+
 - **Phase 0 — Raft External Agent (DONE, owner-set-up).** Profile **`clista_agent`** (agentId
   `7a538a89-31d0-49a4-b514-e68979960ff4`), channel **`#all`** in workspace `clista`
   (`https://app.raft.build/s/clista/...`). `RAFT_PROFILE=clista_agent` in `~/.hermes/.env`;
