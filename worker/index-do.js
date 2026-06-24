@@ -77,6 +77,16 @@ export class IndexDO extends DurableObject {
         updated_at TEXT
       )`
     );
+    // Coarse per-IP rate limit for the PUBLIC intake route (a fixed window). A
+    // backstop behind Turnstile, not the primary gate — keeps a single source
+    // from flooding the quarantine queue.
+    this.sql.exec(
+      `CREATE TABLE IF NOT EXISTS intake_rate (
+        ip TEXT PRIMARY KEY,
+        window_start TEXT,
+        count INTEGER
+      )`
+    );
   }
 
   upsert(card) {
@@ -263,6 +273,28 @@ export class IndexDO extends DurableObject {
       at ?? null,
       id
     );
+    return { ok: true };
+  }
+
+  // Fixed-window per-IP rate limit for public submissions. Returns { ok } —
+  // false once `limit` submissions land inside `windowMs`. Missing IP → allowed
+  // (Turnstile is the real gate; we don't block when we can't attribute).
+  rateLimitIntake(ip, nowIso, limit = 5, windowMs = 600000) {
+    if (!ip) return { ok: true };
+    const now = Date.parse(nowIso) || 0;
+    const row = this.sql.exec('SELECT window_start, count FROM intake_rate WHERE ip = ?', ip).toArray()[0];
+    const started = row ? Date.parse(row.window_start) || 0 : 0;
+    if (!row || now - started > windowMs) {
+      this.sql.exec(
+        `INSERT INTO intake_rate (ip, window_start, count) VALUES (?, ?, 1)
+         ON CONFLICT(ip) DO UPDATE SET window_start = excluded.window_start, count = 1`,
+        ip,
+        nowIso
+      );
+      return { ok: true };
+    }
+    if ((row.count || 0) >= limit) return { ok: false };
+    this.sql.exec('UPDATE intake_rate SET count = count + 1 WHERE ip = ?', ip);
     return { ok: true };
   }
 }

@@ -122,3 +122,75 @@ describe('triage inbox — agent proposes, human approves & owns', () => {
     expect(res.status).toBe(404);
   });
 });
+
+// The PUBLIC submission route: POST /api/intake (no auth). Turnstile is skipped
+// in tests (no TURNSTILE_SECRET binding), so these exercise validation, the
+// quarantine boundary, CORS, rate-limiting, and that approval still yields a
+// human-owned thread.
+describe('public intake route', () => {
+  const publicPost = (body, headers) =>
+    SELF.fetch(`${ORIGIN}/api/intake`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', ...(headers || {}) },
+      body: JSON.stringify(body || {}),
+    });
+
+  it('accepts a public decision → quarantined pending, registers no thread', async () => {
+    const question = 'Should an external team be able to submit a decision here?';
+    const res = await publicPost({ kind: 'decision', question, handle: 'someone@elsewhere.test' });
+    expect(res.status).toBe(200);
+    const receipt = (await res.json()).receipt;
+    expect(receipt).toMatch(/^itk_/);
+
+    // It does NOT register a thread (quarantine).
+    const threads = await (await humanGet('/api/threads')).json();
+    expect(threads.threads.some((t) => t.question === question)).toBe(false);
+
+    // The owner sees it, tagged source 'public'; the submitter handle is carried
+    // but is display-only (never an actor).
+    const inbox = await (await humanGet('/api/intake')).json();
+    const item = inbox.intake.find((i) => i.id === receipt);
+    expect(item.source).toBe('public');
+    expect(item.kind).toBe('decision');
+    expect(item.submitter).toBe('someone@elsewhere.test');
+
+    // Approving it still creates a thread owned by the approving HUMAN.
+    const approve = await humanPost(`/api/intake/${receipt}/approve`, {});
+    expect(approve.status).toBe(200);
+    expect(await ownerId((await approve.json()).id)).toBe('par_troylati');
+  });
+
+  it('accepts a run_report submission', async () => {
+    const res = await publicPost({ kind: 'run_report', title: 'A run', body: 'We ran the debate pack on a real decision and here is what happened.' });
+    expect(res.status).toBe(200);
+  });
+
+  it('rejects unknown kinds, short decisions, malformed and oversize bodies', async () => {
+    expect((await publicPost({ kind: 'thread_proposal', question: 'agents cannot self-promote publicly' })).status).toBe(422);
+    expect((await publicPost({ kind: 'decision', question: 'too short' })).status).toBe(422);
+
+    const bad = await SELF.fetch(`${ORIGIN}/api/intake`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{not json' });
+    expect(bad.status).toBe(400);
+
+    const huge = 'x'.repeat(20 * 1024);
+    expect((await publicPost({ kind: 'run_report', body: huge })).status).toBe(413);
+  });
+
+  it('answers the CORS preflight and tags responses with the allowed origin', async () => {
+    const pre = await SELF.fetch(`${ORIGIN}/api/intake`, { method: 'OPTIONS', headers: { origin: 'https://gate.clista.ai' } });
+    expect(pre.status).toBe(204);
+    expect(pre.headers.get('access-control-allow-origin')).toBe('https://gate.clista.ai');
+
+    const res = await publicPost({ kind: 'decision', question: 'Does the CORS header come back on the POST too?' }, { origin: 'https://gate.clista.ai' });
+    expect(res.headers.get('access-control-allow-origin')).toBe('https://gate.clista.ai');
+  });
+
+  it('rate-limits a single IP after the window allowance', async () => {
+    const ip = { 'cf-connecting-ip': '203.0.113.7' };
+    let last;
+    for (let i = 0; i < 6; i++) {
+      last = await publicPost({ kind: 'decision', question: `Rate limit probe number ${i} for the public route` }, ip);
+    }
+    expect(last.status).toBe(429);
+  });
+});
