@@ -41,6 +41,44 @@ self-hosted app in the `laticooki` Zero Trust org. Local repo:
 - **Two capabilities added after launch (both merged to `main`, agent path deployed):**
   see the "Engine sync" and "Agent write path" sections below.
 
+## Session 2026-06-24 (c) — inline contextual human-action affordances in the cockpit
+**SHIPPED + MERGED (PR #6, deployed).** The cockpit is now where humans contribute, not just the
+separate Compose screen — extending the "Record the decision" merge-panel pattern to the other
+contribution types, in place. Browser-verified end-to-end (the `MCP_DOCKER` Playwright gateway).
+
+- **The affordances (all gated by `canContribute = isParticipant && status !== 'decided'`):**
+  - **Raise objection / take a position** — buttons on each claim row (`claimContributeRow`),
+    target pre-filled. **Add assumption / add claim** — "+ add" on the section headers.
+  - **Stage a decision** — inline `DecisionRequestOpened` (proposal + `RefGroup` support pickers) when
+    `canStageOpen` (undecided, no open proposal); **Submit a review** (`ReviewSubmitted`) when
+    `canReview` (open proposal). Both feed the EXISTING owner merge panel (`canMerge`, owner-only).
+  - A signed-in non-participant gets a **"join to act"** nudge, never a dead 422-bound form. Decided
+    threads hide all of it (objecting to a recorded decision is intentionally NOT offered — reopen
+    with a new DRQ rather than accreting onto a closed decision). Evidence stays excluded
+    (`EvidenceCommitted` remains an ingest/agent path).
+- **Reuse over duplication (the load-bearing decision):** the six per-kind payload builders were
+  trapped in Compose's `buildEvent` closure. Extracted to **`src/events.js`** (`buildObjection` …
+  `buildReview` + `rid` + the `SEVERITIES`/`STANCES`/`CONFIDENCE`/`REVIEW_STATUSES` constants + a
+  shared `guard()`), so ONE module mints every event shape — kills the nested-`participantId` 422
+  drift trap (the server forces only top-level `actor_id`). Compose now consumes it, behavior
+  unchanged (−137 lines there). New reusable **`src/lib/InlineComposer.jsx`** (draft→append→reload
+  lifecycle + inline fail-closed reasons, mirrors the merge panel) and **`src/lib/RefGroup.jsx`**
+  (props-driven chip-multiselect, used by Compose AND the stage panel).
+- **Tests:** **`test/events.test.js`** drives all six builders through the real engine (chain
+  validates) and asserts the nested participant id == actor for every kind (the 422 trap). `npm test`
+  15/15, `npm run test:workers` 13/13, build clean. **End-to-end** against `wrangler dev`: all six
+  builders `POST 200`, chain valid. **Browser** (Playwright via MCP): decided-thread gating holds
+  (scenario_demo shows no affordances); on an active thread, clicking "raise objection" on a claim
+  revealed the inline composer, typed + `blocking` + submit → appended `obj_4c959824`, 8→9 events,
+  integrity+validation true.
+- **Op note — browser MCP:** the Playwright browser tools come through the `MCP_DOCKER` gateway
+  (`docker mcp gateway run`, default profile server = `playwright`, image `mcp/playwright` ~1.72GB
+  local). MCP servers attach at SESSION START, so if Docker/the gateway wasn't up at launch the
+  browser tools are absent even once Docker is running. Fix: `/mcp` → reconnect `MCP_DOCKER` (or
+  restart Claude Code); the browser reaches the dev worker at `http://host.docker.internal:8787`.
+  Dev identity works header-less via `DEV_EMAIL` in `.dev.vars` (a plain browser load authenticates
+  as `par_troylati`).
+
 ## Session 2026-06-24 (b) — positions channel badge + live dual-channel harvest re-proof
 All MERGED + DEPLOYED (PR #2 badge, PR #3 this handoff, PR #4 row-layout fix; PRs used because
 direct pushes to `main` are classifier-gated). The full A2A loop was re-proven LIVE end-to-end this
