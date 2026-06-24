@@ -65,9 +65,10 @@ iso_to_epoch() { date -j -u -f "%Y-%m-%dT%H:%M:%SZ" "$1" +%s 2>/dev/null || echo
 
 COLD=0; [ -f "$STATE_FEED" ] || COLD=1
 
-# Posts the deliberation loop already owns — never propose over them.
+# Posts the deliberation loop already owns — never propose over them. Space-join
+# (NOT newline) so it is safe to pass to `awk -v` below.
 DELIB_POSTS=""
-[ -f "$DELIB_TSV" ] && DELIB_POSTS=$(awk -F'\t' '{print $2}' "$DELIB_TSV" 2>/dev/null)
+[ -f "$DELIB_TSV" ] && DELIB_POSTS=$(awk -F'\t' 'NF{print $2}' "$DELIB_TSV" 2>/dev/null | tr '\n' ' ')
 
 # ---- Gather candidates: id<TAB>created<TAB>author<TAB>title<TAB>theme --------
 CANDIDATES=""
@@ -95,7 +96,7 @@ fi
 
 # Dedup by post id (first theme wins); drop deliberation-owned posts.
 CANDIDATES=$(printf '%s' "$CANDIDATES" | awk -F'\t' -v delib="$DELIB_POSTS" '
-  BEGIN { n=split(delib,a,"\n"); for(i=1;i<=n;i++) if(a[i]!="") d[a[i]]=1 }
+  BEGIN { n=split(delib,a," "); for(i=1;i<=n;i++) if(a[i]!="") d[a[i]]=1 }
   NF && !seen[$1]++ && !($1 in d)')
 
 [ -n "$CANDIDATES" ] || silent_exit "no candidate posts"
