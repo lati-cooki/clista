@@ -62,6 +62,41 @@ describe('agent deliberation flag queue', () => {
     expect(queue2.flags.map((f) => f.threadId)).not.toContain(id);
   });
 
+  it('agent reports deliberation progress → surfaced via agent-status; human cannot write it', async () => {
+    const id = await createThread('Does the agent progress writeback round-trip to the cockpit status?');
+    await humanPost(`/api/threads/${id}/request-agent`, {});
+
+    // A human cannot write deliberation progress (agent-only).
+    const denied = await humanPost(`/api/threads/${id}/agent-progress`, { channel: 'raft' });
+    expect(denied.status).toBe(403);
+
+    // The agent reports live status from Raft + moltbook.
+    const prog = await agentPost(`/api/threads/${id}/agent-progress`, {
+      channel: 'raft+moltbook',
+      workspaceRef: 'clista-deliberation',
+      responders: 3,
+      phase: 'harvesting',
+      detail: '3 agents engaged',
+    });
+    expect(prog.status).toBe(200);
+
+    // The human cockpit sees it via agent-status.
+    const st = await (await humanGet(`/api/threads/${id}/agent-status`)).json();
+    expect(st.requested).toBe(true);
+    expect(st.channel).toBe('raft+moltbook');
+    expect(st.workspaceRef).toBe('clista-deliberation');
+    expect(st.responders).toBe(3);
+    expect(st.phase).toBe('harvesting');
+    expect(st.detail).toBe('3 agents engaged');
+
+    // A fresh re-flag clears prior deliberation status.
+    await humanPost(`/api/threads/${id}/request-agent`, {});
+    const reflagged = await (await humanGet(`/api/threads/${id}/agent-status`)).json();
+    expect(reflagged.requested).toBe(true);
+    expect(reflagged.channel).toBe(null);
+    expect(reflagged.phase).toBe(null);
+  });
+
   it('enforces the auth boundaries', async () => {
     const id = await createThread('Do the flag-queue auth boundaries hold under the wrong caller?');
 

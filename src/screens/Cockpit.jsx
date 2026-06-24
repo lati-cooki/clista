@@ -3,8 +3,9 @@ import { css } from '../lib/css.js';
 import { Svg } from '../lib/Svg.jsx';
 import { Hoverable } from '../lib/Hoverable.jsx';
 import { ico, octopus } from '../icons.js';
-import { badgeFor, tabStyle, provBtnStyle } from '../styles.js';
+import { badgeFor, tabStyle, provBtnStyle, channelMeta, channelBadgeStyle } from '../styles.js';
 import { useThread } from '../useThread.js';
+import { channelLabel } from '../adapt.js';
 import { api } from '../api.js';
 
 const MONO = "font-family:'JetBrains Mono',monospace;";
@@ -50,6 +51,15 @@ const provConn = css(MONO + ' font-size:12px; color:#c4c4c2; flex:none;');
 const provId = (color) => css(MONO + ' font-size:12px; color:' + color + '; flex:none;');
 const provText = css('font-size:12px; color:#6a6a6a; text-wrap:pretty;');
 
+// Small provenance badge marking which A2A deliberation channel an attested
+// contribution entered through (Raft / moltbook). Renders nothing for input that
+// carries no channel (e.g. directly composed by a human). Display-only.
+function ChannelBadge({ channel }) {
+  const m = channelMeta(channel);
+  if (!m) return null;
+  return <span style={channelBadgeStyle(m.color)}>{m.label}</span>;
+}
+
 function ProvTrace({ prov }) {
   if (!prov) return null;
   return (
@@ -89,6 +99,7 @@ function ProvTrace({ prov }) {
                     <span style={provId(k.color)}>{k.id}</span>
                     <span style={provChip(k.color)}>{k.kind}</span>
                     {k.survived && <span style={provChip('#9a6b07')}>survived</span>}
+                    {k.channel && <ChannelBadge channel={k.channel} />}
                     <span style={provText}>{k.text}</span>
                   </div>
                 ))}
@@ -135,7 +146,12 @@ export function Cockpit({ threadId, me, go }) {
   // Hand the thread to the autonomous agent (clistahermes): it deliberates via
   // moltbook and records events back here on its next cron cycle. Human-only.
   const isHuman = !!(me && me.authenticated && (me.kind || 'human') === 'human');
-  const agentRequested = !!(agent && agent.requested);
+  const ag = agent || {};
+  const agentRequested = !!ag.requested;
+  // The agent has reported live A2A deliberation status (channel / workspace /
+  // responders / phase) back from Raft + moltbook.
+  const agentLive = agentRequested && !!(ag.channel || ag.phase || ag.workspaceRef || typeof ag.responders === 'number');
+  const agentResponders = typeof ag.responders === 'number' ? ag.responders : null;
   const canRequestAgent = isHuman && vm.status !== 'decided';
   const requestAgent = async () => {
     setRequesting(true);
@@ -186,12 +202,23 @@ export function Cockpit({ threadId, me, go }) {
         <div style={css('display:flex; align-items:center; gap:12px; padding:11px 16px; margin-bottom:18px; background:' + (agentRequested ? '#f3f6f3' : '#fff') + '; border:1px solid ' + (agentRequested ? 'rgba(28,122,79,0.35)' : '#e0e0de') + '; border-radius:5px;')}>
           <Svg html={octopus} style={css('width:20px; height:20px; color:' + (agentRequested ? '#1c7a4f' : '#6a6a6a') + '; flex:none;')} />
           {agentRequested ? (
-            <span style={css('font-size:13px; color:#2f6a4a;')}>
-              Handed to <span style={css(MONO + ' font-size:12px;')}>clistahermes</span> — it will deliberate this on moltbook and record events here on its next cycle.
-            </span>
+            agentLive ? (
+              <span style={css('font-size:13px; color:#2f6a4a;')}>
+                <span style={css(MONO + ' font-size:12px;')}>clistahermes</span> is deliberating
+                {channelLabel(ag.channel) ? <> via <span style={css('font-weight:600;')}>{channelLabel(ag.channel)}</span></> : null}
+                {ag.workspaceRef ? <> in workspace <span style={css(MONO + ' font-size:12px;')}>{ag.workspaceRef}</span></> : null}
+                {agentResponders != null ? ` — ${agentResponders} ${agentResponders === 1 ? 'agent' : 'agents'} engaged` : ''}
+                {ag.phase ? <> · <span style={css(MONO + ' font-size:11.5px;')}>{ag.phase}</span></> : null}
+                {ag.detail ? <span style={css('display:block; margin-top:3px; font-size:12px; color:#5a7a66;')}>{ag.detail}</span> : null}
+              </span>
+            ) : (
+              <span style={css('font-size:13px; color:#2f6a4a;')}>
+                Handed to <span style={css(MONO + ' font-size:12px;')}>clistahermes</span> — it will take this to Raft + moltbook and record the deliberation back here on its next cycle.
+              </span>
+            )
           ) : (
             <span style={css('font-size:13px; color:#4a4a4a;')}>
-              Stuck on what's next? Hand this thread to the autonomous agent — it puts the question to other agents and records the deliberation back here.
+              Stuck on what's next? Hand this thread to the autonomous agent — it puts the question to other agents (on Raft + moltbook) and records the deliberation back here.
             </span>
           )}
           <div style={css('flex:1;')} />
@@ -323,6 +350,7 @@ export function Cockpit({ threadId, me, go }) {
                   <Svg html={ico('shield', { size: 12, sw: 2 })} />Survived approval
                 </span>
               )}
+              {vm.objection.channel && <ChannelBadge channel={vm.objection.channel} />}
               <div style={css('flex:1;')} />
               <span style={css(MONO + ' font-size:11px; color:#a5a5a5;')}>{vm.objection.id}</span>
             </div>
@@ -363,6 +391,7 @@ export function Cockpit({ threadId, me, go }) {
                       <span style={css(MONO + ' display:inline-flex; align-items:center; gap:6px; font-size:11px; color:#5a5a5a;')}>
                         <span style={css('width:6px; height:6px; border-radius:50%; background:#2c5f96; flex:none;')} />{e.source}
                       </span>
+                      {e.channel && <ChannelBadge channel={e.channel} />}
                       {e.conf != null && (
                         <div style={css('display:flex; align-items:center; gap:8px;')}>
                           <span style={css(MONO + ' font-size:10px; letter-spacing:0.06em; text-transform:uppercase; color:#a5a5a5;')}>conf</span>

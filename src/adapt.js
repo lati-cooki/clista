@@ -25,6 +25,32 @@ const sigFor = (type) => {
   return null;
 };
 
+// The deliberation back-channel an attested contribution came in through, derived
+// from the event's `source` string. clistahermes tags attestations by convention:
+//   Raft:     "raft workspace <name> — message <id>"
+//   moltbook: "moltbook u/clistahermes — reply comment <id>"
+// Provenance only — never affects trust; just shows the human where input entered.
+export function channelFromSource(source) {
+  if (!source) return null;
+  const s = String(source).toLowerCase();
+  if (s.includes('raft')) return 'raft';
+  if (s.includes('moltbook')) return 'moltbook';
+  return null;
+}
+
+// A channel string ("raft", "moltbook", "raft+moltbook") → a friendly label for
+// the live deliberation-status banner.
+export function channelLabel(channel) {
+  if (!channel) return null;
+  const s = String(channel).toLowerCase();
+  const raft = s.includes('raft');
+  const molt = s.includes('moltbook');
+  if (raft && molt) return 'Raft + moltbook';
+  if (raft) return 'Raft';
+  if (molt) return 'moltbook';
+  return channel;
+}
+
 // Decision-rooted provenance tree (mirrors the engine's `provenance trace`):
 // decision → its supporting claims → each claim's grounding evidence/assumptions
 // and the objections targeting it. Built from projection links only.
@@ -46,7 +72,7 @@ function buildProvenance(r, dec) {
       id: c.id,
       text: c.text,
       status: c.status || '',
-      evidence: (c.evidenceIds || []).map((id) => ({ id, text: (evById[id] || {}).finding || '' })),
+      evidence: (c.evidenceIds || []).map((id) => ({ id, text: (evById[id] || {}).finding || '', channel: channelFromSource((evById[id] || {}).source) })),
       assumptions: (c.assumptionIds || []).map((id) => ({ id, text: (asmById[id] || {}).text || '' })),
       objections: objections
         .filter((o) => o.targetObjectId === c.id)
@@ -111,6 +137,7 @@ export function adaptCockpit(state, audit, validate) {
           role: roleOf(objection.participantId),
           survived: objection.status === 'preserved',
           status: objection.status,
+          channel: channelFromSource(objection.source),
         }
       : null,
 
@@ -118,6 +145,7 @@ export function adaptCockpit(state, audit, validate) {
       id: e.id,
       text: e.finding,
       source: e.source,
+      channel: channelFromSource(e.source),
       conf: typeof e.confidence === 'number' ? e.confidence : null,
       hash: e.contentHash,
       sourceType: e.artifactIds && e.artifactIds.length ? `artifact · ${e.artifactIds.join(', ')}` : 'committed evidence',

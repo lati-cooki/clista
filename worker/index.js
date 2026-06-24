@@ -216,6 +216,25 @@ export default {
               return json(result, result.ok ? 200 : 422);
             }
 
+            // Agent reports live deliberation progress (which channel/Raft
+            // workspace it took the question to, how many peer agents engaged,
+            // phase) so the cockpit can show it. Agent-only. DO metadata, not a
+            // protocol event — same boundary the flag queue already respects.
+            if (action === 'agent-progress') {
+              if (identity.kind !== 'agent') {
+                return json({ error: 'forbidden', reason: 'agent service token required' }, 403);
+              }
+              const result = await indexStub(env).recordAgentProgress(threadId, {
+                channel: typeof body.channel === 'string' ? body.channel : null,
+                workspaceRef: typeof body.workspaceRef === 'string' ? body.workspaceRef : null,
+                responders: typeof body.responders === 'number' ? body.responders : null,
+                phase: typeof body.phase === 'string' ? body.phase : null,
+                detail: typeof body.detail === 'string' ? body.detail : null,
+                at: engine.nowIso(),
+              });
+              return json(result, result.ok ? 200 : 422);
+            }
+
             if (action === 'append') {
               // Server-authoritative actor: identity decides actor_id, never the client.
               const event = { ...(body.event || body) };

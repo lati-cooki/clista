@@ -61,6 +61,29 @@ export function badgeFor(status) {
   };
 }
 
+// Visual identity for the A2A deliberation channels (provenance only). Raft —
+// the human+agent shared-workspace channel — gets a slate-indigo; moltbook keeps
+// a muted warm tone. Display-only; channel never affects trust.
+const CHANNEL_META = {
+  raft: { label: 'via Raft', color: '#5856a8' },
+  moltbook: { label: 'via moltbook', color: '#8a7a4a' },
+};
+
+export function channelMeta(channel) {
+  return CHANNEL_META[(channel || '').toLowerCase()] || null;
+}
+
+export const channelBadgeStyle = (color) =>
+  css(
+    'display:inline-flex; align-items:center; gap:5px; font-family:JetBrains Mono,monospace; font-size:9px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; padding:1px 6px; border-radius:3px; flex:none; color:' +
+      color +
+      '; border:1px solid ' +
+      color +
+      '40; background:' +
+      color +
+      '12;'
+  );
+
 export const provBtnStyle = (open) =>
   css(
     'display:inline-flex; align-items:center; gap:6px; font-family:JetBrains Mono,monospace; font-size:10.5px; letter-spacing:0.04em; color:' +

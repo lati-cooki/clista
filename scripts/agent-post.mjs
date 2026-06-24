@@ -14,8 +14,12 @@
 //   node scripts/agent-post.mjs <thread_id> ingest  <log.ndjson|events.json>
 //   node scripts/agent-post.mjs <thread_id> append  <event.json>
 //   node scripts/agent-post.mjs <thread_id> join    [role]
+//   node scripts/agent-post.mjs <thread_id> progress '<json>'   # live deliberation status
 //   node scripts/agent-post.mjs <thread_id> state | summary | audit | validate
 //   node scripts/agent-post.mjs me
+//
+// progress reports live A2A deliberation status back to the cockpit, e.g.
+//   ... progress '{"channel":"raft+moltbook","workspaceRef":"clista-deliberation","responders":3,"phase":"harvesting","detail":"3 agents engaged"}'
 //
 // ingest accepts a raw protocol .ndjson log directly — chain fields are stripped
 // so the engine re-chains deterministically (same as the bundled scenario seed).
@@ -29,7 +33,7 @@ const CHAIN_FIELDS = ["content_hash", "prev_hash", "protocol_version", "hash_ver
 
 const [, , a, b, c] = process.argv;
 if (!a) {
-  console.error("usage: agent-post.mjs <thread_id> <ingest|append|join|state|summary|audit|validate> [arg]  (or: me)");
+  console.error("usage: agent-post.mjs <thread_id> <ingest|append|join|progress|state|summary|audit|validate> [arg]  (or: me)");
   process.exit(2);
 }
 if (!ID || !SECRET) {
@@ -98,6 +102,12 @@ try {
     out(await call("POST", `${base}/append`, { event: loadEvents(c)[0] }));
   } else if (action === "join") {
     out(await call("POST", `${base}/join`, c ? { role: c } : {}));
+  } else if (action === "progress") {
+    if (!c) {
+      console.error("✘ progress needs a JSON payload, e.g. '{\"channel\":\"raft\",\"phase\":\"harvesting\"}'");
+      process.exit(2);
+    }
+    out(await call("POST", `${base}/agent-progress`, JSON.parse(c)));
   } else if (action === "purge") {
     out(await call("POST", `${base}/purge`));
   } else {
