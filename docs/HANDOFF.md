@@ -41,6 +41,46 @@ self-hosted app in the `laticooki` Zero Trust org. Local repo:
 - **Two capabilities added after launch (both merged to `main`, agent path deployed):**
   see the "Engine sync" and "Agent write path" sections below.
 
+## Session 2026-06-24 (e) — public intake route + the gate page becomes the submission form (Phase 2)
+**SHIPPED on branch `public-intake` (stacked on `intake-triage-inbox`/PR #9) + a launch-planning
+PR for the gate page.** The perimeter break: a single PUBLIC, unauthenticated submission route,
+strictly quarantined, fed by the repurposed `gate.clista.ai` form. Owner-gated config
+(Access bypass + Turnstile keys) is documented in **`docs/INTAKE.md`** — do those before it
+works in prod.
+
+- **App route (`worker/index.js`):** `POST /api/intake` (no auth) — the **only public write**.
+  Guard order, fail-closed: **Turnstile** (`verifyTurnstile`; skipped only when
+  `TURNSTILE_SECRET` is unset → dev/test, prod always sets it) → **per-IP rate limit**
+  (`IndexDO.rateLimitIntake`, 5/10min, new `intake_rate` table) → **16 KB size cap** → **kind
+  whitelist** (`decision` | `run_report`) + field validation → enqueue `source:'public'`
+  `pending` → return a **receipt id only**. Registers no thread, appends no event (quarantine).
+  **CORS** restricted to `INTAKE_ALLOWED_ORIGIN` (`wrangler.jsonc` var, default
+  `https://gate.clista.ai`); OPTIONS preflight handled; `withCors`/`corsHeaders` helpers. The
+  human triage surface (`GET /api/intake`, `POST /api/intake/:id/{approve,dismiss}`) is unchanged
+  and still behind Access — the route block now branches public-POST-first, then human-only.
+- **Gate page (launch-planning repo `website/gate.clista.ai/index.html`):** **repurposed** from
+  the retired blind-judging gate into the public submission form — hero "Bring a real decision
+  into the accountable ledger", a kind selector (decision / run report), question/title/context/
+  handle fields, a Turnstile widget (`data-sitekey="REPLACE_WITH_TURNSTILE_SITEKEY"` — owner
+  fills in), and a vanilla-JS submit that POSTs JSON to `https://app.clista.ai/api/intake` and
+  shows the receipt. Dropped the countdown + GitHub-issue CTA. **Nav label "The gate" + the
+  `gate.clista.ai` URL kept** (zero `shared/header.html` change). `./website/build.sh` injects
+  the shared header/footer; built clean for all 6 surfaces; browser-previewed (renders on-brand,
+  kind-toggle works; the only console errors are the placeholder sitekey → gone once a real key
+  is set). `dist/` is gitignored.
+- **Tests:** `test/workers/intake.test.js` grew to **10** (public decision quarantines + approves
+  to a human-owned thread; run_report; unknown-kind/short/ malformed/oversize rejections; CORS
+  preflight + allowed-origin header; per-IP 429). `npm run test:workers` **23/23**, `npm test`
+  **15/15**, build clean.
+- **Owner steps before prod (`docs/INTAKE.md`):** (1) a Cloudflare Access **Bypass** policy
+  scoped to **`/api/intake`** on the app.clista.ai Access app (else Access blocks it pre-Worker);
+  (2) a Turnstile widget → `wrangler secret put TURNSTILE_SECRET` + paste the public site key
+  into the gate form; (3) deploy both (CI on `main` for each repo). I cannot do the Access/
+  Turnstile dashboard config or `wrangler secret put` — owner-gated.
+- **Next (Phase 3/4):** `contribution`/`run_report` **approve-dispatch** (currently approve of
+  those kinds → 422; only proposal/decision create today), then the Hermes emergent-seeder cron
+  that fills `source:'agent'` rows (owner installs + test-fires).
+
 ## Session 2026-06-24 (d) — the triage inbox (Phase 1 of the unified intake subsystem)
 **SHIPPED on branch `intake-triage-inbox` (PR open), behind Access.** A new owner triage
 inbox: the autonomous seeder (and, in a later phase, outside submitters) *propose* into a
