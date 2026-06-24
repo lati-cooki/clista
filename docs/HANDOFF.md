@@ -41,6 +41,38 @@ self-hosted app in the `laticooki` Zero Trust org. Local repo:
 - **Two capabilities added after launch (both merged to `main`, agent path deployed):**
   see the "Engine sync" and "Agent write path" sections below.
 
+## Session 2026-06-24 (f) — intake approve-dispatch for run_report + contribution (Phase 3)
+**SHIPPED on branch `intake-approve-kinds` (stacked on `public-intake`/PR #10).** Completes the
+kind dispatch on `POST /api/intake/:id/approve` (previously only `thread_proposal`/`decision`
+created a thread; `run_report`/`contribution` returned 422).
+
+- **`run_report` approve (`worker/index.js`):** creates a NEW human-owned thread (question =
+  the report's question, else a synthesized `"External run report — <title>"`) and attests the
+  body as **`EvidenceCommitted`** (`source: "public run report <receipt> — <handle>"`),
+  committed by the approving human (external origin preserved in `source`).
+- **`contribution` approve:** appends the input as **`EvidenceCommitted`** onto the EXISTING
+  `targetThreadId` (`source: "public submission <receipt>"`). The approver **joins the target
+  thread as a contributor** first (`ensureParticipant`) so the validator's
+  "committer must be a known participant" rule holds — the human vouches for the external input
+  under their identity. Creates no new thread.
+- **Shared helpers:** `evidenceEvent(threadId, identity, {source, finding})` (minimal valid
+  EvidenceCommitted — validator needs only `id` + matching `threadId` + a participant committer;
+  no contentHash) and `ensureParticipant(env, threadId, identity)`.
+- **Public route:** now also accepts **`contribution`** (requires a `targetThreadId` that
+  resolves to a registered thread → 404 at submit if not, plus text ≥12). The gate form still
+  only offers `decision`/`run_report`; contribution is an API / deep-link path (no cold-start
+  form field for a target id).
+- **Cockpit (`ThreadIndex.jsx`):** the card now shows `→ onto <targetThreadId>` for
+  contributions, labels the action "Approve → attest" (vs "Approve → create thread"), and shows
+  the deliberate toggle only for proposal/decision (`canDeliberate`).
+- **Tests:** `test/workers/intake.test.js` → **13** (run_report approve creates a human-owned
+  thread + attests evidence; contribution approve attaches evidence to the target, creates no
+  thread; contribution to a non-existent thread → 404). `npm run test:workers` **26/26**,
+  `npm test` **15/15**, build clean.
+- **Next (Phase 4):** the Hermes emergent-seeder cron that fills `source:'agent'` rows
+  (`POST /api/agent/intake`) — owner installs + test-fires (precheck + cron + de-confliction
+  spec is in `~/.claude/plans/review-idea-another-plan-resilient-teacup.md`).
+
 ## Session 2026-06-24 (e) — public intake route + the gate page becomes the submission form (Phase 2)
 **SHIPPED on branch `public-intake` (stacked on `intake-triage-inbox`/PR #9) + a launch-planning
 PR for the gate page.** The perimeter break: a single PUBLIC, unauthenticated submission route,

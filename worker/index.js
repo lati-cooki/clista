@@ -17,7 +17,10 @@ const indexStub = (env) => env.INDEX.get(env.INDEX.idFromName('index'));
 
 // --- Public intake plumbing (the one unauthenticated write) -----------------
 const MAX_INTAKE_BYTES = 16 * 1024; // a generous cap for a text submission
-const PUBLIC_INTAKE_KINDS = new Set(['decision', 'run_report']);
+// Kinds the public route accepts. `decision`/`run_report` are offered by the
+// gate.clista.ai form; `contribution` targets an existing thread (API / a
+// deep-link from a public thread) — no cold-start form field for it.
+const PUBLIC_INTAKE_KINDS = new Set(['decision', 'run_report', 'contribution']);
 
 // CORS for the gate.clista.ai submission form (cross-origin to the app). Only
 // the configured origin(s) are echoed back; anything else gets the first
@@ -101,6 +104,14 @@ async function handlePublicIntake(request, env) {
   if (kind === 'run_report' && text.length < 12 && question.length < 12) {
     return json({ error: 'invalid', reason: 'a run report needs a description' }, 422);
   }
+  let targetThreadId = null;
+  if (kind === 'contribution') {
+    targetThreadId = cap(body.targetThreadId, 200);
+    if (!targetThreadId) return json({ error: 'invalid', reason: 'a contribution must target an existing thread' }, 422);
+    if (text.length < 12 && question.length < 12) return json({ error: 'invalid', reason: 'a contribution needs text' }, 422);
+    const card = await threadStub(env, targetThreadId).indexCard();
+    if (!card || !card.id) return json({ error: 'not_found', reason: 'target thread does not exist' }, 404);
+  }
 
   const result = await indexStub(env).enqueueIntake({
     id: engine.newId('itk', question || kind),
@@ -109,6 +120,7 @@ async function handlePublicIntake(request, env) {
     title: cap(body.title, 160) || null,
     question: question || null,
     body: text || null,
+    targetThreadId,
     payload: body.artifacts && typeof body.artifacts === 'object' ? { artifacts: body.artifacts } : null,
     // Submitter-stated origin is UNTRUSTED — stored for the owner's context only,
     // never used as an actor_id (the approving human is always the actor).
@@ -117,6 +129,51 @@ async function handlePublicIntake(request, env) {
     at: engine.nowIso(),
   });
   return json({ ok: true, receipt: result.id }, result.ok ? 200 : 422);
+}
+
+// Build an EvidenceCommitted event that records an external submission on a
+// thread. The server forces top-level actor_id; the nested committedBy must be a
+// known participant, so the approving human VOUCHES for the external input under
+// their own identity, with the real origin preserved in `source`.
+function evidenceEvent(threadId, identity, { source, finding }) {
+  return {
+    event_type: 'EvidenceCommitted',
+    thread_id: threadId,
+    actor_id: identity.actorId,
+    payload: {
+      evidence: {
+        id: engine.newId('evd', source || 'intake'),
+        object: 'evidence',
+        threadId,
+        source: source || 'public submission',
+        finding: String(finding || '').slice(0, MAX_INTAKE_BYTES),
+        confidence: 0.5,
+        committedByParticipantId: identity.actorId,
+        committedAt: engine.nowIso(),
+        artifactIds: [],
+      },
+    },
+  };
+}
+
+// Ensure `identity` is a participant of an existing thread (join as a
+// contributor if not), so it can commit evidence onto it. Returns true once a
+// participant.
+async function ensureParticipant(env, threadId, identity) {
+  const stub = threadStub(env, threadId);
+  const state = await stub.state(threadId);
+  const participants = (state.identityState && state.identityState.participants) || [];
+  if (participants.some((p) => p.id === identity.actorId)) return true;
+  const join = await stub.append({
+    event_type: 'ParticipantDeclared',
+    thread_id: threadId,
+    actor_id: identity.actorId,
+    payload: {
+      participant: { id: identity.actorId, object: 'participant', kind: identity.kind || 'human', name: identity.name, role: 'contributor' },
+    },
+  });
+  if (join.ok) await registerThread(env, stub);
+  return join.ok;
 }
 
 // Keep the thread index in sync after a write to a thread.
@@ -305,8 +362,45 @@ export default {
                 await indexStub(env).resolveIntake(intakeId, { status: 'approved', threadId: created.id, at });
                 return json({ ok: true, status: 'approved', id: created.id, flagged: !!body.flag });
               }
-              // contribution / run_report approval lands in later phases.
-              return json({ error: 'unsupported', reason: `approve not yet implemented for kind '${item.kind}'` }, 422);
+
+              // run_report → record it as a NEW human-owned thread with the
+              // report attested as evidence (external source preserved).
+              if (item.kind === 'run_report') {
+                const q = item.question && item.question.length >= 12 ? item.question : `External run report — ${item.title || item.id}`;
+                const created = await createThread(env, identity, { question: q, title: item.title || 'External run report' });
+                if (!created.ok) {
+                  return json({ error: 'invalid', reason: created.reason || 'could not create thread from run report' }, 422);
+                }
+                const src = `public run report ${item.id}` + (item.submitter ? ` — ${item.submitter}` : '');
+                const ev = await threadStub(env, created.id).append(
+                  evidenceEvent(created.id, identity, { source: src, finding: item.body || item.question || 'External run report.' })
+                );
+                if (ev.ok) await registerThread(env, threadStub(env, created.id));
+                await indexStub(env).resolveIntake(intakeId, { status: 'approved', threadId: created.id, at });
+                return json({ ok: true, status: 'approved', id: created.id, attested: ev.ok });
+              }
+
+              // contribution → append the external input as evidence onto the
+              // EXISTING target thread (the approver joins it to vouch).
+              if (item.kind === 'contribution') {
+                const target = item.targetThreadId;
+                if (!target) return json({ error: 'invalid', reason: 'contribution has no target thread' }, 422);
+                const card = await threadStub(env, target).indexCard();
+                if (!card || !card.id) return json({ error: 'not found', reason: 'target thread does not exist' }, 404);
+                if (!(await ensureParticipant(env, target, identity))) {
+                  return json({ error: 'failed', reason: 'could not join the target thread to attest' }, 422);
+                }
+                const src = `public submission ${item.id}` + (item.submitter ? ` — ${item.submitter}` : '');
+                const ev = await threadStub(env, target).append(
+                  evidenceEvent(target, identity, { source: src, finding: item.body || item.question || 'External contribution.' })
+                );
+                if (!ev.ok) return json({ error: 'rejected', ...ev }, 422);
+                await registerThread(env, threadStub(env, target));
+                await indexStub(env).resolveIntake(intakeId, { status: 'approved', threadId: target, at });
+                return json({ ok: true, status: 'approved', id: target, attested: true });
+              }
+
+              return json({ error: 'unsupported', reason: `approve not implemented for kind '${item.kind}'` }, 422);
             }
 
             return json({ error: 'not found' }, 404);

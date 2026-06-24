@@ -17,10 +17,22 @@ promoted to the ledger — mirroring the protocol boundary *"agent stages, human
 | Route | Auth | Purpose |
 |---|---|---|
 | `POST /api/agent/intake` | agent service token | the emergent seeder proposes a `thread_proposal` |
-| `POST /api/intake` | **none (public)** | the gate.clista.ai submission form (`decision` / `run_report`) |
+| `POST /api/intake` | **none (public)** | submissions: `decision` / `run_report` (gate.clista.ai form) · `contribution` (API / deep-link, needs `targetThreadId`) |
 | `GET /api/intake` | human (Access) | the owner triage inbox |
-| `POST /api/intake/:id/approve` | human | kind-dispatched: create a thread (proposal/decision) … |
+| `POST /api/intake/:id/approve` | human | kind-dispatched (see below) |
 | `POST /api/intake/:id/dismiss` | human | dismiss / mark spam |
+
+### Approve dispatch by kind
+- **`thread_proposal` / `decision`** → create a thread via the normal create path
+  (approving human = `decision owner`); optional `{flag:true}` hands it to the deliberation cron.
+- **`run_report`** → create a new human-owned thread and attest the report as
+  `EvidenceCommitted` (`source: "public run report <receipt>"`), the external origin preserved.
+- **`contribution`** → append the input as `EvidenceCommitted` onto the existing
+  `targetThreadId` (`source: "public submission <receipt>"`); the approver joins that thread as a
+  contributor to vouch for it. Creates no new thread.
+
+All approvals are by a human; the submitter's stated handle is display-only and never an
+`actor_id` — the approving human is always the committing participant.
 
 `POST /api/intake` is the **only unauthenticated write** in the app. It is guarded
 (fail-closed): **Turnstile** → **per-IP rate limit** → **size cap** (16 KB) → **kind +

@@ -276,7 +276,10 @@ function IntakeCard({ it, onApprove, onDismiss }) {
   const useCases = Array.isArray(payload.useCases) ? payload.useCases : [];
   const tradeoffs = payload.tradeoffs || null;
   const provenance = Array.isArray(it.provenance) ? it.provenance : [];
-  const creates = it.kind === 'thread_proposal' || it.kind === 'decision';
+  // proposal/decision/run_report mint a NEW thread; a contribution attaches to
+  // an existing one. Only proposal/decision can be handed to the deliberation cron.
+  const creates = it.kind !== 'contribution';
+  const canDeliberate = it.kind === 'thread_proposal' || it.kind === 'decision';
 
   const act = (fn) => async () => {
     setBusy(true);
@@ -295,6 +298,9 @@ function IntakeCard({ it, onApprove, onDismiss }) {
       </div>
 
       <div style={css('font-size:14.5px; font-weight:500; color:#1a1a1a; line-height:1.5; margin-bottom:6px;')}>{it.question || it.title}</div>
+      {it.targetThreadId && (
+        <div style={css(MONO + ' font-size:11px; color:#1c5fa8; margin-bottom:6px;')}>→ onto {it.targetThreadId}</div>
+      )}
       {it.body && <p style={css('margin:0 0 10px; font-size:13px; color:#5a5a5a; line-height:1.55;')}>{it.body}</p>}
 
       {useCases.length > 0 && (
@@ -338,13 +344,13 @@ function IntakeCard({ it, onApprove, onDismiss }) {
 
       <div style={css('display:flex; align-items:center; gap:12px; padding-top:6px;')}>
         <Hoverable
-          onClick={busy ? undefined : act(() => onApprove(it.id, creates && flag))}
+          onClick={busy ? undefined : act(() => onApprove(it.id, canDeliberate && flag))}
           base={css('display:inline-flex; align-items:center; gap:7px; padding:9px 15px; background:#1c7a4f; color:#fff; border:none; border-radius:5px; ' + MONO + ' font-size:11.5px; font-weight:500; letter-spacing:0.04em; cursor:' + (busy ? 'default' : 'pointer') + '; opacity:' + (busy ? '0.6' : '1') + ';')}
           hover={css('background:#176540;')}
         >
-          <Svg html={ico('checkArrow', { size: 13, sw: 1.9 })} />{creates ? 'Approve → create thread' : 'Approve'}
+          <Svg html={ico('checkArrow', { size: 13, sw: 1.9 })} />{creates ? 'Approve → create thread' : 'Approve → attest'}
         </Hoverable>
-        {creates && (
+        {canDeliberate && (
           <label style={css('display:inline-flex; align-items:center; gap:6px; ' + MONO + ' font-size:11px; color:#6a6a6a; cursor:pointer;')}>
             <input type="checkbox" checked={flag} onChange={(e) => setFlag(e.target.checked)} />
             have clistahermes deliberate
