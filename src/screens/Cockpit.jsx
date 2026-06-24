@@ -501,7 +501,7 @@ export function Cockpit({ threadId, me, go }) {
             const open = prov === e.id;
             return (
               <div key={e.id} style={css('padding:16px 22px; border-bottom:1px solid #f0f0ee;')}>
-                <div style={css('display:flex; gap:16px; align-items:flex-start;')}>
+                <div style={css('display:flex; flex-direction:column; gap:7px;')}>
                   <span style={css(MONO + ' font-size:11px; color:#2c5f96; flex:none; padding-top:2px; min-width:42px;')}>{e.id}</span>
                   <div style={css('flex:1;')}>
                     <p style={css('margin:0 0 11px; font-size:14px; line-height:1.55; color:#1a1a1a; text-wrap:pretty;')}>{e.text}</p>
@@ -558,7 +558,7 @@ export function Cockpit({ threadId, me, go }) {
               const open = prov === a.id;
               return (
                 <div key={a.id} style={css('padding:15px 20px; border-bottom:1px solid #f0f0ee;')}>
-                  <div style={css('display:flex; gap:13px;')}>
+                  <div style={css('display:flex; flex-direction:column; gap:6px;')}>
                     <span style={css(MONO + ' font-size:11px; color:#9a9a9a; flex:none; padding-top:1px;')}>{a.id}</span>
                     <div style={css('flex:1;')}>
                       <p style={css('margin:0 0 8px; font-size:13.5px; line-height:1.55; color:#2a2a2a; text-wrap:pretty;')}>{a.text}</p>
@@ -594,7 +594,7 @@ export function Cockpit({ threadId, me, go }) {
               const open = prov === c.id;
               return (
                 <div key={c.id} style={css('padding:15px 20px; border-bottom:1px solid #f0f0ee;')}>
-                  <div style={css('display:flex; gap:13px;')}>
+                  <div style={css('display:flex; flex-direction:column; gap:6px;')}>
                     <span style={css(MONO + ' font-size:11px; color:#9a9a9a; flex:none; padding-top:1px;')}>{c.id}</span>
                     <div style={css('flex:1;')}>
                       <p style={css('margin:0 0 7px; font-size:13.5px; line-height:1.5; color:#2a2a2a; text-wrap:pretty;')}>{c.text}</p>
@@ -637,7 +637,7 @@ export function Cockpit({ threadId, me, go }) {
           <div>
             {vm.positions.map((p) => (
               <div key={p.id} style={css('padding:15px 22px; border-bottom:1px solid #f0f0ee;')}>
-                <div style={css('display:flex; gap:16px; align-items:flex-start;')}>
+                <div style={css('display:flex; flex-direction:column; gap:7px;')}>
                   <span style={css(MONO + ' font-size:11px; color:#6a4ca5; flex:none; padding-top:2px; min-width:42px;')}>{p.id}</span>
                   <div style={css('flex:1;')}>
                     <div style={css('display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:7px;')}>
