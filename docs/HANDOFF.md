@@ -51,6 +51,34 @@ the **accountable ledger + A2A provenance surface** over it. The app never talks
 directly. (`cloudflare/moltworker` — OpenClaw in Sandbox Containers — is the Phase 3 migration
 target for hosting the runtime on Cloudflare; design-only, not built.) Newest first:
 
+- **HARVEST PROVEN — both channels, with provenance (thread `…mqrlmyuh_0bf0bb6f`).** After
+  seeding, the loop harvested real peer input from BOTH surfaces into accountable state:
+  - `evd_moltbook_trinity_…` — a **real external agent `TrinityProtocolAgent`** replied on
+    moltbook → EvidenceCommitted (source `moltbook u/TrinityProtocolAgent …`) → **via moltbook**.
+  - `evd_raft_clistahermes_reply_741e56c5` — clistahermes's Raft reply attested (source `raft
+    workspace #all:1800456c — reply …`) → **via Raft**.
+  - `pos_raft_troy_decided_state` — the owner's Raft `#all` reply "Yes, this is the decided
+    state" harvested as **PositionTaken** (source `raft workspace #all:1800456c — message …`) →
+    **via Raft**. Integrity+validation valid; progress `responders:2, harvesting`. The cockpit
+    renders the via-Raft / via-moltbook badges (badges are on evidence/objections/provenance;
+    PositionTaken shows in the audit chain but is not a badged section — minor cosmetic gap).
+- **THREE fixes the live test forced (all shipped/applied):**
+  1. **app — `agent-ack` status-wipe (commit `b3863b4`, deployed):** ack DELETED the
+     `agent_flags` row that carries the live status, so the banner never lit. Fixed:
+     `claimFlag()` marks `'claimed'` (dequeued, row kept) + `recordAgentProgress()` UPSERTs.
+  2. **Hermes — shared `clista_agent` inbox:** the MAIN Hermes gateway session co-uses the
+     `clista_agent` Raft profile (it answered a `#all` "hi"), so `(A) cron is sole drainer` is
+     FALSE. Harvest switched from draining (`raft message check`) to **non-draining reads**
+     (`raft message read --channel <target> --after <seq>`) — immune to the race.
+  3. **Hermes — replies land in the channel ROOT, not the sub-thread:** peers reply in `#all`,
+     not `#all:<shortId>`. Precheck Detector C + the harvest prompt now watch the **parent
+     channel** too (derive `#all` from each `raft_target`). State file
+     `~/.hermes/cron/clista-app-raft.state.tsv` (`raft_target ⇥ last_seq`).
+- **Op note — firing a tick manually:** `hermes cron run e31c1a1dd850 --accept-hooks` (gateway
+  ticker runs it within seconds). The precheck still gates it; reset the relevant
+  `clista-app-raft.state.tsv` seq to re-expose an already-snapshotted message. Detector C
+  ADVANCES the snapshot every run (incl. dry-runs) — a manual `bash …precheck.sh` consumes the
+  wake signal, so reset after probing.
 - **LIVE END-TO-END PROOF (the dual-channel path works).** Flagged a NEW thread
   `thd_should_agent_to_agent_runs_be_integrated_in_the__mqrlmyuh_0bf0bb6f` in the cockpit;
   manually fired the cron (`hermes cron run e31c1a1dd850 --accept-hooks` — the gateway ticker
