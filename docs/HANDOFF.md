@@ -41,6 +41,55 @@ self-hosted app in the `laticooki` Zero Trust org. Local repo:
 - **Two capabilities added after launch (both merged to `main`, agent path deployed):**
   see the "Engine sync" and "Agent write path" sections below.
 
+## Session 2026-06-24 (i) — intake subsystem LIVE end-to-end; seeder cron installed; full loop proven
+**The whole intake subsystem is now live, configured, and PROVEN end-to-end on a real decided
+thread.** Phases 1–4 are merged + deployed; the public route + gate form are live; the emergent
+seeder cron is installed and running; and a single autonomous proposal was driven all the way to
+a recorded `DecisionMerged`. Owner did the Cloudflare dashboard steps this session.
+
+- **Public intake is LIVE (owner config done + verified).** Owner created a Turnstile widget
+  (sitekey `0x4AAAAAADqjTCzruN8pmQGL` in the gate form; secret set via `wrangler secret put
+  TURNSTILE_SECRET`) and a **Cloudflare Access Bypass app scoped to `app.clista.ai/api/intake/
+  submit`** (NOT bare `/api/intake` — see (h)). Verified live: `POST /api/intake/submit` with a
+  bad token → Worker **403 human-verification** (reaches the Worker, Turnstile enforced); OPTIONS
+  preflight → 204 + `access-control-allow-origin: https://gate.clista.ai`; `GET /api/intake`
+  (owner inbox) stays **302/gated** (identity intact). The repurposed gate form is live at
+  gate.clista.ai (renders, real Turnstile, no console errors).
+- **Emergent seeder cron INSTALLED + running.** Job **`cf20e6b92686`**
+  (`clistahermes-emergent-meta-seeder`, `0 */4 * * *`, enabled) added to `~/.hermes/cron/jobs.json`
+  (prompt inline); precheck copied to `~/.hermes/scripts/clista-emergent-meta-precheck.sh`. Live
+  dry-run baselined 151 matches → silent. **A precheck bug the live run caught (PR #14):** the
+  deliberation-owned-post exclusion passed newline-joined ids to `awk -v` ("newline in string"),
+  blanking candidates → always silent; fixed (space-join + split on space). The cron was
+  demo-fired (CLUSTER_MIN=1, single theme) → clistahermes synthesized a real proposal and POSTed
+  it to `/api/agent/intake`; then **reverted to canonical** (re-copied repo source, re-baselined).
+- **Two app refinements (merged + deployed):** **PR #16** — approve of a `thread_proposal`/
+  `decision` now **seeds `payload.useCases` as `ClaimCreated` substrate** (the new thread opens
+  pre-grounded; response carries `seededClaims`; `claimEvent()` helper). **PR #17** — ThreadIndex
+  gained a **`review` filter chip + blue badge** (review-status threads were visible only under
+  `all` and fell back to the `active` badge — a real "where's my thread" gap).
+- **FULL LOOP PROVEN LIVE — autonomous propose → human own → agent stage → human decide.** On
+  thread **`thd_should_agent_deliberation_provenance_and_decisio_mqsrbnwx_b0a96bd1`**
+  ("Pre-Thread Silos vs Shared Deliberation"): the seeder proposed it (demo), the owner approved
+  it (→ decision owner), **clistahermes staged it** (joined as contributor + `EvidenceCommitted`
+  `evd_a2a_dualchannel_hybrid_…` grounded in the real Raft `#all`+moltbook run + `ClaimCreated`
+  `clm_hybrid_shared_provenance_…` + a `ReviewSubmitted` `approve_with_conditions` on
+  `drq_9651ec76`), then the **owner recorded the decision** → `DecisionMerged` `dcr_adf27a2d`
+  (decidedBy `par_troylati`, supporting claim+evidence+assumption all referenced). Final state:
+  **decided**, 10 events, integrity + validation **true**. The governance boundary held: agent
+  staged, human merged.
+- **Op note — reading/writing live prod as the agent.** Prod read endpoints are Access-gated to
+  curl (302), but `node scripts/agent-post.mjs <thd> {state|audit|validate|append}` works by
+  sourcing the CF service-token creds: `set -a; . ~/.hermes/.env; set +a` (resolves to
+  `par_agent_clistahermes`). Reads are read-only; `append` writes claim/evidence/review as the
+  agent. **`DecisionMerged` is human-owner-only** — the agent cannot merge (governance), so the
+  final decision always needs the owner in the cockpit. (Reading state this way is how this
+  session verified the decided thread without an Access browser session.)
+- **Note for future approvals:** threads approved BEFORE PR #16 deployed are bare (genesis only);
+  after #16 they open pre-grounded with the proposal's use-cases as claims. The cockpit still has
+  **no evidence affordance** (EvidenceCommitted stays agent/ingest) — grounding a thread to a
+  mergeable decision needs evidence added via the agent path or a clistahermes harvest.
+
 ## Session 2026-06-24 (h) — split the public intake onto its own path (Access-bypass fix)
 **SHIPPED on branch `intake-split-public-path` (PR open) + a launch-planning PR.** A live bug:
 the public route and the owner triage GET shared the path `/api/intake`. Cloudflare Access
