@@ -8,7 +8,7 @@ import { api } from '../api.js';
 import { relativeTime } from '../adapt.js';
 
 const MONO = "font-family:'JetBrains Mono',monospace;";
-const FILTERS = ['all', 'active', 'decided', 'degraded', 'failed'];
+const FILTERS = ['all', 'active', 'review', 'decided', 'degraded', 'failed'];
 const colHead = "font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#a5a5a5;";
 const GRID = 'grid-template-columns:1fr 132px 130px 96px 60px; gap:16px;';
 const fieldLabel = "display:block; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#6a6a6a; margin-bottom:8px;";
