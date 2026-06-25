@@ -17,10 +17,17 @@ promoted to the ledger — mirroring the protocol boundary *"agent stages, human
 | Route | Auth | Purpose |
 |---|---|---|
 | `POST /api/agent/intake` | agent service token | the emergent seeder proposes a `thread_proposal` |
-| `POST /api/intake` | **none (public)** | submissions: `decision` / `run_report` (gate.clista.ai form) · `contribution` (API / deep-link, needs `targetThreadId`) |
+| `POST /api/intake/submit` | **none (public, Access-bypassed)** | submissions: `decision` / `run_report` (gate.clista.ai form) · `contribution` (API / deep-link, needs `targetThreadId`) |
 | `GET /api/intake` | human (Access) | the owner triage inbox |
 | `POST /api/intake/:id/approve` | human | kind-dispatched (see below) |
 | `POST /api/intake/:id/dismiss` | human | dismiss / mark spam |
+
+> **Path split (important for the Access bypass):** Cloudflare Access matches by **path, not
+> method**, and a Bypass policy *strips identity* from that path. The public submission therefore
+> lives on its **own** path, `POST /api/intake/submit`, which is the ONLY path the bypass covers.
+> The owner routes (`GET /api/intake`, `POST /api/intake/:id/...`) stay on `/api/intake` under the
+> main gated app, so the owner's identity is intact. A bypass scoped to bare `/api/intake` would
+> also bypass the owner's `GET` → 401 → the cockpit Triage inbox would render empty.
 
 ### Approve dispatch by kind
 - **`thread_proposal` / `decision`** → create a thread via the normal create path
@@ -34,7 +41,7 @@ promoted to the ledger — mirroring the protocol boundary *"agent stages, human
 All approvals are by a human; the submitter's stated handle is display-only and never an
 `actor_id` — the approving human is always the committing participant.
 
-`POST /api/intake` is the **only unauthenticated write** in the app. It is guarded
+`POST /api/intake/submit` is the **only unauthenticated write** in the app. It is guarded
 (fail-closed): **Turnstile** → **per-IP rate limit** → **size cap** (16 KB) → **kind +
 field validation** → enqueue `pending` and return a **receipt id only**. It registers no
 thread and appends no event. CORS is restricted to `INTAKE_ALLOWED_ORIGIN`
@@ -42,14 +49,22 @@ thread and appends no event. CORS is restricted to `INTAKE_ALLOWED_ORIGIN`
 
 ## Owner-gated setup (Phase 2 — required before the public route works in prod)
 
-### 1. Cloudflare Access — bypass policy for `/api/intake`
-The app.clista.ai Access app currently covers the whole hostname, so it would block the
-unauthenticated public route before the Worker runs. Add a **Bypass** (a.k.a. *Service Auth*
-/ public) policy **scoped to the path `/api/intake`** on the app.clista.ai Access application
-(Zero Trust → Access → Applications → app.clista.ai → Policies → Add a policy, action
-**Bypass**, include **Everyone**, with the application path/route limited to `/api/intake`).
-Leave every other path gated. Verify afterwards: `POST /api/intake` is reachable without an
-Access cookie, while `GET /api/me`, `POST /api/threads`, etc. still redirect/401.
+### 1. Cloudflare Access — bypass app scoped to `/api/intake/submit`
+The app.clista.ai Access app covers the whole hostname, so it would block the unauthenticated
+public route before the Worker runs. Add a **separate self-hosted application** scoped to the
+exact path **`app.clista.ai/api/intake/submit`** with a **Bypass** policy (include **Everyone**):
+Zero Trust → Access → Applications → **Add an application** → Self-hosted → domain `app` ·
+`clista.ai` · path `api/intake/submit` → Add policy: action **Bypass**, Include **Everyone**.
+The more-specific path shadows the broader gated app for just that route.
+
+> **Do NOT scope the bypass to bare `/api/intake`.** Access matches by path, not method, and a
+> Bypass strips identity — so it would also bypass the owner's `GET /api/intake` (the cockpit
+> Triage inbox), which would then 401 and render empty. Keep the bypass on `/api/intake/submit`
+> only; the owner routes on `/api/intake` stay under the main gated app.
+
+Verify afterwards: `POST /api/intake/submit` is reachable without an Access cookie (→ Worker
+403 `human-verification` on a bad token), while `GET /api/intake`, `GET /api/me`,
+`POST /api/threads`, etc. still redirect/401.
 
 ### 2. Turnstile widget + secret
 Create a Turnstile widget (managed mode) for `gate.clista.ai` (Cloudflare dash → Turnstile →
