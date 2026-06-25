@@ -31,7 +31,10 @@ promoted to the ledger — mirroring the protocol boundary *"agent stages, human
 
 ### Approve dispatch by kind
 - **`thread_proposal` / `decision`** → create a thread via the normal create path
-  (approving human = `decision owner`); optional `{flag:true}` hands it to the deliberation cron.
+  (approving human = `decision owner`); **seed the proposal's `payload.useCases` as starting
+  substrate** — each becomes a `ClaimCreated` (status `proposed`, committed by the approver) so
+  the thread opens pre-grounded (response carries `seededClaims`). Optional `{flag:true}` hands it
+  to the deliberation cron.
 - **`run_report`** → create a new human-owned thread and attest the report as
   `EvidenceCommitted` (`source: "public run report <receipt>"`), the external origin preserved.
 - **`contribution`** → append the input as `EvidenceCommitted` onto the existing
