@@ -41,6 +41,23 @@ self-hosted app in the `laticooki` Zero Trust org. Local repo:
 - **Two capabilities added after launch (both merged to `main`, agent path deployed):**
   see the "Engine sync" and "Agent write path" sections below.
 
+## Session 2026-06-24 (h) — split the public intake onto its own path (Access-bypass fix)
+**SHIPPED on branch `intake-split-public-path` (PR open) + a launch-planning PR.** A live bug:
+the public route and the owner triage GET shared the path `/api/intake`. Cloudflare Access
+matches by **path, not method**, and a Bypass policy **strips identity** — so the owner's
+authenticated `GET /api/intake` (the cockpit Triage inbox) got bypassed too → arrived with no
+JWT → 401 → the inbox panel rendered empty. Fix: the public submission moved to its **own path
+`POST /api/intake/submit`** (the ONLY Access-bypassed path); the owner routes stay on
+`/api/intake` under the main gated app, identity intact.
+- `worker/index.js`: `parts[2] === 'submit'` handles OPTIONS + the public POST (CORS + Turnstile
+  + quarantine); bare `/api/intake` is now GET-list + `:id/{approve,dismiss}` (human-only).
+- Gate form (`website/gate.clista.ai/index.html`): `API` → `https://app.clista.ai/api/intake/submit`.
+- `docs/INTAKE.md`: bypass step rewritten — scope a SEPARATE self-hosted app to
+  `app.clista.ai/api/intake/submit` (NOT bare `/api/intake`, which would 401 the owner GET).
+- Tests updated (public path → `/submit`); `npm run test:workers` 26/26, build clean.
+- **Owner action:** re-scope the Access bypass to `/api/intake/submit` (the earlier bare
+  `/api/intake` bypass shadows the owner GET; deleting/disabling it restores the inbox immediately).
+
 ## Session 2026-06-24 (g) — emergent meta-thread seeder authored (Phase 4, owner-installs)
 **AUTHORED on branch `hermes-emergent-seeder` (PR open) as reviewable files under
 `docs/hermes/`.** The third autonomous loop — but it only ever *proposes* into the intake inbox

@@ -300,20 +300,24 @@ export default {
           return json(result, result.ok ? 200 : 422);
         }
 
-        // /api/intake — the triage inbox. Two surfaces share the path:
-        //   • POST /api/intake (no id)        → the PUBLIC submission route
+        // /api/intake — the triage inbox. Two surfaces on SEPARATE paths so a
+        // Cloudflare Access bypass (which matches by path, not method, and
+        // strips identity) can cover ONLY the public one:
+        //   • POST /api/intake/submit         → the PUBLIC submission route
         //     (unauthenticated, Turnstile + rate-limit + quarantine; CORS for
-        //     the gate.clista.ai form). The only public write in the app.
+        //     the gate.clista.ai form). The only Access-bypassed path.
         //   • GET /api/intake, POST :id/...   → the owner triage surface
-        //     (human-only, behind Access).
+        //     (human-only, behind Access — identity must stay intact here).
         if (parts[1] === 'intake') {
-          // CORS preflight for the cross-origin submission form.
-          if (request.method === 'OPTIONS' && !parts[2]) {
-            return new Response(null, { status: 204, headers: corsHeaders(env, request) });
-          }
-          // Public submission — no auth, fail-closed, returns a receipt only.
-          if (!parts[2] && request.method === 'POST') {
-            return withCors(env, request, await handlePublicIntake(request, env));
+          // Public submission surface — the only path the Access bypass covers.
+          if (parts[2] === 'submit') {
+            if (request.method === 'OPTIONS') {
+              return new Response(null, { status: 204, headers: corsHeaders(env, request) });
+            }
+            if (request.method === 'POST') {
+              return withCors(env, request, await handlePublicIntake(request, env));
+            }
+            return json({ error: 'method_not_allowed' }, 405);
           }
 
           const identity = await resolveIdentity(request, env);

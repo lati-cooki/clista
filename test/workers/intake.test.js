@@ -129,7 +129,7 @@ describe('triage inbox — agent proposes, human approves & owns', () => {
 // human-owned thread.
 describe('public intake route', () => {
   const publicPost = (body, headers) =>
-    SELF.fetch(`${ORIGIN}/api/intake`, {
+    SELF.fetch(`${ORIGIN}/api/intake/submit`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', ...(headers || {}) },
       body: JSON.stringify(body || {}),
@@ -169,7 +169,7 @@ describe('public intake route', () => {
     expect((await publicPost({ kind: 'thread_proposal', question: 'agents cannot self-promote publicly' })).status).toBe(422);
     expect((await publicPost({ kind: 'decision', question: 'too short' })).status).toBe(422);
 
-    const bad = await SELF.fetch(`${ORIGIN}/api/intake`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{not json' });
+    const bad = await SELF.fetch(`${ORIGIN}/api/intake/submit`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{not json' });
     expect(bad.status).toBe(400);
 
     const huge = 'x'.repeat(20 * 1024);
@@ -177,7 +177,7 @@ describe('public intake route', () => {
   });
 
   it('answers the CORS preflight and tags responses with the allowed origin', async () => {
-    const pre = await SELF.fetch(`${ORIGIN}/api/intake`, { method: 'OPTIONS', headers: { origin: 'https://gate.clista.ai' } });
+    const pre = await SELF.fetch(`${ORIGIN}/api/intake/submit`, { method: 'OPTIONS', headers: { origin: 'https://gate.clista.ai' } });
     expect(pre.status).toBe(204);
     expect(pre.headers.get('access-control-allow-origin')).toBe('https://gate.clista.ai');
 
