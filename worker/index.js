@@ -156,6 +156,27 @@ function evidenceEvent(threadId, identity, { source, finding }) {
   };
 }
 
+// Build a ClaimCreated event (proposed claim) attributed to `identity`. Used to
+// seed an approved proposal's use-cases as starting substrate on the new thread.
+function claimEvent(threadId, identity, text) {
+  return {
+    event_type: 'ClaimCreated',
+    thread_id: threadId,
+    actor_id: identity.actorId,
+    payload: {
+      claim: {
+        id: engine.newId('clm', text),
+        object: 'claim',
+        threadId,
+        text: String(text || '').trim().slice(0, 600),
+        status: 'proposed',
+        createdByParticipantId: identity.actorId,
+        createdAt: engine.nowIso(),
+      },
+    },
+  };
+}
+
 // Ensure `identity` is a participant of an existing thread (join as a
 // contributor if not), so it can commit evidence onto it. Returns true once a
 // participant.
@@ -362,9 +383,22 @@ export default {
                 if (!created.ok) {
                   return json({ error: 'invalid', reason: created.reason || 'could not create thread from intake item' }, 422);
                 }
+                // Seed the proposal's use-cases as starting substrate (proposed
+                // claims, committed by the approving owner) so the thread opens
+                // pre-grounded for deliberation. Best-effort: a bad one is
+                // skipped, never failing the approval.
+                const useCases = Array.isArray(item.payload?.useCases) ? item.payload.useCases : [];
+                let seededClaims = 0;
+                for (const uc of useCases) {
+                  const text = (typeof uc === 'string' ? uc : '').trim();
+                  if (text.length < 8) continue;
+                  const ev = await threadStub(env, created.id).append(claimEvent(created.id, identity, text));
+                  if (ev.ok) seededClaims += 1;
+                }
+                if (seededClaims) await registerThread(env, threadStub(env, created.id));
                 if (body.flag) await indexStub(env).flagForAgent(created.id, identity.actorId, at);
                 await indexStub(env).resolveIntake(intakeId, { status: 'approved', threadId: created.id, at });
-                return json({ ok: true, status: 'approved', id: created.id, flagged: !!body.flag });
+                return json({ ok: true, status: 'approved', id: created.id, flagged: !!body.flag, seededClaims });
               }
 
               // run_report → record it as a NEW human-owned thread with the

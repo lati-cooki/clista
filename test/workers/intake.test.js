@@ -66,8 +66,16 @@ describe('triage inbox — agent proposes, human approves & owns', () => {
     const approveBody = await approve.json();
     expect(approveBody.status).toBe('approved');
     expect(approveBody.flagged).toBe(true);
+    // The two use-cases were seeded as starting substrate (proposed claims).
+    expect(approveBody.seededClaims).toBe(2);
     const threadId = approveBody.id;
     expect(threadId).toMatch(/^thd_/);
+
+    // Those claims are projected onto the new thread, owned by the approver.
+    const seededState = await (await humanGet(`/api/threads/${threadId}/state`)).json();
+    const blob = JSON.stringify(seededState);
+    expect(blob).toContain('preserved objection chains');
+    expect(blob).toContain('cross-pollination in #all');
 
     // The governance keystone: the created thread's decision owner is the
     // APPROVING HUMAN (par_troylati), not the agent.
