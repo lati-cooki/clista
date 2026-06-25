@@ -40,6 +40,7 @@ export const filterStyle = (active) =>
 const BADGE_MAP = {
   decided: { bg: '#0a0a0a', fg: '#ffffff', bd: '#0a0a0a', dot: '#ffffff' },
   verified: { bg: '#eef5f0', fg: '#1c7a4f', bd: 'rgba(28,122,79,0.3)', dot: '#1c7a4f' },
+  review: { bg: '#eef3fa', fg: '#1c5fa8', bd: 'rgba(28,95,168,0.3)', dot: '#1c5fa8' },
   active: { bg: '#ffffff', fg: '#4a4a4a', bd: '#d4d4d2', dot: '#8a8a8a' },
   degraded: { bg: '#f7f2e8', fg: '#9a6b07', bd: 'rgba(154,107,7,0.35)', dot: '#9a6b07' },
   failed: { bg: '#f8eeee', fg: '#b3343c', bd: 'rgba(179,52,60,0.35)', dot: '#b3343c' },
