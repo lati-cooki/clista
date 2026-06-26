@@ -23,6 +23,7 @@ export const ID_PREFIX = {
   position: 'pos',
   decisionRequest: 'drq',
   review: 'rev',
+  reviewTrigger: 'rvt',
 };
 
 export function rid(prefix) {
@@ -116,6 +117,24 @@ export function buildReview({ threadId, actorId, decisionRequestId, status, cond
         decisionRequestId,
         reviewerParticipantId: actorId, status,
         conditions: conds, comment: (comment || '').trim(), reviewedAt: at,
+      },
+    },
+  };
+}
+
+// Re-review trigger. The server (ThreadDO.append) auto-emits this when a
+// post-decision objection lands on a decided thread; the decision stays in
+// force, the thread flips to 're-review'. This client builder exists so the
+// event vocabulary has one canonical shape (used by tests/tools) — the browser
+// never appends ReviewTriggered directly.
+export function buildReviewTrigger({ threadId, actorId, decisionRecordId, triggeringObjectionId, reason = 'post_decision_objection', id = rid(ID_PREFIX.reviewTrigger), at = nowIso() }) {
+  return {
+    event_type: 'ReviewTriggered',
+    payload: {
+      reviewTrigger: {
+        id, object: 'reviewTrigger', threadId,
+        decisionRecordId, triggeringObjectionId, reason,
+        triggeredByParticipantId: actorId, triggeredAt: at,
       },
     },
   };

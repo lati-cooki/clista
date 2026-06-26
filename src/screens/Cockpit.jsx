@@ -184,7 +184,14 @@ export function Cockpit({ threadId, me, go }) {
   const myRole = (vm.participants.find((p) => p.id === (me && me.actorId)) || {}).role || '';
   const isDecisionOwner = /decision owner/i.test(myRole);
   const proposal = vm.decisionRequest;
-  const canMerge = isDecisionOwner && !!proposal && !vm.decision.id && vm.status !== 'decided';
+  // A proposal is "live" (awaiting a decision) when it was opened after the last
+  // recorded decision. True for a fresh thread (no decision yet) AND for a
+  // re-review thread where a new decision cycle has been opened to supersede the
+  // flagged decision. Replaces the old `!vm.decision.id` proxy so re-deciding
+  // works while a prior (now-questioned) decision still exists in the log.
+  const decidedAtMs = vm.decision.id ? (Date.parse(vm.decision.decidedAt) || 0) : -1;
+  const liveProposal = !!proposal && (Date.parse(proposal.openedAt) || 0) > decidedAtMs;
+  const canMerge = isDecisionOwner && liveProposal && vm.status !== 'decided';
   // A decision requires supporting evidence + claims + assumptions (engine
   // governance). If the staged proposal left a set empty, fall back to the
   // thread's full substrate so a complete thread is still mergeable.
@@ -242,8 +249,10 @@ export function Cockpit({ threadId, me, go }) {
   // and submit a review (ReviewSubmitted); the final DecisionMerged stays the
   // owner's (canMerge). Opening moves the thread to review and surfaces the
   // owner's merge panel.
-  const canStageOpen = canContribute && !vm.decision.id && !vm.decisionRequest;
-  const canReview = canContribute && !vm.decision.id && !!vm.decisionRequest;
+  // Stage a decision when no proposal is awaiting one (fresh thread, or a
+  // re-review thread before its supersede cycle is opened). Review when one is.
+  const canStageOpen = canContribute && !liveProposal;
+  const canReview = canContribute && liveProposal;
   const onWrote = () => { setAct(null); reload(); };
   const closeAct = () => setAct(null);
 
@@ -398,6 +407,33 @@ export function Cockpit({ threadId, me, go }) {
                 ? 'Preview: this is how the cockpit renders when deterministic replay does not match the appended record. '
                 : 'Deterministic replay does not match the appended record. '}
               The decision below is shown <span style={css('font-weight:600;')}>as last recorded</span> and must not be treated as verified until the chain re-validates. Fail-closed.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* re-review banner — a post-decision objection flagged the in-force
+          decision for re-validation. The decision below stays in force (frozen
+          snapshot) until the owner reaffirms or supersedes it via a new cycle. */}
+      {vm.reReview && (
+        <div style={css('padding:14px 16px; margin-bottom:18px; background:#fbf3e6; border:1px solid rgba(154,107,7,0.3); border-left:3px solid #c8841a; border-radius:5px; animation:clistaFade 0.25s ease-out;')}>
+          <div style={css('display:flex; align-items:flex-start; gap:12px;')}>
+            <Svg html={ico('alertTriangle', { size: 18 })} style={css('flex:none; color:#9a6b07; margin-top:1px;')} />
+            <div style={css('flex:1;')}>
+              <div style={css(MONO + ' font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:#9a6b07; margin-bottom:4px;')}>Flagged for re-review · decision in force</div>
+              <div style={css('font-size:13px; color:#7a5a12; line-height:1.5; text-wrap:pretty;')}>
+                {vm.reReview.objections.length === 1 ? 'An objection was' : `${vm.reReview.objections.length} objections were`} raised after this decision was recorded. The decision below stands <span style={css('font-weight:600;')}>as recorded</span> until the decision owner reaffirms it or opens a new decision request to supersede it{isDecisionOwner ? ' — use “stage a decision” below.' : '.'}
+              </div>
+              {vm.reReview.objections.length > 0 && (
+                <div style={css('margin-top:11px; display:flex; flex-direction:column; gap:8px;')}>
+                  {vm.reReview.objections.map((o) => (
+                    <div key={o.id} style={css('padding:9px 12px; background:#fff; border:1px solid rgba(154,107,7,0.22); border-radius:5px;')}>
+                      <div style={css('font-size:12.5px; color:#2a2a2a; line-height:1.5; text-wrap:pretty;')}>{o.text}</div>
+                      <div style={css(MONO + ' font-size:10px; color:#9a8a6a; margin-top:5px; letter-spacing:0.04em;')}>{o.who}{o.role ? ` · ${o.role}` : ''}{o.status === 'preserved' ? ' · preserved' : ''}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -173,6 +173,27 @@ export class IndexDO extends DurableObject {
     return { ok: true, ...this.flagStatus(threadId) };
   }
 
+  // A decided thread received a post-decision objection and flipped to
+  // re-review (see ThreadDO.append). Surface that to the owner via the existing
+  // agent_flags row — no new table, no OAuth: the cockpit's flagStatus() already
+  // renders phase/detail. This is the in-app notification seam; external
+  // alerting (email/push) and owner-transfer plug in at the router around the
+  // call site, not here. DO metadata only; never touches the append-only log.
+  flagReReview(threadId, { ownerId, objectorId, objectionId, at } = {}) {
+    if (!threadId) return { ok: false };
+    const detail = `re-review · owner=${ownerId || 'unknown'} · objection=${objectionId || 'unknown'} · by=${objectorId || 'unknown'}`;
+    this.sql.exec(
+      `INSERT INTO agent_flags (thread_id, status, phase, detail, updated_at)
+       VALUES (?, 're-review', 're-review', ?, ?)
+       ON CONFLICT(thread_id) DO UPDATE SET
+         status='re-review', phase='re-review', detail=excluded.detail, updated_at=excluded.updated_at`,
+      threadId,
+      detail,
+      at ?? null
+    );
+    return { ok: true, ...this.flagStatus(threadId) };
+  }
+
   // The agent's poll queue: threads awaiting deliberation.
   listFlags() {
     const flags = this.sql

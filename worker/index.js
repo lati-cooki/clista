@@ -598,6 +598,18 @@ export default {
               event.actor_id = identity.actorId;
               const result = await stub.append(event);
               if (result.ok) await registerThread(env, stub);
+              // A post-decision objection auto-emitted a ReviewTriggered: the
+              // thread flipped to re-review. Flag the owner (in-app). External
+              // alerting (email/push) and owner-transfer resolution plug in here.
+              if (result.ok && result.reReviewTriggered) {
+                const card = await stub.indexCard();
+                await indexStub(env).flagReReview(threadId, {
+                  ownerId: card && card.owner,
+                  objectorId: result.reviewTrigger && result.reviewTrigger.triggeredByParticipantId,
+                  objectionId: result.reviewTrigger && result.reviewTrigger.triggeringObjectionId,
+                  at: engine.nowIso(),
+                });
+              }
               return json(result, result.ok ? 200 : 422); // fail-closed → 422
             }
           }

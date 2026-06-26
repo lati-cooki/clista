@@ -127,7 +127,30 @@ export function adaptCockpit(state, audit, validate) {
       conditions: dec.conditions || [],
       nextAction: dec.nextAction || r.next_action || '',
       status: dec.status || (r.decision && r.decision.status) || '',
+      decidedAt: dec.decidedAt || '',
     },
+
+    // Re-review: a post-decision objection flagged the in-force decision for
+    // re-validation (thread.status === 're-review'). Surface the objection(s)
+    // raised after the decision so the cockpit can explain WHY, and the owner
+    // can open a new decision request to reaffirm or supersede.
+    reReview:
+      thread.status === 're-review'
+        ? {
+            decidedAt: dec.decidedAt || '',
+            objections: (r.objections || [])
+              .filter((o) => dec.decidedAt && o.raisedAt && Date.parse(o.raisedAt) >= Date.parse(dec.decidedAt))
+              .map((o) => ({
+                id: o.id,
+                text: o.text,
+                who: nameOf(o.participantId),
+                role: roleOf(o.participantId),
+                raisedAt: o.raisedAt,
+                status: o.status,
+                channel: channelFromSource(o.source),
+              })),
+          }
+        : null,
 
     objection: objection
       ? {
@@ -236,6 +259,7 @@ export function adaptCockpit(state, audit, validate) {
           id: state.currentProposal.id,
           proposal: state.currentProposal.proposal,
           status: state.currentProposal.status,
+          openedAt: state.currentProposal.openedAt || '',
           supportingClaimIds: state.currentProposal.supportingClaimIds || [],
           supportingEvidenceIds: state.currentProposal.supportingEvidenceIds || [],
           supportingAssumptionIds: state.currentProposal.supportingAssumptionIds || [],
