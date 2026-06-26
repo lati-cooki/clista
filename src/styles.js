@@ -41,6 +41,10 @@ const BADGE_MAP = {
   decided: { bg: '#0a0a0a', fg: '#ffffff', bd: '#0a0a0a', dot: '#ffffff' },
   verified: { bg: '#eef5f0', fg: '#1c7a4f', bd: 'rgba(28,122,79,0.3)', dot: '#1c7a4f' },
   review: { bg: '#eef3fa', fg: '#1c5fa8', bd: 'rgba(28,95,168,0.3)', dot: '#1c5fa8' },
+  // A decided thread flagged for re-validation by a post-decision objection.
+  // Amber-alert, distinct from the blue 'review' (a thread first staging a
+  // decision) — this one already has an in-force decision under question.
+  're-review': { bg: '#fbf3e6', fg: '#9a6b07', bd: 'rgba(154,107,7,0.45)', dot: '#c8841a' },
   active: { bg: '#ffffff', fg: '#4a4a4a', bd: '#d4d4d2', dot: '#8a8a8a' },
   degraded: { bg: '#f7f2e8', fg: '#9a6b07', bd: 'rgba(154,107,7,0.35)', dot: '#9a6b07' },
   failed: { bg: '#f8eeee', fg: '#b3343c', bd: 'rgba(179,52,60,0.35)', dot: '#b3343c' },

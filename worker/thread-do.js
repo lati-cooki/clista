@@ -34,6 +34,13 @@ export class ThreadDO extends DurableObject {
 
   // Append one event: validate-before-trust against the full prospective log,
   // fail-closed on rejection (event_id + reasons), otherwise hash-chain and store.
+  //
+  // Re-review loop: when the accepted event is an ObjectionRaised on an
+  // already-decided thread, the DO mints a companion ReviewTriggered in the SAME
+  // call and stores both atomically. This keeps the trigger inside the
+  // hash-chained log (replayable, no external actor) — the finance model-risk
+  // "monitoring breach → re-validate" loop, in-protocol. The decision record is
+  // never touched; only the thread status flips to "re-review".
   append(rawEvent) {
     const stored = this._readAll();
     // Server-authoritative: the DO mints event_id + timestamp when absent.
@@ -43,14 +50,16 @@ export class ThreadDO extends DurableObject {
       timestamp: rawEvent.timestamp || engine.nowIso(),
     };
     const prepared = engine.prepareEventForAppend(event, this._headHash());
-    const candidate = [...stored, prepared];
+
+    const companions = this._reReviewCompanions(stored, prepared);
+    const toStore = [prepared, ...companions];
+    const candidate = [...stored, ...toStore];
 
     const validation = engine.validateEvents(candidate);
     if (!validation.valid) {
-      // validator returns `errors`; surface only the new event's, fail-closed.
-      const scoped = validation.errors.filter(
-        (e) => !e.event_id || e.event_id === prepared.event_id
-      );
+      // validator returns `errors`; surface only the new events', fail-closed.
+      const newIds = new Set(toStore.map((e) => e.event_id));
+      const scoped = validation.errors.filter((e) => !e.event_id || newIds.has(e.event_id));
       return {
         ok: false,
         event_id: prepared.event_id,
@@ -58,13 +67,71 @@ export class ThreadDO extends DurableObject {
       };
     }
 
-    this.sql.exec(
-      'INSERT INTO events (event_id, content_hash, raw) VALUES (?, ?, ?)',
-      prepared.event_id,
-      prepared.content_hash,
-      engine.stableStringify(prepared)
-    );
-    return { ok: true, event: prepared, head_hash: prepared.content_hash };
+    for (const e of toStore) {
+      this.sql.exec(
+        'INSERT INTO events (event_id, content_hash, raw) VALUES (?, ?, ?)',
+        e.event_id,
+        e.content_hash,
+        engine.stableStringify(e)
+      );
+    }
+    const trigger = companions.find((e) => e.event_type === 'ReviewTriggered');
+    return {
+      ok: true,
+      event: prepared,
+      events: toStore,
+      head_hash: toStore.at(-1).content_hash,
+      ...(trigger
+        ? { reReviewTriggered: true, reviewTrigger: trigger.payload.reviewTrigger }
+        : {}),
+    };
+  }
+
+  // If `prepared` is a post-decision objection on a decided thread, build the
+  // companion ReviewTriggered event (chained onto the objection). Returns [] in
+  // every other case. Only objections on threads that already carry a
+  // DecisionMerged pay the projection cost (cheap pre-scan first).
+  _reReviewCompanions(stored, prepared) {
+    if (prepared.event_type !== 'ObjectionRaised') return [];
+    if (!stored.some((e) => e.event_type === 'DecisionMerged')) return [];
+
+    const threadId = prepared.thread_id;
+    const state = engine.selectThreadState(engine.projectEvents(stored), threadId);
+    // Only flip from a settled decision. 're-review' is already flagged (one
+    // trigger per decision epoch — further objections just accrue); 'review'
+    // means a re-decision is already in progress; both skip emission.
+    if (state.thread?.status !== 'decided') return [];
+
+    const decision = state.decisionStatus?.decisionRecord;
+    const objection = prepared.payload?.objection;
+    if (!decision || !objection) return [];
+
+    // "Post-decision" is guaranteed by append order, NOT by timestamps: this
+    // objection is landing on a log that already carries the DecisionMerged
+    // (status is 'decided'), so in seq order it follows the decision. We do not
+    // consult the client-supplied objection.raisedAt — trusting it would let a
+    // backdated objection silently suppress the trigger (the harvester is the
+    // actor we least control). The trigger time is the server's own clock.
+    const triggeredAt = engine.nowIso();
+    const triggerEvent = engine.createEvent({
+      type: 'ReviewTriggered',
+      threadId,
+      actorId: objection.participantId, // the objector is the accountable actor
+      at: triggeredAt,
+      payload: {
+        reviewTrigger: {
+          id: engine.newId('rvt'),
+          object: 'reviewTrigger',
+          threadId,
+          decisionRecordId: decision.id,
+          triggeringObjectionId: objection.id,
+          reason: 'post_decision_objection',
+          triggeredByParticipantId: objection.participantId,
+          triggeredAt,
+        },
+      },
+    });
+    return [engine.prepareEventForAppend(triggerEvent, prepared.content_hash)];
   }
 
   // Seed/replay a batch of raw events as one chained log (used to ingest the
