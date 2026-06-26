@@ -106,11 +106,12 @@ export class ThreadDO extends DurableObject {
     const objection = prepared.payload?.objection;
     if (!decision || !objection) return [];
 
-    // Post-decision ordering. A backdated objection (raisedAt before the
-    // decision) is left as a plain append — never blocks the objection.
-    const raisedAt = objection.raisedAt || prepared.timestamp;
-    if (Date.parse(raisedAt) < Date.parse(decision.decidedAt)) return [];
-
+    // "Post-decision" is guaranteed by append order, NOT by timestamps: this
+    // objection is landing on a log that already carries the DecisionMerged
+    // (status is 'decided'), so in seq order it follows the decision. We do not
+    // consult the client-supplied objection.raisedAt — trusting it would let a
+    // backdated objection silently suppress the trigger (the harvester is the
+    // actor we least control). The trigger time is the server's own clock.
     const triggeredAt = engine.nowIso();
     const triggerEvent = engine.createEvent({
       type: 'ReviewTriggered',

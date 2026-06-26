@@ -34,9 +34,9 @@ async function decideThread(question) {
   return { id, claimId, evdId, asmId, drqId };
 }
 
-const objection = (id, oid, target) => ({
+const objection = (id, oid, target, raisedAt = iso()) => ({
   event_type: 'ObjectionRaised',
-  payload: { objection: { id: oid, object: 'objection', threadId: id, participantId: ACTOR, targetObjectId: target, targetObjectType: 'claim', text: 'New evidence contradicts the basis of this decision.', status: 'open', raisedAt: iso() } },
+  payload: { objection: { id: oid, object: 'objection', threadId: id, participantId: ACTOR, targetObjectId: target, targetObjectType: 'claim', text: 'New evidence contradicts the basis of this decision.', status: 'open', raisedAt } },
 });
 
 describe('re-review trigger: post-decision objection flags a decided thread', () => {
@@ -111,6 +111,20 @@ describe('re-review trigger: post-decision objection flags a decided thread', ()
     expect(st.thread.status).toBe('decided');
     // The newest decision is in force.
     expect(st.decisionStatus.decisionRecord.id).toBe('dcr_rr2');
+  });
+
+  it('a backdated objection.raisedAt cannot suppress the trigger (gate is append order, not client time)', async () => {
+    const { id, claimId } = await decideThread('Can a backdated objection dodge the re-review trigger?');
+    // Objection claims it was raised in 2020 — long before the decision. The
+    // server must STILL fire the trigger: the gate is append order, not raisedAt.
+    const res = await (await append(id, objection(id, 'obj_backdated', claimId, '2020-01-01T00:00:00.000Z'))).json();
+    expect(res.ok).toBe(true);
+    expect(res.reReviewTriggered).toBe(true);
+    const st = await (await get(`/api/threads/${id}/state`)).json();
+    expect(st.thread.status).toBe('re-review');
+    const v = await (await get(`/api/threads/${id}/validate`)).json();
+    expect(v.integrity.valid).toBe(true);
+    expect(v.validation.valid).toBe(true);
   });
 
   it('a malformed ReviewTriggered is rejected fail-closed (422)', async () => {
