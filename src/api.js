@@ -32,6 +32,7 @@ export const api = {
   validate: (id) => req(`/api/threads/${enc(id)}/validate`),
   seedDemo: (id) => req(`/api/threads/${enc(id)}/seed-demo`, { method: 'POST' }),
   seedVendorDd: (id) => req(`/api/threads/${enc(id)}/seed-vendor-dd`, { method: 'POST' }),
+  seedPharmaPhaseGate: (id) => req(`/api/threads/${enc(id)}/seed-pharma-phase-gate`, { method: 'POST' }),
   join: (id, role) => postJson(`/api/threads/${enc(id)}/join`, { role }),
   append: (id, event) => postJson(`/api/threads/${enc(id)}/append`, { event }),
   // Ask the autonomous agent (clistahermes) to deliberate this thread.
@@ -45,6 +46,7 @@ export const api = {
 
 export const DEMO_THREAD_ID = 'thd_scenario_demo';
 export const VENDOR_DD_THREAD_ID = 'thd_vendor_dd_baas_partner_eval';
+export const PHARMA_PHASE_GATE_THREAD_ID = 'thd_phase2_to_phase3_go_nogo_ltn_4481';
 
 // Canonical bundled decisions that auto-seed into their (empty) thread the first
 // time the cockpit opens them. Keyed by thread id → the seed call that ingests
@@ -52,4 +54,5 @@ export const VENDOR_DD_THREAD_ID = 'thd_vendor_dd_baas_partner_eval';
 export const SEEDABLE_THREADS = {
   [DEMO_THREAD_ID]: api.seedDemo,
   [VENDOR_DD_THREAD_ID]: api.seedVendorDd,
+  [PHARMA_PHASE_GATE_THREAD_ID]: api.seedPharmaPhaseGate,
 };
