@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { api, DEMO_THREAD_ID } from './api.js';
+import { api, SEEDABLE_THREADS } from './api.js';
 import { adaptCockpit } from './adapt.js';
 
 const POLL_MS = 20000; // re-fetch cadence while a thread is still in progress
 
 // Loads a thread's projected state + audit + validation and adapts it to the
-// cockpit view model. Auto-seeds the bundled scenario log into the demo thread
-// the first time it's opened empty. While the thread isn't decided yet, it
+// cockpit view model. Auto-seeds a bundled canonical log (scenario-demo,
+// vendor-dd) into its thread the first time it's opened empty. While the
+// thread isn't decided yet, it
 // silently re-fetches on an interval so out-of-band agent contributions
 // (clistahermes) appear without a manual refresh.
 export function useThread(threadId) {
@@ -20,8 +21,9 @@ export function useThread(threadId) {
     if (!silent) setS((p) => ({ ...p, loading: true, error: null }));
     try {
       let v = await api.validate(threadId);
-      if (v.ok && v.data.event_count === 0 && threadId === DEMO_THREAD_ID) {
-        await api.seedDemo(threadId);
+      const seed = SEEDABLE_THREADS[threadId];
+      if (v.ok && v.data.event_count === 0 && seed) {
+        await seed(threadId);
         v = await api.validate(threadId);
       }
       const [st, au, ag] = await Promise.all([api.state(threadId), api.audit(threadId), api.agentStatus(threadId)]);
