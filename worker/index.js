@@ -2,6 +2,7 @@ import { ThreadDO } from './thread-do.js';
 import { IndexDO } from './index-do.js';
 import { scenarioDemoEvents } from './scenario-demo.js';
 import { vendorDueDiligenceEvents } from './vendor-dd.js';
+import { pharmaPhaseGateEvents } from './pharma-phase-gate.js';
 import { resolveIdentity } from './identity.js';
 import * as engine from './engine/index.js';
 
@@ -530,6 +531,14 @@ export default {
             // log — the companion decision to the sepsis scenario-demo.
             if (action === 'seed-vendor-dd') {
               const result = await stub.ingest(vendorDueDiligenceEvents);
+              if (result.ok) await registerThread(env, stub);
+              return json(result, result.ok ? 200 : 409);
+            }
+
+            // Seed the pharma Phase II/III go/no-go thread (LTN-4481) with its
+            // bundled canonical log — companion to scenario-demo and vendor-dd.
+            if (action === 'seed-pharma-phase-gate') {
+              const result = await stub.ingest(pharmaPhaseGateEvents);
               if (result.ok) await registerThread(env, stub);
               return json(result, result.ok ? 200 : 409);
             }
