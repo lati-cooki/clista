@@ -31,6 +31,7 @@ export const api = {
   audit: (id) => req(`/api/threads/${enc(id)}/audit`),
   validate: (id) => req(`/api/threads/${enc(id)}/validate`),
   seedDemo: (id) => req(`/api/threads/${enc(id)}/seed-demo`, { method: 'POST' }),
+  seedVendorDd: (id) => req(`/api/threads/${enc(id)}/seed-vendor-dd`, { method: 'POST' }),
   join: (id, role) => postJson(`/api/threads/${enc(id)}/join`, { role }),
   append: (id, event) => postJson(`/api/threads/${enc(id)}/append`, { event }),
   // Ask the autonomous agent (clistahermes) to deliberate this thread.
@@ -43,3 +44,12 @@ export const api = {
 };
 
 export const DEMO_THREAD_ID = 'thd_scenario_demo';
+export const VENDOR_DD_THREAD_ID = 'thd_vendor_dd_baas_partner_eval';
+
+// Canonical bundled decisions that auto-seed into their (empty) thread the first
+// time the cockpit opens them. Keyed by thread id → the seed call that ingests
+// the bundled log server-side.
+export const SEEDABLE_THREADS = {
+  [DEMO_THREAD_ID]: api.seedDemo,
+  [VENDOR_DD_THREAD_ID]: api.seedVendorDd,
+};

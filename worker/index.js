@@ -1,6 +1,7 @@
 import { ThreadDO } from './thread-do.js';
 import { IndexDO } from './index-do.js';
 import { scenarioDemoEvents } from './scenario-demo.js';
+import { vendorDueDiligenceEvents } from './vendor-dd.js';
 import { resolveIdentity } from './identity.js';
 import * as engine from './engine/index.js';
 
@@ -521,6 +522,14 @@ export default {
             // Seed the demo thread with the bundled canonical scenario log.
             if (action === 'seed-demo') {
               const result = await stub.ingest(scenarioDemoEvents);
+              if (result.ok) await registerThread(env, stub);
+              return json(result, result.ok ? 200 : 409);
+            }
+
+            // Seed the vendor due-diligence thread with its bundled canonical
+            // log — the companion decision to the sepsis scenario-demo.
+            if (action === 'seed-vendor-dd') {
+              const result = await stub.ingest(vendorDueDiligenceEvents);
               if (result.ok) await registerThread(env, stub);
               return json(result, result.ok ? 200 : 409);
             }
