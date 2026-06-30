@@ -1,6 +1,6 @@
 {
   "source": "lati-club/ClisTa-Protocol",
-  "ref": "ref: refs/heads/main",
+  "ref": "refs/heads/main",
   "files": {
     "adaptation.js": "sha256:93c3dfabd499e0f4c3bd70d0d5e1572528077a908c264f6add35139320c0b8e4",
     "amendments.js": "sha256:fa9cabbe7126a7b70311ee5e91bf457b240615d23ed4130bcd4c29dc773d0f7f",
@@ -19,11 +19,11 @@
     "negotiation.js": "sha256:e5529ceb1daa2b61bd33b6c9c873eed13f8e2bc633bce517578bfb458c24ee9d",
     "outcome-learning.js": "sha256:85c0edbd7b2363b3622029fdb4cde44b45db8354de8f423f5b07ec0dfcf8a447",
     "outcome.js": "sha256:79e124005ed7dcbf7d80a4438bf9a17039583c0aeff9db2be7955891b1b2cc3f",
-    "projector.js": "sha256:b7e821ee31dad92585619e8c63038cdbedce1eb037a9134659565d767b24166a",
-    "provenance.js": "sha256:205cae7e35db6c89a1a3b9f8b052e8f43c9a4b27266f4905bcc87fc8565ddcbc",
+    "projector.js": "sha256:9194746910c97a76c758157f970ba59501a0bf169c0d10a574998cbd75fa4989",
+    "provenance.js": "sha256:b97aebb5e7f15793710ebf71337d96dd14ba35d4c6e56b68769b31ba32a8ee75",
     "recovery.js": "sha256:04cb76198af446e925e051abae645a72b28a5a1885708681bec76e40384de09c",
     "review.js": "sha256:4d57a345d35f9c0bb72e37aa6c65bb29f9d9b2c69d398b9be833311c7aa84717",
     "utils.js": "sha256:ddb0e6804a28b15313f93dad2b0ee9dfdc04eca20ea92b975a8b82f6b654c1f2",
-    "validator.js": "sha256:bd20b28a55b16bc6f6a03549cbafb9afb82ae2732f50eaefa3c010a9f6f93b6e"
+    "validator.js": "sha256:9d793a404b7bd5fe4c52891accf768735e46e5a5077354bf041425a4ef9c9d31"
   }
 }
