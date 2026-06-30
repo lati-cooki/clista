@@ -1,0 +1,85 @@
+name: Sync ClisTa examples
+
+# Re-vendor worker/examples/ from lati-club/ClisTa-Protocol's examples/manifest.json.
+# This is the SECOND sync track, alongside sync-engine. Examples are self-verifying
+# data already reviewed upstream, so this track re-verifies each one with the engine
+# (replay + cross-thread provenance, in vendor-examples.mjs) and opens a PR on drift.
+# Lighter than the engine sync by design — the gate is automated integrity, not a
+# trust-anchor review.
+#
+# Runs weekly, on manual dispatch (optionally pinning a ref), or when the protocol
+# repo pings us via repository_dispatch {type: clista-protocol-release} — the same
+# event that drives sync-engine.
+#
+# Depends on the CrossThreadEvidence engine (sync-engine / PR landing worker/engine).
+
+on:
+  schedule:
+    - cron: "30 7 * * 1" # Mondays 07:30 UTC, just after sync-engine
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "ClisTa-Protocol git ref (tag/branch/sha). Blank = latest release tag."
+        required: false
+        default: ""
+  repository_dispatch:
+    types: [clista-protocol-release]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Clone ClisTa-Protocol (public)
+        run: |
+          git clone --quiet https://github.com/lati-club/ClisTa-Protocol.git ../ClisTa-Protocol
+          REF="${{ github.event.inputs.ref || github.event.client_payload.ref }}"
+          if [ -z "$REF" ]; then
+            REF="$(git -C ../ClisTa-Protocol describe --tags --abbrev=0 2>/dev/null || echo main)"
+          fi
+          git -C ../ClisTa-Protocol checkout --quiet "$REF"
+          echo "SYNCED_REF=$REF" >> "$GITHUB_ENV"
+          echo "SYNCED_SHA=$(git -C ../ClisTa-Protocol rev-parse --short HEAD)" >> "$GITHUB_ENV"
+
+      - run: npm ci
+
+      # Re-vendor. Exits non-zero (fails the run) if any published example fails
+      # verification (validate per thread + cross-thread provenance) — that is the
+      # intended signal: the manifest or data is broken upstream.
+      - name: Re-vendor examples
+        run: node scripts/vendor-examples.mjs --from ../ClisTa-Protocol
+
+      - name: Tests (registry shape + in-runtime seed)
+        run: npm run test:all
+
+      - name: Open PR on drift
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: sync/clista-examples
+          base: main
+          add-paths: |
+            worker/examples/**
+          commit-message: "Sync ClisTa examples from upstream (${{ env.SYNCED_REF }} @ ${{ env.SYNCED_SHA }})"
+          title: "Sync ClisTa examples from upstream (${{ env.SYNCED_REF }})"
+          body: |
+            Automated re-vendor of `worker/examples/` from
+            **lati-club/ClisTa-Protocol@${{ env.SYNCED_REF }}** (`${{ env.SYNCED_SHA }}`).
+
+            Every published example in `examples/manifest.json` was re-verified with
+            the engine — `validate` per thread (replay) and, for cross-thread
+            examples, cross-thread provenance — before generation. Registry-shape and
+            in-runtime seed tests passed.
+
+            Example data, machine-verified: safe to merge on green. Merging (touches
+            `worker/**`) triggers `deploy-app.yml` → app.clista.ai.
+          labels: examples-sync

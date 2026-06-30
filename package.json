@@ -12,7 +12,9 @@
     "test:workers": "vitest run",
     "test:all": "npm test && npm run test:workers",
     "sync:engine": "node scripts/vendor-engine.mjs",
-    "sync:engine:check": "node scripts/vendor-engine.mjs --check"
+    "sync:engine:check": "node scripts/vendor-engine.mjs --check",
+    "sync:examples": "node scripts/vendor-examples.mjs",
+    "sync:examples:check": "node scripts/vendor-examples.mjs --check"
   },
   "dependencies": {
     "js-sha256": "^0.11.1",
