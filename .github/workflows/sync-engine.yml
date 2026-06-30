@@ -32,7 +32,12 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          # Match deploy-app.yml (Node 22). The `npm test` script runs
+          # `node --test 'test/*.test.js'`, whose glob is expanded by the test
+          # runner — support landed in Node 21+. On Node 20 the pattern is taken
+          # literally ("Could not find 'test/*.test.js'") and the parity step
+          # fails before the drift PR can open.
+          node-version: 22
           cache: npm
 
       - name: Clone ClisTa-Protocol (public)
