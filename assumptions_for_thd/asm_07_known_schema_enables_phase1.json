@@ -1,0 +1,15 @@
+{
+  "event_type": "AssumptionDeclared",
+  "thread_id": "thd_decide_which_objective_is_key_the_first_objectiv_mqr26l7l_96291fb4",
+  "actor_id": "par_agent_clistahermes",
+  "payload": {
+    "assumption": {
+      "id": "asm_current_known_schema_enables_meaningful_firewall_phase1",
+      "object": "assumption",
+      "threadId": "thd_decide_which_objective_is_key_the_first_objectiv_mqr26l7l_96291fb4",
+      "content": "The schema, provenance, and deduplication expectations that are already known today are stable enough to implement a useful Phase 1 data_port_firewall (enforcement at the port) without waiting for the full bad-data hunter to discover additional cases.",
+      "declaredByParticipantId": "par_agent_clistahermes",
+      "evidenceIds": []
+    }
+  }
+}
