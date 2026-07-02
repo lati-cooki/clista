@@ -134,6 +134,35 @@ six-Pages loop (it's a Worker, deployed by §3/§5 here).
 
 ---
 
+## 7. Staging (`staging.clista.ai`) — see changes before production
+
+Staging is a **separate Worker** (`clista-ai-app-staging`, `env.staging` in
+`wrangler.jsonc`) with its **own Durable Objects** — seed, append, and break
+threads freely; production event logs are untouched. `deploy-staging.yml`
+deploys every app-touching pull request to it (latest push wins), so you review
+the running app at `https://staging.clista.ai` before merging; merging to main
+still deploys production via `deploy-app.yml`.
+
+One-time setup **[you]** — until this is done, the workflow skips with a
+warning and nothing is ever exposed:
+
+1. As in §1, create a second Access application: **Self-hosted**, domain
+   `staging.clista.ai`, same policy (or a looser test one).
+2. Copy its **AUD tag** into `wrangler.jsonc` → `env.staging.vars.ACCESS_AUD`
+   and commit. The next PR push deploys staging.
+
+Notes:
+
+- Writes on staging need the Access JWT exactly like production — same
+  `laticooki` team, staging's own AUD. With the AUD empty the CI gate refuses
+  to deploy at all (never a public unauthenticated cockpit).
+- `TURNSTILE_SECRET` is per-Worker; unset on staging, so `/api/intake`
+  verification is skipped there (matches local dev).
+- Reset staging data anytime: `npx wrangler delete --env staging` then let the
+  next PR redeploy (fresh DOs), or seed over the old threads.
+
+---
+
 ## Notes
 
 - **Rollback:** `wrangler rollback` (or redeploy a previous commit). DO data persists

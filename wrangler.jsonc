@@ -48,5 +48,38 @@
     // When TURNSTILE_SECRET is unset (local dev / tests), verification is skipped
     // so the route is drivable without a token; production always sets it.
     "INTAKE_ALLOWED_ORIGIN": "https://gate.clista.ai"
+  },
+  // Staging — a separate Worker (clista-ai-app-staging) at staging.clista.ai so
+  // changes can be seen and exercised before a production deploy. Being its own
+  // Worker gives it its OWN Durable Objects: seed/append/break threads freely,
+  // production event logs are untouched. Bindings and vars don't inherit across
+  // environments, so everything is redeclared. Deployed by deploy-staging.yml
+  // on pull requests; production (top-level config) still deploys from main.
+  "env": {
+    "staging": {
+      "name": "clista-ai-app-staging",
+      "routes": [{ "pattern": "staging.clista.ai", "custom_domain": true }],
+      "assets": {
+        "directory": "./dist",
+        "binding": "ASSETS",
+        "not_found_handling": "single-page-application"
+      },
+      "durable_objects": {
+        "bindings": [
+          { "name": "THREAD", "class_name": "ThreadDO" },
+          { "name": "INDEX", "class_name": "IndexDO" }
+        ]
+      },
+      "observability": { "enabled": true },
+      "vars": {
+        "ACCESS_TEAM_DOMAIN": "laticooki",
+        // AUD of the *staging* Access application (staging.clista.ai). If this is
+        // ever emptied, deploy-staging.yml refuses to deploy — staging never goes
+        // up without Access in front of it (docs/DEPLOY.md §7).
+        "ACCESS_AUD": "f58afc8602c9f4328273b8620e99e434a9e65e6016b014086c49a7793f02cd3a",
+        "AGENT_NAMES": "398a39a665f1d0faeee372da7b67e360:clistahermes",
+        "INTAKE_ALLOWED_ORIGIN": "https://gate.clista.ai"
+      }
+    }
   }
 }
