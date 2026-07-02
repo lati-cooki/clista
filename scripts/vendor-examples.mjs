@@ -26,7 +26,7 @@
 // verification (manifest or data is broken upstream) · 3 usage/IO error.
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 
@@ -40,7 +40,8 @@ const argVal = (name, def) => {
   return i >= 0 && i + 1 < args.length ? args[i + 1] : def;
 };
 const CHECK = args.includes("--check");
-const protocolDir = argVal("--from", process.env.CLISTA_PROTOCOL_DIR || join(repoRoot, "..", "ClisTa-Protocol"));
+// Absolute: createRequire (used to load the checkout's engine) rejects relative paths.
+const protocolDir = resolve(argVal("--from", process.env.CLISTA_PROTOCOL_DIR || join(repoRoot, "..", "ClisTa-Protocol")));
 
 const fail = (code, msg) => {
   console.error(`\n✘ ${msg}`);

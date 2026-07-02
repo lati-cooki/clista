@@ -62,24 +62,41 @@ jobs:
       - name: Tests (registry shape + in-runtime seed)
         run: npm run test:all
 
+      # First-party PR-on-drift (git + gh with the workflow token). The org
+      # Actions policy allows GitHub-owned actions only, so no create-pull-request
+      # action here. Force-push keeps the sync branch a clean single commit on
+      # re-runs; `gh pr create` is skipped if the PR is already open.
       - name: Open PR on drift
-        uses: peter-evans/create-pull-request@v6
-        with:
-          branch: sync/clista-examples
-          base: main
-          add-paths: |
-            worker/examples/**
-          commit-message: "Sync ClisTa examples from upstream (${{ env.SYNCED_REF }} @ ${{ env.SYNCED_SHA }})"
-          title: "Sync ClisTa examples from upstream (${{ env.SYNCED_REF }})"
-          body: |
-            Automated re-vendor of `worker/examples/` from
-            **lati-club/ClisTa-Protocol@${{ env.SYNCED_REF }}** (`${{ env.SYNCED_SHA }}`).
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git add worker/examples
+          if git diff --cached --quiet; then
+            echo "No examples drift."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B sync/clista-examples
+          git commit -m "Sync ClisTa examples from upstream ($SYNCED_REF @ $SYNCED_SHA)"
+          git push -f origin sync/clista-examples
+          if gh pr list --head sync/clista-examples --state open --json number --jq length | grep -qx 0; then
+            gh pr create --base main --head sync/clista-examples \
+              --title "Sync ClisTa examples from upstream ($SYNCED_REF)" \
+              --label examples-sync \
+              --body "$(cat <<EOF
+          Automated re-vendor of \`worker/examples/\` from
+          **lati-club/ClisTa-Protocol@$SYNCED_REF** (\`$SYNCED_SHA\`).
 
-            Every published example in `examples/manifest.json` was re-verified with
-            the engine — `validate` per thread (replay) and, for cross-thread
-            examples, cross-thread provenance — before generation. Registry-shape and
-            in-runtime seed tests passed.
+          Every published example in \`examples/manifest.json\` was re-verified with
+          the engine — \`validate\` per thread (replay) and, for cross-thread
+          examples, cross-thread provenance — before generation. Registry-shape and
+          in-runtime seed tests passed.
 
-            Example data, machine-verified: safe to merge on green. Merging (touches
-            `worker/**`) triggers `deploy-app.yml` → app.clista.ai.
-          labels: examples-sync
+          Example data, machine-verified: safe to merge on green. Merging (touches
+          \`worker/**\`) triggers \`deploy-app.yml\` → app.clista.ai.
+          EOF
+          )"
+          else
+            echo "PR already open for sync/clista-examples — branch updated."
+          fi
