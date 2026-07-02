@@ -57,11 +57,23 @@ ClisTa CLI / `expected-state.json` — same decision, object IDs, preserved obje
 minority report, and 23-event audit — both in the Node parity test and live in `workerd`.
 Tampering a stored event breaks the chain. The full plan: [`docs/PLAN.md`](docs/PLAN.md).
 
-Next: Phase 5 — deploy `app.clista.ai` (Worker + custom domain + Cloudflare Access
-app), then cut `cli.clista.ai`'s mock over to it. **Runbook ready:**
-[`docs/DEPLOY.md`](docs/DEPLOY.md) — config (`wrangler.jsonc` route) and CI
-(`.github/workflows/deploy-app.yml`) are in place; the remaining steps need
-Cloudflare account access (Access app + deploy).
+**Deployed (Phase 5).** Merges to `main` that touch the app deploy
+**app.clista.ai** (`deploy-app.yml`), behind the Cloudflare Access app.
+
+**Staging.** Every app-touching pull request auto-deploys to
+**staging.clista.ai** (`deploy-staging.yml`) so changes are seen running
+*before* they merge: open a PR → review it live on staging → merge → production.
+Staging is a separate Worker (`env.staging` in `wrangler.jsonc`) with its
+**own Durable Objects** — seed, append, and break threads freely there;
+production event logs are untouched. It sits behind its own Cloudflare Access
+application, and the workflow is gated fail-closed: with
+`env.staging.vars.ACCESS_AUD` empty it refuses to deploy, so staging can never
+come up without Access in front of it. One shared environment, latest PR push
+wins. Setup + notes: [`docs/DEPLOY.md`](docs/DEPLOY.md) §7.
+
+The vendored engine and example threads re-sync from ClisTa-Protocol releases:
+a release tag there dispatches `sync-engine.yml` / `sync-examples.yml`, which
+open PRs on drift (the engine one is the human-reviewed trust-anchor gate).
 
 ## Run it
 
@@ -96,7 +108,8 @@ curl localhost:8787/api/threads/thd_scenario_demo/validate
 - `worker/identity.js` — Cloudflare Access JWT verification + gated dev fallback → `actor_id`
 - `worker/engine/` — vendored ClisTa engine (pure modules; `integrity.js` + `events.js` adapted)
 - `test/engine-parity.test.js` — scenario-demo parity + integrity proof
-- `wrangler.jsonc` — DO binding, SQLite migration, static-asset (SPA) serving
+- `wrangler.jsonc` — DO binding, SQLite migration, static-asset (SPA) serving; `env.staging` = the staging Worker
+- `.github/workflows/` — `deploy-app.yml` (main → production), `deploy-staging.yml` (PRs → staging), `sync-engine.yml` / `sync-examples.yml` (upstream release → PR on drift)
 
 ## API
 
