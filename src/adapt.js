@@ -236,11 +236,15 @@ export function adaptCockpit(state, audit, validate) {
       })),
     },
 
-    // Compose targets: real claims + the decision itself.
+    // Compose targets: real claims + the decision itself. The engine has no
+    // "decision" target type — challenging the decision attaches to its request
+    // (drq_*), so that entry carries the decisionRequestId, labeled as the decision.
     composeTargets: [
       { v: '', label: '— select what this challenges —' },
       ...(r.claims || []).map((c) => ({ v: c.id, label: `${c.id} · ${c.text}` })),
-      ...(dec.id ? [{ v: dec.id, label: `${dec.id} · the decision itself` }] : []),
+      ...(dec.id && dec.decisionRequestId
+        ? [{ v: dec.decisionRequestId, label: `${dec.id} · the decision itself` }]
+        : []),
     ],
 
     // Reference lists for the Compose pickers (position target, decision-request

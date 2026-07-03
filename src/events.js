@@ -38,14 +38,27 @@ const nowIso = () => new Date().toISOString();
 // Each returns { event_type, payload }. id/at default so callers may omit them;
 // the nested participant id is always the joined actor.
 
+// Mirrors the engine CLI's inferTargetType — the validator accepts exactly these
+// types (claim/assumption/decisionRequest/position/evidence/thread). There is no
+// "decision" target: a decision is challenged via its request (drq_*), never the
+// decision record itself.
+function inferTargetType(id) {
+  if (!id) return undefined;
+  if (id.startsWith('clm_')) return 'claim';
+  if (id.startsWith('asm_')) return 'assumption';
+  if (id.startsWith('drq_')) return 'decisionRequest';
+  if (id.startsWith('pos_')) return 'position';
+  if (id.startsWith('evd_')) return 'evidence';
+  return 'thread';
+}
+
 export function buildObjection({ threadId, actorId, target, text, basis, id = rid(ID_PREFIX.objection), at = nowIso() }) {
-  const isDecision = /^(dcr|dec)/.test(target || '');
   return {
     event_type: 'ObjectionRaised',
     payload: {
       objection: {
         id, object: 'objection', threadId, participantId: actorId,
-        targetObjectId: target, targetObjectType: isDecision ? 'decision' : 'claim',
+        targetObjectId: target, targetObjectType: inferTargetType(target),
         text: (text || '').trim(), status: 'open', raisedAt: at,
         ...(basis ? { assumption: basis } : {}),
       },

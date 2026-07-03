@@ -85,11 +85,17 @@ test('every builder sets the nested participant id to the actor (the 422 trap)',
   assert.equal(review.payload.review.reviewerParticipantId, ACTOR);
 });
 
-test('an objection on a decision id is typed as a decision target, not a claim', () => {
+test('an objection is typed by its target id — decision challenges attach to the request (drq_*)', () => {
+  // Mirrors the engine CLI's inferTargetType: the validator has no "decision"
+  // type, so the cockpit offers the decision's request id as the target.
   const onClaim = buildObjection({ threadId, actorId: ACTOR, target: 'clm_x', text: 'x'.repeat(12) });
-  const onDecision = buildObjection({ threadId, actorId: ACTOR, target: 'dcr_abc', text: 'x'.repeat(12) });
+  const onRequest = buildObjection({ threadId, actorId: ACTOR, target: 'drq_abc', text: 'x'.repeat(12) });
+  const onAssumption = buildObjection({ threadId, actorId: ACTOR, target: 'asm_y', text: 'x'.repeat(12) });
+  const onEvidence = buildObjection({ threadId, actorId: ACTOR, target: 'evd_z', text: 'x'.repeat(12) });
   assert.equal(onClaim.payload.objection.targetObjectType, 'claim');
-  assert.equal(onDecision.payload.objection.targetObjectType, 'decision');
+  assert.equal(onRequest.payload.objection.targetObjectType, 'decisionRequest');
+  assert.equal(onAssumption.payload.objection.targetObjectType, 'assumption');
+  assert.equal(onEvidence.payload.objection.targetObjectType, 'evidence');
 });
 
 test('guard mirrors the engine rules (target/open-DRQ/min-12, optional text for position+review)', () => {
