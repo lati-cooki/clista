@@ -54,10 +54,10 @@ export function channelLabel(channel) {
 // Decision-rooted provenance tree (mirrors the engine's `provenance trace`):
 // decision → its supporting claims → each claim's grounding evidence/assumptions
 // and the objections targeting it. Built from projection links only.
-function buildProvenance(r, dec) {
+function buildProvenance(r, dec, allEvidence) {
   const decisionId = dec.id || (r.decision && r.decision.id) || null;
   if (!decisionId) return null;
-  const evById = Object.fromEntries((r.evidence || []).map((e) => [e.id, e]));
+  const evById = Object.fromEntries(allEvidence.map((e) => [e.id, e]));
   const asmById = Object.fromEntries((r.assumptions || []).map((a) => [a.id, a]));
   const claimsById = Object.fromEntries((r.claims || []).map((c) => [c.id, c]));
   const objections = r.objections || [];
@@ -92,6 +92,11 @@ export function adaptCockpit(state, audit, validate) {
   const roleOf = (id) => (byId[id] && byId[id].role) || '';
 
   const dec = ds.decisionRecord || {};
+  // Full evidence ledger vs the narrowed supporting set: `allEvidence` is every
+  // committed item; `reasoningState.evidence` narrows to what the current
+  // proposal/decision cites (falling back to everything when nothing cites).
+  const allEvidence = state.allEvidence || r.evidence || [];
+  const supportingIds = new Set((r.evidence || []).map((e) => e.id));
   const integrityOk = !!(validate && validate.integrity && validate.integrity.valid);
   const validationOk = !!(validate && validate.validation && validate.validation.valid);
   const verified = integrityOk && validationOk;
@@ -164,7 +169,9 @@ export function adaptCockpit(state, audit, validate) {
         }
       : null,
 
-    evidence: (r.evidence || []).map((e) => ({
+    // The full ledger — every committed evidence item, cited or not. `supporting`
+    // marks membership in the narrowed set backing the current proposal/decision.
+    evidence: allEvidence.map((e) => ({
       id: e.id,
       text: e.finding,
       source: e.source,
@@ -174,6 +181,7 @@ export function adaptCockpit(state, audit, validate) {
       sourceType: e.artifactIds && e.artifactIds.length ? `artifact · ${e.artifactIds.join(', ')}` : 'committed evidence',
       introducedBy: e.committedByParticipantId,
       committedAt: e.committedAt,
+      supporting: supportingIds.has(e.id),
     })),
 
     assumptions: (r.assumptions || []).map((a) => ({
@@ -220,7 +228,7 @@ export function adaptCockpit(state, audit, validate) {
 
     risks,
 
-    provenance: buildProvenance(r, dec),
+    provenance: buildProvenance(r, dec, allEvidence),
 
     audit: {
       count: (audit && audit.auditTrail && audit.auditTrail.length) || (validate && validate.event_count) || 0,
@@ -251,7 +259,9 @@ export function adaptCockpit(state, audit, validate) {
     // support sets, review target). Each is { id, text } drawn from the projection.
     refLists: {
       claims: (r.claims || []).map((c) => ({ id: c.id, text: c.text })),
-      evidence: (r.evidence || []).map((e) => ({ id: e.id, text: e.finding })),
+      // Pickers offer the full ledger — a new proposal may cite evidence the
+      // current one doesn't.
+      evidence: allEvidence.map((e) => ({ id: e.id, text: e.finding })),
       assumptions: (r.assumptions || []).map((a) => ({ id: a.id, text: a.text })),
       objections: (r.objections || []).map((o) => ({ id: o.id, text: o.text })),
     },

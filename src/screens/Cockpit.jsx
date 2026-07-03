@@ -212,7 +212,9 @@ export function Cockpit({ threadId, me, go }) {
           rationale: mRationale.trim(),
           conditions: mConditions.split('\n').map((c) => c.trim()).filter(Boolean),
           supportingClaimIds: fallback(proposal.supportingClaimIds, vm.claims),
-          supportingEvidenceIds: fallback(proposal.supportingEvidenceIds, vm.evidence),
+          // vm.evidence is the full ledger; the merge fallback stays narrowed to
+          // the supporting set so an uncited item isn't recorded as support.
+          supportingEvidenceIds: fallback(proposal.supportingEvidenceIds, vm.evidence.filter((e) => e.supporting)),
           supportingAssumptionIds: fallback(proposal.supportingAssumptionIds, vm.assumptions),
           objectionIds: proposal.objectionIds,
           reviewIds: proposal.reviewIds,
@@ -700,7 +702,12 @@ export function Cockpit({ threadId, me, go }) {
             return (
               <div key={e.id} style={css('padding:16px 22px; border-bottom:1px solid #f0f0ee;')}>
                 <div style={css('display:flex; flex-direction:column; gap:7px;')}>
-                  <span style={css(MONO + ' font-size:11px; color:#2c5f96; flex:none; padding-top:2px; min-width:42px;')}>{e.id}</span>
+                  <span style={css(MONO + ' font-size:11px; color:#2c5f96; flex:none; padding-top:2px; min-width:42px;')}>
+                    {e.id}
+                    {!e.supporting && (
+                      <span style={css(MONO + ' margin-left:10px; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#a5a5a5; border:1px solid #e4e4e2; border-radius:3px; padding:1px 6px;')}>uncited</span>
+                    )}
+                  </span>
                   <div style={css('flex:1;')}>
                     <p style={css('margin:0 0 11px; font-size:14px; line-height:1.55; color:#1a1a1a; text-wrap:pretty;')}>{e.text}</p>
                     <div style={css('display:flex; align-items:center; gap:16px; flex-wrap:wrap;')}>
