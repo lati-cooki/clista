@@ -1,6 +1,6 @@
 {
   "source": "lati-club/ClisTa-Protocol",
-  "ref": "refs/heads/main",
+  "ref": "16e7c169e92efa50e8eaa759c530317aa5d89b74",
   "files": {
     "adaptation.js": "sha256:93c3dfabd499e0f4c3bd70d0d5e1572528077a908c264f6add35139320c0b8e4",
     "amendments.js": "sha256:fa9cabbe7126a7b70311ee5e91bf457b240615d23ed4130bcd4c29dc773d0f7f",
