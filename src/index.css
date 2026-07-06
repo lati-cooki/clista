@@ -59,6 +59,6 @@ button { font-family: inherit; }
   .clista-shell main h1 { font-size: 23px !important; }
   .clista-shell .clista-screen { padding: 20px 16px 48px !important; }
   .clista-shell .clista-grid-2 { grid-template-columns: 1fr !important; }
-  .clista-shell .clista-ledger-grid { grid-template-columns: 1fr 110px !important; }
-  .clista-shell .clista-ledger-grid > :nth-child(n+3) { display: none !important; }
+  .clista-shell .clista-ledger-grid { grid-template-columns: 30px 1fr 110px !important; }
+  .clista-shell .clista-ledger-grid > :nth-child(n+4) { display: none !important; }
 }
