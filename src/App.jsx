@@ -14,7 +14,7 @@ const initials = (s) => (s || '').split(/\s+/).filter(Boolean).map((w) => w[0]).
 
 const NAV = [
   { key: 'cockpit', label: 'Thread Cockpit', count: '', icon: ico('cockpit', { size: 18 }) },
-  { key: 'index', label: 'Thread Index', count: '6', icon: ico('index', { size: 18 }) },
+  { key: 'index', label: 'Thread Index', count: '', icon: ico('index', { size: 18 }) },
   { key: 'compose', label: 'Compose / Append', count: '', icon: ico('plus', { size: 18 }) },
   { key: 'kit', label: 'Component Kit', count: '', icon: ico('kit', { size: 18 }) },
 ];
@@ -32,10 +32,21 @@ const SURFACE_NAV = [
 
 export function App() {
   const [screen, setScreen] = useState('cockpit');
-  const [threadId, setThreadId] = useState(DEMO_THREAD_ID);
+  // null until the index loads — the cockpit defaults to the latest-changed
+  // thread (the index is ordered by updated_ms DESC, so that's the first row).
+  const [threadId, setThreadId] = useState(null);
+  const [threadCount, setThreadCount] = useState(null);
   const [me, setMe] = useState(null);
   useEffect(() => {
     api.me().then((res) => setMe(res.ok ? res.data : { authenticated: false }));
+    api
+      .listThreads()
+      .then((res) => {
+        const threads = (res.ok && res.data.threads) || [];
+        setThreadCount(threads.length);
+        setThreadId((cur) => cur ?? (threads[0] ? threads[0].id : DEMO_THREAD_ID));
+      })
+      .catch(() => setThreadId((cur) => cur ?? DEMO_THREAD_ID));
   }, []);
   const go = (next) => () => setScreen(next);
   const openThread = (id) => {
@@ -93,7 +104,7 @@ export function App() {
               <Hoverable key={n.key} onClick={go(n.key)} base={navItemStyle(active)} hover={active ? null : css('background:#f0efed;')}>
                 <Svg html={n.icon} style={css('width:18px; height:18px; flex:none;')} />
                 <span style={css('flex:1; text-align:left;')}>{n.label}</span>
-                <span style={navCountStyle(active)}>{n.count}</span>
+                <span style={navCountStyle(active)}>{n.key === 'index' ? threadCount ?? '' : n.count}</span>
               </Hoverable>
             );
           })}
@@ -129,9 +140,9 @@ export function App() {
           'grid-row:2 / 3; overflow-y:auto; background:#e7e6e3; background-image:radial-gradient(circle at 1px 1px, rgba(10,10,10,0.045) 1px, transparent 0); background-size:24px 24px;'
         )}
       >
-        {screen === 'cockpit' && <Cockpit threadId={threadId} me={me} go={go} />}
+        {screen === 'cockpit' && threadId && <Cockpit threadId={threadId} me={me} go={go} />}
         {screen === 'index' && <ThreadIndex openThread={openThread} me={me} />}
-        {screen === 'compose' && <Compose threadId={threadId} me={me} go={go} />}
+        {screen === 'compose' && threadId && <Compose threadId={threadId} me={me} go={go} />}
         {screen === 'kit' && <Kit />}
       </main>
     </div>

@@ -10,7 +10,7 @@ import { relativeTime } from '../adapt.js';
 const MONO = "font-family:'JetBrains Mono',monospace;";
 const FILTERS = ['all', 'active', 'review', 're-review', 'decided', 'degraded', 'failed'];
 const colHead = "font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#a5a5a5;";
-const GRID = 'grid-template-columns:1fr 132px 130px 96px 60px; gap:16px;';
+const GRID = 'grid-template-columns:40px 1fr 132px 130px 96px 60px; gap:16px;';
 const fieldLabel = "display:block; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#6a6a6a; margin-bottom:8px;";
 const inputBase = "width:100%; padding:11px 13px; font-family:'JetBrains Mono',monospace; font-size:12.5px; color:#1a1a1a; background:#fcfcfb; border:1px solid #d8d8d6; border-radius:5px; outline:none;";
 
@@ -47,6 +47,9 @@ export function ThreadIndex({ openThread, me }) {
   }, []);
 
   const threads = (rows || []).filter((t) => filter === 'all' || t.status === filter);
+  // Index numbers follow ledger order (latest change first) and stay stable
+  // under status filters — #1 is always the most recently changed thread.
+  const numberOf = new Map((rows || []).map((t, i) => [t.id, i + 1]));
   const attention = (rows || []).filter((t) => t.status === 'degraded' || t.status === 'failed' || t.status === 're-review').length;
 
   return (
@@ -110,6 +113,7 @@ export function ThreadIndex({ openThread, me }) {
       {/* ledger */}
       <div style={css('background:#fff; border:1px solid #dcdcda; border-radius:7px; overflow:hidden;')}>
         <div className="clista-ledger-grid" style={css('display:grid; ' + GRID + ' padding:11px 22px; border-bottom:1px solid #e5e5e5; background:#fcfcfb;')}>
+          <span style={css(colHead)}>#</span>
           <span style={css(colHead)}>Question</span>
           <span style={css(colHead)}>Status</span>
           <span style={css(colHead)}>Owner</span>
@@ -126,6 +130,7 @@ export function ThreadIndex({ openThread, me }) {
               base={css('display:grid; ' + GRID + ' align-items:center; width:100%; text-align:left; padding:15px 22px; border:none; border-bottom:1px solid #f0f0ee; background:#fff; cursor:pointer;')}
               hover={css('background:#fafaf9;')}
             >
+              <span style={css(MONO + ' font-size:11.5px; color:#a5a5a5;')}>{numberOf.get(t.id)}</span>
               <span className="clista-ledger-grid" style={css('display:flex; align-items:baseline; gap:10px; min-width:0;')}>
                 <span style={css('flex:1 1 auto; min-width:0; font-size:14px; font-weight:500; color:#1a1a1a; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;')}>{t.question || t.title}</span>
                 <span style={css(MONO + ' flex:0 1 auto; min-width:0; max-width:240px; font-size:10.5px; color:#b0b0b0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;')}>{t.id}</span>
