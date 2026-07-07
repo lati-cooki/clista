@@ -102,3 +102,36 @@ test('OctopusWriter emits signed clista.event records to a live hub', async () =
     assert.strictEqual(hub.store.getIdentity('id_octopus').private_key, null);
   } finally { server.close(); }
 });
+
+test('OctopusWriter.send is the generic signed path: verbatim payload, any kind', async () => {
+  const { server, hub } = createServer(tmp());
+  try {
+    const troy = hub.createIdentity({ id: 'id_troy', displayName: 'Troy', kind: 'human' });
+    hub.createThread({ title: 'Deliberation', authorId: troy.id, slug: 'delib' });
+    const keypair = identity.generateKeypair();
+    hub.createIdentity({ id: 'id_raft', displayName: 'hermes-raft', kind: 'agent', publicKey: keypair.publicKeyHex });
+    const port = await new Promise((r) => server.listen(0, () => r(server.address().port)));
+
+    const writer = new OctopusWriter({
+      baseUrl: `http://localhost:${port}`, slug: 'delib', authorId: 'id_raft', keypair,
+    });
+    const clistaEvent = {
+      event_type: 'ClaimCreated', thread_id: 'thd_delib', actor_id: 'par_hermes_raft',
+      payload: { claim: { id: 'clm_1', object: 'claim', text: 'Supervised-only is the safer default.' } },
+    };
+    const r1 = await writer.send({ payload: clistaEvent });           // default kind clista.event
+    const r2 = await writer.send({ kind: 'note', payload: { memo: 'session end' } });
+    assert.match(r1.record_hash, /^sha256:/);
+    assert.strictEqual(r2.seq, r1.seq + 1);
+
+    const report = hub.verifyThread('delib');
+    assert.strictEqual(report.valid, true);
+    assert.strictEqual(report.records, 3); // genesis + event + note
+
+    const records = hub.exportThread('delib');
+    assert.deepStrictEqual(records[1].payload, clistaEvent);          // stored verbatim, no mapping
+    assert.strictEqual(records[1].kind, 'clista.event');
+    assert.strictEqual(records[2].kind, 'note');
+    assert.strictEqual(hub.store.getIdentity('id_raft').private_key, null); // non-custodial
+  } finally { server.close(); }
+});

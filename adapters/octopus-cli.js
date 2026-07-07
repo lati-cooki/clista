@@ -23,6 +23,13 @@
 //       glue owns the retry-once-on-stale policy, so this returns the stale
 //       signal structurally rather than retrying itself.
 //       -> {ok, record_hash, seq}  |  {ok:false, code, error}
+//
+//   send     --hub URL --slug S --author ID --key PATH
+//            [--kind clista.event|note|attestation]
+//            (--payload '<json>'  |  payload JSON on stdin)
+//       Generic signed write for ANY agent (not just Octopus): the payload is
+//       stored verbatim — no build-event mapping. Same single-shot semantics
+//       and stale signal as emit. -> {ok, record_hash, seq}
 'use strict';
 const fs = require('node:fs');
 const path = require('node:path');
@@ -105,6 +112,26 @@ const isStale = (err) => / 409 /.test(String(err && err.message));
       const writer = new OctopusWriter({ baseUrl: hub, slug, authorId: author, keypair, actorId: actor });
       try {
         const r = await writer.emit(buildEvent);
+        return out({ ok: true, record_hash: r.record_hash, seq: r.seq });
+      } catch (e) {
+        return fail(e.message, { code: isStale(e) ? 'stale_chain' : undefined });
+      }
+    }
+
+    if (cmd === 'send') {
+      const hub = flag('hub');
+      const slug = flag('slug');
+      const author = flag('author');
+      const keyPath = flag('key');
+      if (!hub || !slug || !author || !keyPath) {
+        return fail('send requires --hub --slug --author --key');
+      }
+      const raw = flag('payload') ?? fs.readFileSync(0, 'utf8'); // fd 0 = stdin
+      const payload = JSON.parse(raw);
+      const keypair = loadKey(keyPath);
+      const writer = new OctopusWriter({ baseUrl: hub, slug, authorId: author, keypair });
+      try {
+        const r = await writer.send({ kind: flag('kind', 'clista.event'), payload });
         return out({ ok: true, record_hash: r.record_hash, seq: r.seq });
       } catch (e) {
         return fail(e.message, { code: isStale(e) ? 'stale_chain' : undefined });
