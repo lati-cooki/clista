@@ -14,9 +14,14 @@
 //                  asks a human to re-apply the port, then bless it with
 //                  --update-baseline.
 //   - app-owned  : index.js (public surface) + package.json. Never touched.
-// Files intentionally NOT vendored (cli.js, continuity.js, mcp_server.js,
-// release.js, runtime.js) are simply absent from worker/engine/, and this
-// script never adds new files — it only mirrors the curated set already there.
+// Files intentionally NOT vendored (cli.js, src/cli/, continuity.js,
+// mcp_server.js, release.js, runtime.js) are simply absent from worker/engine/,
+// and this script never adds new top-level files — it only mirrors the curated
+// set already there. EXCEPTION: subdirectories listed in VENDORED_SUBDIRS are
+// vendored WHOLESALE (upstream additions are copied in, engine-side orphans
+// flagged) — upstream #49 split validator.js into src/validator/<domain>.js
+// modules, and the curated top-level rule can't see files that don't exist
+// in worker/engine/ yet.
 //
 // Usage:
 //   node scripts/vendor-engine.mjs [--from <ClisTa-Protocol dir>] [--check] [--update-baseline]
@@ -29,9 +34,9 @@
 // Exit codes: 0 clean/applied · 1 drift (in --check) · 2 port drift on an
 // adapted file (manual re-port required) · 3 usage/IO error.
 
-import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync } from "node:fs";
 import { createHash } from "node:crypto";
-import { join, dirname } from "node:path";
+import { join, dirname, posix } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -52,6 +57,9 @@ const srcDir = join(protocolDir, "src");
 
 const APP_OWNED = new Set(["index.js", "package.json"]);
 const ADAPTED = new Set(["integrity.js", "events.js"]);
+// Subdirectories of src/ vendored wholesale (see header). Everything upstream
+// in these dirs is copied; a new upstream subdir must be added here on purpose.
+const VENDORED_SUBDIRS = ["validator"];
 
 const fail = (code, msg) => {
   console.error(`\n✘ ${msg}`);
@@ -72,16 +80,26 @@ const baseline = existsSync(baselinePath)
   : { source: "lati-club/ClisTa-Protocol", ref: null, files: {} };
 baseline.files ||= {};
 
-// The vendored set is exactly the .js files already in worker/engine/ that also
-// exist upstream and aren't app-owned. This preserves the curated exclusion list.
+// The vendored set: the .js files already in worker/engine/ that also exist
+// upstream and aren't app-owned (the curated exclusion list), PLUS the
+// VENDORED_SUBDIRS wholesale — for those, upstream is the source of the file
+// list, so a module upstream adds to src/validator/ vendors in automatically.
+// All paths below are engine-relative ("validator/shared.js").
 const engineJs = readdirSync(engineDir).filter((f) => f.endsWith(".js"));
+const listJs = (dir) =>
+  existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith(".js")) : [];
+const vendoredFiles = [...engineJs];
+for (const sub of VENDORED_SUBDIRS) {
+  const names = new Set([...listJs(join(srcDir, sub)), ...listJs(join(engineDir, sub))]);
+  for (const f of [...names].sort()) vendoredFiles.push(posix.join(sub, f));
+}
 
 const updated = [];      // verbatim files copied/would-copy
 const portDrift = [];    // adapted files whose upstream changed
 const orphaned = [];     // in engine, gone upstream
 const missingDeps = [];  // require('./x') with no x.js in engine
 
-for (const f of engineJs) {
+for (const f of vendoredFiles) {
   if (APP_OWNED.has(f)) continue;
   const up = join(srcDir, f);
   if (!existsSync(up)) {
@@ -108,19 +126,34 @@ for (const f of engineJs) {
   const cur = existsSync(join(engineDir, f)) ? readFileSync(join(engineDir, f)) : null;
   if (!cur || sha(cur) !== upHash) {
     updated.push(f);
-    if (!CHECK) writeFileSync(join(engineDir, f), upBuf);
+    if (!CHECK) {
+      mkdirSync(dirname(join(engineDir, f)), { recursive: true });
+      writeFileSync(join(engineDir, f), upBuf);
+    }
   }
   baseline.files[f] = upHash;
 }
 
-// Dependency check: every relative require in a vendored file must resolve locally.
-const reqRe = /require\(\s*["']\.\/([\w-]+)["']\s*\)/g;
-const present = new Set(engineJs.map((f) => f.replace(/\.js$/, "")));
-for (const f of engineJs) {
-  const txt = readFileSync(join(engineDir, f), "utf8");
+// Dependency check: every relative require in a vendored file must resolve
+// inside worker/engine/. Subpath-aware: "./validator/shared" from validator.js
+// and "../events" from validator/shared.js both resolve against the requiring
+// file's engine-relative directory.
+const reqRe = /require\(\s*["'](\.\.?\/[\w/-]+)["']\s*\)/g;
+const present = new Set(vendoredFiles.map((f) => f.replace(/\.js$/, "")));
+for (const f of vendoredFiles) {
+  const abs = join(engineDir, f);
+  if (!existsSync(abs)) continue; // --check on a not-yet-copied addition
+  const txt = readFileSync(abs, "utf8");
   let m;
   while ((m = reqRe.exec(txt))) {
-    if (!present.has(m[1]) && !missingDeps.includes(m[1])) missingDeps.push(`${m[1]}.js (required by ${f})`);
+    const resolved = posix.normalize(posix.join(posix.dirname(f), m[1]));
+    if (resolved.startsWith("..")) {
+      if (!missingDeps.includes(resolved)) missingDeps.push(`${resolved} escapes worker/engine/ (required by ${f})`);
+      continue;
+    }
+    if (!present.has(resolved) && !missingDeps.some((d) => d.startsWith(`${resolved}.js`))) {
+      missingDeps.push(`${resolved}.js (required by ${f})`);
+    }
   }
 }
 
