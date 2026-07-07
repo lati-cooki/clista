@@ -294,19 +294,6 @@ export default {
           return json(id);
         }
 
-        // GET /api/agent/queue — threads humans flagged for autonomous
-        // deliberation. Agent-only (the clistahermes service token polls this).
-        if (parts[1] === 'agent' && parts[2] === 'queue' && request.method === 'GET') {
-          const identity = await resolveIdentity(request, env);
-          if (!identity.authenticated) {
-            return json({ error: 'unauthenticated', reason: identity.reason || 'sign in required' }, 401);
-          }
-          if (identity.kind !== 'agent') {
-            return json({ error: 'forbidden', reason: 'agent service token required' }, 403);
-          }
-          return json(await indexStub(env).listFlags());
-        }
-
         // POST /api/agent/intake — the emergent meta-thread seeder proposes a
         // canonical thread into the triage inbox. Agent-only. The agent does NOT
         // create the thread (it would become decision owner and the decision
@@ -414,9 +401,8 @@ export default {
                   if (ev.ok) seededClaims += 1;
                 }
                 if (seededClaims) await registerThread(env, threadStub(env, created.id));
-                if (body.flag) await indexStub(env).flagForAgent(created.id, identity.actorId, at);
                 await indexStub(env).resolveIntake(intakeId, { status: 'approved', threadId: created.id, at });
-                return json({ ok: true, status: 'approved', id: created.id, flagged: !!body.flag, seededClaims });
+                return json({ ok: true, status: 'approved', id: created.id, seededClaims });
               }
 
               // run_report → record it as a NEW human-owned thread with the
@@ -535,14 +521,6 @@ export default {
             if (action === 'summary') return json(await stub.summary(threadId));
             if (action === 'audit') return json(await stub.audit(threadId));
             if (action === 'validate') return json(await stub.validate());
-            // Has this thread been flagged for agent deliberation? (cockpit poll)
-            if (action === 'agent-status') {
-              const identity = await resolveIdentity(request, env);
-              if (!identity.authenticated) {
-                return json({ error: 'unauthenticated', reason: identity.reason || 'sign in required' }, 401);
-              }
-              return json(await indexStub(env).flagStatus(threadId));
-            }
           }
 
           if (request.method === 'POST') {
@@ -618,50 +596,8 @@ export default {
               return json(result);
             }
 
-            // Flag this thread for autonomous agent deliberation. Human-only —
-            // an agent shouldn't queue work for itself. Requires the thread to
-            // exist (be registered) so we don't queue orphans.
-            if (action === 'request-agent') {
-              if (identity.kind !== 'human') {
-                return json({ error: 'forbidden', reason: 'only a human participant can request the agent' }, 403);
-              }
-              const card = await stub.indexCard();
-              if (!card || !card.id) {
-                return json({ error: 'not found', reason: 'no such thread' }, 404);
-              }
-              const result = await indexStub(env).flagForAgent(threadId, identity.actorId, engine.nowIso());
-              return json(result, result.ok ? 200 : 422);
-            }
 
-            // Agent acks a flag (it has picked the thread up). Dequeues it but
-            // keeps the row so the cockpit keeps showing live deliberation
-            // status. Agent-only.
-            if (action === 'agent-ack') {
-              if (identity.kind !== 'agent') {
-                return json({ error: 'forbidden', reason: 'agent service token required' }, 403);
-              }
-              const result = await indexStub(env).claimFlag(threadId);
-              return json(result, result.ok ? 200 : 422);
-            }
 
-            // Agent reports live deliberation progress (which channel/Raft
-            // workspace it took the question to, how many peer agents engaged,
-            // phase) so the cockpit can show it. Agent-only. DO metadata, not a
-            // protocol event — same boundary the flag queue already respects.
-            if (action === 'agent-progress') {
-              if (identity.kind !== 'agent') {
-                return json({ error: 'forbidden', reason: 'agent service token required' }, 403);
-              }
-              const result = await indexStub(env).recordAgentProgress(threadId, {
-                channel: typeof body.channel === 'string' ? body.channel : null,
-                workspaceRef: typeof body.workspaceRef === 'string' ? body.workspaceRef : null,
-                responders: typeof body.responders === 'number' ? body.responders : null,
-                phase: typeof body.phase === 'string' ? body.phase : null,
-                detail: typeof body.detail === 'string' ? body.detail : null,
-                at: engine.nowIso(),
-              });
-              return json(result, result.ok ? 200 : 422);
-            }
 
             if (action === 'append') {
               // Server-authoritative actor: identity decides actor_id, never the client.
