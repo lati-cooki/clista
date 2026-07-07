@@ -19,13 +19,12 @@ export class IndexDO extends DurableObject {
         updated_ms INTEGER
       )`
     );
-    // Queue of threads a human asked the autonomous agent (clistahermes) to
-    // deliberate. NOT a protocol event — kept out of the append-only log so the
-    // chain stays clean. The agent polls listFlags() and clears each after it
-    // picks the thread up (agent-ack) or records a decision. The channel/
-    // workspace_ref/responders/phase/detail columns carry live A2A deliberation
-    // status the agent reports back via recordAgentProgress() (e.g. which Raft
-    // workspace it took the question to, how many peer agents engaged).
+    // Per-thread status rows (DO metadata, NOT protocol events — kept out of
+    // the append-only log so the chain stays clean). Originally the clistahermes
+    // deliberation flag queue (agent automation retired 2026-07-07; the queue/
+    // ack/progress accessors are gone) — retained as the in-app notification
+    // seam: flagReReview() marks a decided thread that received a post-decision
+    // objection, and historical deliberation rows keep their provenance.
     this.sql.exec(
       `CREATE TABLE IF NOT EXISTS agent_flags (
         thread_id TEXT PRIMARY KEY,
@@ -124,61 +123,15 @@ export class IndexDO extends DurableObject {
     return { threads };
   }
 
-  // Flag a thread for autonomous agent deliberation (idempotent — re-flagging
-  // an in-progress thread just refreshes it to pending). A fresh request clears
-  // any prior deliberation status — the agent reports it anew on its next cycle.
-  flagForAgent(threadId, requestedBy, at) {
-    if (!threadId) return { ok: false };
-    this.sql.exec(
-      `INSERT INTO agent_flags (thread_id, requested_by, requested_at, status,
-         channel, workspace_ref, responders, phase, detail, updated_at)
-       VALUES (?, ?, ?, 'pending', NULL, NULL, NULL, NULL, NULL, ?)
-       ON CONFLICT(thread_id) DO UPDATE SET
-         requested_by=excluded.requested_by, requested_at=excluded.requested_at, status='pending',
-         channel=NULL, workspace_ref=NULL, responders=NULL, phase=NULL, detail=NULL, updated_at=excluded.updated_at`,
-      threadId,
-      requestedBy ?? null,
-      at ?? null,
-      at ?? null
-    );
-    return { ok: true, requested: true, since: at ?? null };
-  }
 
-  // The agent reports live deliberation status back to the cockpit (which Raft
-  // workspace / moltbook channel it used, how many peer agents engaged, phase).
-  // UPSERT (status 'claimed' on insert) so it's resilient: a progress report
-  // recreates the status row even if the flag was already acked/cleared — the
-  // agent reports progress on threads it is actively deliberating. DO metadata
-  // only; never touches the append-only log.
-  recordAgentProgress(threadId, p = {}) {
-    if (!threadId) return { ok: false };
-    this.sql.exec(
-      `INSERT INTO agent_flags (thread_id, status, channel, workspace_ref, responders, phase, detail, updated_at)
-       VALUES (?, 'claimed', ?, ?, ?, ?, ?, ?)
-       ON CONFLICT(thread_id) DO UPDATE SET
-         channel = COALESCE(excluded.channel, channel),
-         workspace_ref = COALESCE(excluded.workspace_ref, workspace_ref),
-         responders = COALESCE(excluded.responders, responders),
-         phase = COALESCE(excluded.phase, phase),
-         detail = COALESCE(excluded.detail, detail),
-         updated_at = excluded.updated_at`,
-      threadId,
-      p.channel ?? null,
-      p.workspaceRef ?? null,
-      typeof p.responders === 'number' ? p.responders : null,
-      p.phase ?? null,
-      p.detail ?? null,
-      p.at ?? null
-    );
-    return { ok: true, ...this.flagStatus(threadId) };
-  }
 
   // A decided thread received a post-decision objection and flipped to
-  // re-review (see ThreadDO.append). Surface that to the owner via the existing
-  // agent_flags row — no new table, no OAuth: the cockpit's flagStatus() already
-  // renders phase/detail. This is the in-app notification seam; external
-  // alerting (email/push) and owner-transfer plug in at the router around the
-  // call site, not here. DO metadata only; never touches the append-only log.
+  // re-review (see ThreadDO.append). Record that on the thread's agent_flags
+  // row. The cockpit's re-review banner renders from the projection itself
+  // (vm.reReview), so this row is the durable seam for FUTURE notification
+  // surfaces — external alerting (email/push) and owner-transfer plug in at
+  // the router around the call site, not here. DO metadata only; never
+  // touches the append-only log.
   flagReReview(threadId, { ownerId, objectorId, objectionId, at } = {}) {
     if (!threadId) return { ok: false };
     const detail = `re-review · owner=${ownerId || 'unknown'} · objection=${objectionId || 'unknown'} · by=${objectorId || 'unknown'}`;
@@ -194,18 +147,8 @@ export class IndexDO extends DurableObject {
     return { ok: true, ...this.flagStatus(threadId) };
   }
 
-  // The agent's poll queue: threads awaiting deliberation.
-  listFlags() {
-    const flags = this.sql
-      .exec(
-        `SELECT thread_id AS threadId, requested_by AS requestedBy, requested_at AS requestedAt, status
-         FROM agent_flags WHERE status = 'pending' ORDER BY requested_at`
-      )
-      .toArray();
-    return { flags };
-  }
-
-  // Single-thread status for the cockpit UI (incl. live deliberation status).
+  // Single-thread status row (flagReReview's return payload; historical
+  // deliberation rows readable here too).
   flagStatus(threadId) {
     const row = this.sql
       .exec(
@@ -231,15 +174,6 @@ export class IndexDO extends DurableObject {
       : { requested: false };
   }
 
-  // The agent acks a flag: it has picked the thread up and is now deliberating.
-  // Dequeue it (status 'claimed' → listFlags only returns 'pending') but KEEP
-  // the row — it carries the live deliberation status the cockpit shows until
-  // the thread is decided. (Deleting here is what dropped the reported status.)
-  claimFlag(threadId) {
-    if (!threadId) return { ok: false };
-    this.sql.exec("UPDATE agent_flags SET status = 'claimed' WHERE thread_id = ?", threadId);
-    return { ok: true, ...this.flagStatus(threadId) };
-  }
 
   // --- Triage inbox -------------------------------------------------------
   // Enqueue a proposal/submission for the owner to triage. `payload` and

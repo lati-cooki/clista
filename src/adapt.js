@@ -38,19 +38,6 @@ export function channelFromSource(source) {
   return null;
 }
 
-// A channel string ("raft", "moltbook", "raft+moltbook") → a friendly label for
-// the live deliberation-status banner.
-export function channelLabel(channel) {
-  if (!channel) return null;
-  const s = String(channel).toLowerCase();
-  const raft = s.includes('raft');
-  const molt = s.includes('moltbook');
-  if (raft && molt) return 'Raft + moltbook';
-  if (raft) return 'Raft';
-  if (molt) return 'moltbook';
-  return channel;
-}
-
 // Decision-rooted provenance tree (mirrors the engine's `provenance trace`):
 // decision → its supporting claims → each claim's grounding evidence/assumptions
 // and the objections targeting it. Built from projection links only.

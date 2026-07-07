@@ -60,12 +60,11 @@ describe('triage inbox — agent proposes, human approves & owns', () => {
     expect(item.kind).toBe('thread_proposal');
     expect(item.payload.useCases).toContain('preserved objection chains');
 
-    // Approve + hand to the deliberation cron.
-    const approve = await humanPost(`/api/intake/${itemId}/approve`, { flag: true });
+    // Approve.
+    const approve = await humanPost(`/api/intake/${itemId}/approve`, {});
     expect(approve.status).toBe(200);
     const approveBody = await approve.json();
     expect(approveBody.status).toBe('approved');
-    expect(approveBody.flagged).toBe(true);
     // The two use-cases were seeded as starting substrate (proposed claims).
     expect(approveBody.seededClaims).toBe(2);
     const threadId = approveBody.id;
@@ -80,11 +79,6 @@ describe('triage inbox — agent proposes, human approves & owns', () => {
     // The governance keystone: the created thread's decision owner is the
     // APPROVING HUMAN (par_troylati), not the agent.
     expect(await ownerId(threadId)).toBe('par_troylati');
-
-    // And it was handed to the agent queue (flag:true).
-    const status = await (await humanGet(`/api/threads/${threadId}/agent-status`)).json();
-    expect(status.requested).toBe(true);
-    expect(status.requestedBy).toBe('par_troylati');
 
     // The item is no longer pending.
     const inbox2 = await (await humanGet('/api/intake')).json();

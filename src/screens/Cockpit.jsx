@@ -2,10 +2,9 @@ import { useState } from 'react';
 import { css } from '../lib/css.js';
 import { Svg } from '../lib/Svg.jsx';
 import { Hoverable } from '../lib/Hoverable.jsx';
-import { ico, octopus } from '../icons.js';
+import { ico } from '../icons.js';
 import { badgeFor, tabStyle, provBtnStyle, channelMeta, channelBadgeStyle, filterStyle } from '../styles.js';
 import { useThread } from '../useThread.js';
-import { channelLabel } from '../adapt.js';
 import { api } from '../api.js';
 import { InlineComposer } from '../lib/InlineComposer.jsx';
 import { RefGroup } from '../lib/RefGroup.jsx';
@@ -133,12 +132,11 @@ function Notice({ children }) {
 }
 
 export function Cockpit({ threadId, me, go }) {
-  const { loading, error, vm, empty, agent, reload } = useThread(threadId);
+  const { loading, error, vm, empty, reload } = useThread(threadId);
   const [previewDegraded, setPreviewDegraded] = useState(false);
   const [prov, setProv] = useState(null);
   const [auditOpen, setAuditOpen] = useState(true);
   const [joining, setJoining] = useState(false);
-  const [requesting, setRequesting] = useState(false);
   const [merging, setMerging] = useState(false);
   const [mergeResult, setMergeResult] = useState(null);
   const [mSummary, setMSummary] = useState('');
@@ -157,23 +155,6 @@ export function Cockpit({ threadId, me, go }) {
     setJoining(true);
     await api.join(threadId, 'contributor');
     setJoining(false);
-    reload();
-  };
-
-  // Hand the thread to the autonomous agent (clistahermes): it deliberates via
-  // moltbook and records events back here on its next cron cycle. Human-only.
-  const isHuman = !!(me && me.authenticated && (me.kind || 'human') === 'human');
-  const ag = agent || {};
-  const agentRequested = !!ag.requested;
-  // The agent has reported live A2A deliberation status (channel / workspace /
-  // responders / phase) back from Raft + moltbook.
-  const agentLive = agentRequested && !!(ag.channel || ag.phase || ag.workspaceRef || typeof ag.responders === 'number');
-  const agentResponders = typeof ag.responders === 'number' ? ag.responders : null;
-  const canRequestAgent = isHuman && vm.status !== 'decided';
-  const requestAgent = async () => {
-    setRequesting(true);
-    await api.requestAgent(threadId);
-    setRequesting(false);
     reload();
   };
 
@@ -362,39 +343,6 @@ export function Cockpit({ threadId, me, go }) {
           <Hoverable onClick={joining ? undefined : join} base={css('display:inline-flex; align-items:center; gap:7px; padding:8px 14px; background:#0a0a0a; color:#fff; border:none; border-radius:5px; ' + MONO + ' font-size:11px; font-weight:500; letter-spacing:0.04em; cursor:' + (joining ? 'default' : 'pointer') + '; opacity:' + (joining ? '0.6' : '1') + '; flex:none;')} hover={css('background:#2a2a2a;')}>
             {joining ? 'joining…' : 'Join thread'}
           </Hoverable>
-        </div>
-      )}
-
-      {/* autonomous-agent affordance — hand the thread to clistahermes */}
-      {canRequestAgent && (
-        <div style={css('display:flex; align-items:center; gap:12px; padding:11px 16px; margin-bottom:18px; background:' + (agentRequested ? '#f3f6f3' : '#fff') + '; border:1px solid ' + (agentRequested ? 'rgba(28,122,79,0.35)' : '#e0e0de') + '; border-radius:5px;')}>
-          <Svg html={octopus} style={css('width:20px; height:20px; color:' + (agentRequested ? '#1c7a4f' : '#6a6a6a') + '; flex:none;')} />
-          {agentRequested ? (
-            agentLive ? (
-              <span style={css('font-size:13px; color:#2f6a4a;')}>
-                <span style={css(MONO + ' font-size:12px;')}>clistahermes</span> is deliberating
-                {channelLabel(ag.channel) ? <> via <span style={css('font-weight:600;')}>{channelLabel(ag.channel)}</span></> : null}
-                {ag.workspaceRef ? <> in workspace <span style={css(MONO + ' font-size:12px;')}>{ag.workspaceRef}</span></> : null}
-                {agentResponders != null ? ` — ${agentResponders} ${agentResponders === 1 ? 'agent' : 'agents'} engaged` : ''}
-                {ag.phase ? <> · <span style={css(MONO + ' font-size:11.5px;')}>{ag.phase}</span></> : null}
-                {ag.detail ? <span style={css('display:block; margin-top:3px; font-size:12px; color:#5a7a66;')}>{ag.detail}</span> : null}
-              </span>
-            ) : (
-              <span style={css('font-size:13px; color:#2f6a4a;')}>
-                Handed to <span style={css(MONO + ' font-size:12px;')}>clistahermes</span> — it will take this to Raft + moltbook and record the deliberation back here on its next cycle.
-              </span>
-            )
-          ) : (
-            <span style={css('font-size:13px; color:#4a4a4a;')}>
-              Stuck on what's next? Hand this thread to the autonomous agent — it puts the question to other agents (on Raft + moltbook) and records the deliberation back here.
-            </span>
-          )}
-          <div style={css('flex:1;')} />
-          {!agentRequested && (
-            <Hoverable onClick={requesting ? undefined : requestAgent} base={css('display:inline-flex; align-items:center; gap:7px; padding:8px 14px; background:#1c7a4f; color:#fff; border:none; border-radius:5px; ' + MONO + ' font-size:11px; font-weight:500; letter-spacing:0.04em; cursor:' + (requesting ? 'default' : 'pointer') + '; opacity:' + (requesting ? '0.6' : '1') + '; flex:none;')} hover={css('background:#176440;')}>
-              {requesting ? 'requesting…' : 'Have clistahermes deliberate'}
-            </Hoverable>
-          )}
         </div>
       )}
 
