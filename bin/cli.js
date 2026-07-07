@@ -80,7 +80,11 @@ try {
     }
     case 'serve': {
       const port = Number(flag('port', 7777));
-      const { server } = createServer(DB);
+      // Write rate-limit override (--rate-limit / THREADHUB_RATE_LIMIT): test
+      // harnesses need a high ceiling; absent/invalid → server default (120/min).
+      const rlMax = Number(flag('rate-limit', process.env.THREADHUB_RATE_LIMIT));
+      const opts = Number.isFinite(rlMax) && rlMax > 0 ? { rateLimit: { max: rlMax } } : {};
+      const { server } = createServer(DB, opts);
       server.listen(port, () => console.log(`threadhub listening on http://localhost:${port}  (db: ${DB})`));
       break;
     }
@@ -98,7 +102,7 @@ usage:
   threadhub verify --thread <id|slug>
   threadhub verify --all                # CI: exit 0 iff every thread chain is valid
   threadhub export --thread <id|slug>
-  threadhub serve [--port 7777]`);
+  threadhub serve [--port 7777] [--rate-limit 120]`);
   }
 } catch (e) {
   console.error('error:', e.message);
