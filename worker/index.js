@@ -160,6 +160,34 @@ function evidenceEvent(threadId, identity, { source, finding }) {
   };
 }
 
+// Build an ObjectionRaised event recording an external submission as a MATERIAL
+// OBJECTION on a thread (the approve-as-objection triage path). Same vouching
+// model as evidenceEvent — the approving human is the accountable participant,
+// with the real origin folded into the text (objections carry no source field).
+// Targets the thread itself, so it needs no reference into the reasoning graph.
+// On a decided thread this is precisely what trips the re-review loop.
+function objectionEvent(threadId, identity, { source, text }) {
+  const body = String(text || '').slice(0, MAX_INTAKE_BYTES);
+  return {
+    event_type: 'ObjectionRaised',
+    thread_id: threadId,
+    actor_id: identity.actorId,
+    payload: {
+      objection: {
+        id: engine.newId('obj', body || source || 'intake'),
+        object: 'objection',
+        threadId,
+        participantId: identity.actorId,
+        targetObjectType: 'thread',
+        targetObjectId: threadId,
+        text: `${body}${source ? ` [source: ${source}]` : ''}`,
+        status: 'open',
+        raisedAt: engine.nowIso(),
+      },
+    },
+  };
+}
+
 // Build a ClaimCreated event (proposed claim) attributed to `identity`. Used to
 // seed an approved proposal's use-cases as starting substrate on the new thread.
 function claimEvent(threadId, identity, text) {
@@ -207,6 +235,27 @@ async function ensureParticipant(env, threadId, identity) {
 async function registerThread(env, stub) {
   const card = await stub.indexCard();
   if (card && card.id) await indexStub(env).upsert(card);
+}
+
+// After ANY successful append whose result carries reReviewTriggered (the DO
+// minted a companion ReviewTriggered — see ThreadDO.append), flag + optionally
+// email the CURRENT decision owner. Shared by every route that can land a
+// post-decision objection (direct append, intake approve-as-objection), so no
+// write path can flip a thread to re-review without the owner being notified.
+// Owner resolution honors transfers (revoke + grant), falling back to the index
+// card's display name for legacy threads with no active authority.
+async function notifyReReview(env, stub, threadId, result) {
+  if (!result.ok || !result.reReviewTriggered) return null;
+  const card = await stub.indexCard();
+  const owner = currentDecisionOwner(await stub.state(threadId), threadId);
+  await indexStub(env).flagReReview(threadId, {
+    ownerId: (owner && owner.id) || (card && card.owner),
+    objectorId: result.reviewTrigger && result.reviewTrigger.triggeredByParticipantId,
+    objectionId: result.reviewTrigger && result.reviewTrigger.triggeringObjectionId,
+    at: engine.nowIso(),
+  });
+  const emailed = await sendReReviewAlert(env, owner, card, result.reviewTrigger);
+  return { ownerId: (owner && owner.id) || null, emailed };
 }
 
 // Example-mirror registry (worker/examples/, vendored from ClisTa-Protocol's
@@ -384,6 +433,12 @@ export default {
             }
 
             if (op === 'approve') {
+              // approve-as-objection only makes sense for a contribution — the
+              // other kinds mint a NEW thread, which has nothing to object to.
+              if (body.as === 'objection' && item.kind !== 'contribution') {
+                return json({ error: 'invalid', reason: `approve as objection only applies to contributions, not '${item.kind}'` }, 422);
+              }
+
               // thread_proposal / decision → create a thread OWNED BY THE
               // APPROVING HUMAN (the governance keystone), optionally handing it
               // to the deliberation cron.
@@ -426,24 +481,40 @@ export default {
                 return json({ ok: true, status: 'approved', id: created.id, attested: ev.ok });
               }
 
-              // contribution → append the external input as evidence onto the
-              // EXISTING target thread (the approver joins it to vouch).
+              // contribution → append the external input onto the EXISTING
+              // target thread (the approver joins it to vouch). Default is an
+              // EvidenceCommitted attestation; `{ as: 'objection' }` records it
+              // as an ObjectionRaised instead — the triage judgement that the
+              // input MATERIALLY CONTRADICTS the thread. On a decided thread
+              // that is what trips the re-review loop, so an outside
+              // contradiction can re-open a decision with a human in the loop.
               if (item.kind === 'contribution') {
+                const asObjection = body.as === 'objection';
                 const target = item.targetThreadId;
                 if (!target) return json({ error: 'invalid', reason: 'contribution has no target thread' }, 422);
-                const card = await threadStub(env, target).indexCard();
+                const stub = threadStub(env, target);
+                const card = await stub.indexCard();
                 if (!card || !card.id) return json({ error: 'not found', reason: 'target thread does not exist' }, 404);
                 if (!(await ensureParticipant(env, target, identity))) {
                   return json({ error: 'failed', reason: 'could not join the target thread to attest' }, 422);
                 }
                 const src = `public submission ${item.id}` + (item.submitter ? ` — ${item.submitter}` : '');
-                const ev = await threadStub(env, target).append(
-                  evidenceEvent(target, identity, { source: src, finding: item.body || item.question || 'External contribution.' })
+                const ev = await stub.append(
+                  asObjection
+                    ? objectionEvent(target, identity, { source: src, text: item.body || item.question || 'External objection.' })
+                    : evidenceEvent(target, identity, { source: src, finding: item.body || item.question || 'External contribution.' })
                 );
                 if (!ev.ok) return json({ error: 'rejected', ...ev }, 422);
-                await registerThread(env, threadStub(env, target));
+                await registerThread(env, stub);
+                const notify = await notifyReReview(env, stub, target, ev);
                 await indexStub(env).resolveIntake(intakeId, { status: 'approved', threadId: target, at });
-                return json({ ok: true, status: 'approved', id: target, attested: true });
+                return json({
+                  ok: true,
+                  status: 'approved',
+                  id: target,
+                  attested: true,
+                  ...(asObjection ? { objection: true, reReview: !!ev.reReviewTriggered, reReviewNotify: notify } : {}),
+                });
               }
 
               return json({ error: 'unsupported', reason: `approve not implemented for kind '${item.kind}'` }, 422);
@@ -611,24 +682,10 @@ export default {
               event.actor_id = identity.actorId;
               const result = await stub.append(event);
               if (result.ok) await registerThread(env, stub);
-              // A post-decision objection auto-emitted a ReviewTriggered: the
-              // thread flipped to re-review. Notify the CURRENT decision owner
-              // — resolved from active authorities so an owner transfer
-              // (revoke + grant) is honored, falling back to the index card's
-              // display name for legacy threads with no active authority.
-              // In-app flag always; email only when configured (see notify.js).
-              if (result.ok && result.reReviewTriggered) {
-                const card = await stub.indexCard();
-                const owner = currentDecisionOwner(await stub.state(threadId), threadId);
-                await indexStub(env).flagReReview(threadId, {
-                  ownerId: (owner && owner.id) || (card && card.owner),
-                  objectorId: result.reviewTrigger && result.reviewTrigger.triggeredByParticipantId,
-                  objectionId: result.reviewTrigger && result.reviewTrigger.triggeringObjectionId,
-                  at: engine.nowIso(),
-                });
-                const emailed = await sendReReviewAlert(env, owner, card, result.reviewTrigger);
-                result.reReviewNotify = { ownerId: (owner && owner.id) || null, emailed };
-              }
+              // A post-decision objection flipped the thread to re-review:
+              // flag + (when configured) email the current decision owner.
+              const notify = await notifyReReview(env, stub, threadId, result);
+              if (notify) result.reReviewNotify = notify;
               return json(result, result.ok ? 200 : 422); // fail-closed → 422
             }
           }
