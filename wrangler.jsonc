@@ -31,6 +31,14 @@
     }
   ],
   "observability": { "enabled": true },
+  // OPTIONAL re-review email alerts (issue #21). The worker flags the current
+  // decision owner in-app on every re-review flip; it ALSO emails them iff a
+  // send_email binding named EMAIL exists AND the owner declared an email at
+  // participation. To enable: onboard the domain once
+  // (`npx wrangler email sending enable clista.ai`), then uncomment:
+  //   "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["notify@clista.ai"] }],
+  // Optionally set the sender via vars.EMAIL_FROM (default notify@clista.ai).
+  // Absent binding → alerting is silently skipped; nothing else changes.
   // Phase 4 identity. Production reads identity from Cloudflare Access: set these
   // to your Access team domain (the "<team>" in <team>.cloudflareaccess.com) and
   // the Access application's AUD tag. Local dev uses DEV_IDENTITY in .dev.vars

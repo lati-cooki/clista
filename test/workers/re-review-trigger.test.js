@@ -58,6 +58,9 @@ describe('re-review trigger: post-decision objection flags a decided thread', ()
     expect(res.reviewTrigger.triggeredByParticipantId).toBe(ACTOR);
     // Two events stored for one append: the objection + the trigger.
     expect(res.events.length).toBe(2);
+    // The notify resolved the creator as the current decision owner (no
+    // transfer happened), and no email fired (no send_email binding in tests).
+    expect(res.reReviewNotify).toEqual({ ownerId: ACTOR, emailed: false });
 
     // Thread flipped to re-review; the decision record is UNCHANGED (in force).
     const after = await (await get(`/api/threads/${id}/state`)).json();

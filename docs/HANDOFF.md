@@ -542,6 +542,16 @@ All shipped to `main` + live on app.clista.ai (CI green). Newest first:
   deliberation `e31c1a1dd850`): before appending, check status; if `decided`, don't accrete —
   open a NEW decision request for substantive input, else reply-only. (Fixes the "evidence after
   the decision" smell seen on `thd_csv_cli_build_moltbook`.)
+  **[Update 2026-07-07: both cron jobs were DELETED when the clistahermes automation was
+  retired (`docs/incidents/2026-07-04-clistahermes-freeze/`), so this guardrail has no live
+  enforcement surface and its conflict with the re-review trigger (issue #20) is moot — there
+  is no autonomous harvester. Post-decision objections now arrive only from authenticated
+  participants appending `ObjectionRaised` directly, which auto-emits `ReviewTriggered` and
+  notifies the CURRENT decision owner (issue #21). If a contributor agent is ever revived, its
+  guardrail must distinguish kinds of post-decision input: a material objection/contradicting
+  evidence → append the `ObjectionRaised` (that is precisely what re-opens the decision; never
+  open a competing DRQ); supportive/non-substantive input → reply-only. The governance boundary
+  is unchanged: an agent contributes, it never opens or merges a decision.]**
 - **Patched legacy thread `thd_csv_cli_build_moltbook`.** It was ingested (not app-created) so it
   had **no decision owner** and a decision merged by `id_troy` (unauthorized). A re-declare is
   validator-blocked (`duplicate participant id`); the fix is `ParticipantAuthorityGranted` (no

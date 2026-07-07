@@ -5,6 +5,7 @@ import { vendorDueDiligenceEvents } from './vendor-dd.js';
 import { pharmaPhaseGateEvents } from './pharma-phase-gate.js';
 import { examples as exampleRegistry } from './examples/index.js';
 import { resolveIdentity } from './identity.js';
+import { currentDecisionOwner, sendReReviewAlert } from './notify.js';
 import * as engine from './engine/index.js';
 
 export { ThreadDO, IndexDO };
@@ -193,7 +194,9 @@ async function ensureParticipant(env, threadId, identity) {
     thread_id: threadId,
     actor_id: identity.actorId,
     payload: {
-      participant: { id: identity.actorId, object: 'participant', kind: identity.kind || 'human', name: identity.name, role: 'contributor' },
+      // email (when the identity carries one) rides on the participant record
+      // so re-review alerting can reach a declared owner later (issue #21).
+      participant: { id: identity.actorId, object: 'participant', kind: identity.kind || 'human', name: identity.name, ...(identity.email ? { email: identity.email } : {}), role: 'contributor' },
     },
   });
   if (join.ok) await registerThread(env, stub);
@@ -251,6 +254,7 @@ async function createThread(env, identity, { question, title } = {}) {
           object: 'participant',
           kind: identity.kind || 'human',
           name: identity.name,
+          ...(identity.email ? { email: identity.email } : {}),
           role: 'decision owner',
         },
       },
@@ -543,6 +547,7 @@ export default {
                     object: 'participant',
                     kind: identity.kind || 'human',
                     name: identity.name,
+                    ...(identity.email ? { email: identity.email } : {}),
                     role: body.role || 'contributor',
                   },
                 },
@@ -607,16 +612,22 @@ export default {
               const result = await stub.append(event);
               if (result.ok) await registerThread(env, stub);
               // A post-decision objection auto-emitted a ReviewTriggered: the
-              // thread flipped to re-review. Flag the owner (in-app). External
-              // alerting (email/push) and owner-transfer resolution plug in here.
+              // thread flipped to re-review. Notify the CURRENT decision owner
+              // — resolved from active authorities so an owner transfer
+              // (revoke + grant) is honored, falling back to the index card's
+              // display name for legacy threads with no active authority.
+              // In-app flag always; email only when configured (see notify.js).
               if (result.ok && result.reReviewTriggered) {
                 const card = await stub.indexCard();
+                const owner = currentDecisionOwner(await stub.state(threadId), threadId);
                 await indexStub(env).flagReReview(threadId, {
-                  ownerId: card && card.owner,
+                  ownerId: (owner && owner.id) || (card && card.owner),
                   objectorId: result.reviewTrigger && result.reviewTrigger.triggeredByParticipantId,
                   objectionId: result.reviewTrigger && result.reviewTrigger.triggeringObjectionId,
                   at: engine.nowIso(),
                 });
+                const emailed = await sendReReviewAlert(env, owner, card, result.reviewTrigger);
+                result.reReviewNotify = { ownerId: (owner && owner.id) || null, emailed };
               }
               return json(result, result.ok ? 200 : 422); // fail-closed → 422
             }
