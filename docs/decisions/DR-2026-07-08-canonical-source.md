@@ -33,6 +33,7 @@ Adopt Option B with the following binding rules:
 2. **Provenance pinning.** Every atlas page carries a source line citing the repo + commit hash it was written against. Stale pins are visible, not hidden.
 3. **Same-commit rule scoped.** The existing same-commit maintenance rule applies within the atlas; cross-repo freshness is tracked via the provenance pins, not promised.
 4. **Single entry point.** External-facing materials (clista.ai, sales decks, Darrell onboarding) link only to `clista-protocol` as the canonical home; the atlas is linked *from* it, never presented in parallel.
+5. **Automated pin validation.** The provenance pins of rule 2 are machine-checked, not manually trusted: CI in the atlas repo fails any change that leaves a page without a pin or pinned to a nonexistent repo/commit, and emits a visible staleness report comparing each pin against the referenced repo's current head. Missing/invalid pins block merge; staleness is disclosed, never hidden. *(Added by amendment, 2026-07-08 — resolves `obj_supremacy-enforceability`.)*
 
 ## Evidence Basis
 
@@ -41,8 +42,13 @@ Adopt Option B with the following binding rules:
 
 ## Consequences Accepted
 
-- Atlas can drift between pin updates; drift is disclosed, not prevented.
+- Atlas can drift between pin updates; drift is disclosed, not prevented — and, per rule 5, the disclosure is machine-generated rather than dependent on maintainer discipline.
 - One additional maintenance step (updating provenance pins) per upstream change referenced by the atlas.
+- CI tooling for pin validation must be built and maintained in the atlas repo (one-time cost accepted in exchange for closing the manual-discipline gap).
+
+## Amendments
+
+- **2026-07-08 (pre-seal):** Rule 5 (automated pin validation) added in response to hermes-raft's effective challenge on ThreadHub thread `canonical-source-designation` (`thd_c1a2a74df65b`): objection `obj_supremacy-enforceability` (seq 4) — rules 1–2 relied on manual discipline with no machine enforcement. Supporting evidence: `evd_blurry-facts-boundary` (seq 3), `evd_maintenance-burden` (seq 5).
 
 ## Seal
 
