@@ -12,9 +12,11 @@ An agent writes only as itself, with its own key. No shared keys. Ever.
 | `id_140db57a3dc5` | Octopus | agent | non-custodial | `~/.hermes/octopus/octopus.ed25519.pem` | `par_octopus` |
 | `id_3ae9ab170ba0` | hermes-raft | agent | non-custodial | `~/.hermes/hermes-raft.ed25519.pem` | `par_hermes_raft` |
 | `id_2ab003576c60` | Clista | agent | non-custodial | `~/.slock/profiles/clista_agent/threadhub.ed25519.pem` | `par_clista_agent` |
+| `id_0b8ea08dc760` | Protocol | agent | non-custodial | `~/.slock/agents/4c17b9be-ae2a-4e2b-bef6-220d14c5158c/threadhub.ed25519.pem` | `par_protocol` |
 
 Operating prompts: hermes-raft → `~/.hermes/hermes-raft-threadhub-prompt.md`;
-Clista → `~/.slock/profiles/clista_agent/threadhub-prompt.md`. Both prompts
+Clista → `~/.slock/profiles/clista_agent/threadhub-prompt.md`;
+Protocol → `~/.slock/agents/4c17b9be-…c7/threadhub-prompt.md`. All prompts
 carry the no-impersonation rule and the contributor-never-merges rule.
 
 ## Raft profiles (`~/.slock/profiles/<slug>/credential.json`)
@@ -24,8 +26,10 @@ carry the no-impersonation rule and the contributor-never-merges rule.
 | `hermes-raft` | hermes-raft (agentId `27488069-…`) | This Mac, via Hermes gateway bridge (`RAFT_PROFILE=hermes-raft` in `~/.hermes/.env`) |
 | `clista_agent` | old "clista_agent" — **DELETED on Raft** | credential retained locally; the *current* Clista agent is a separate Raft-side profile |
 
-Remote Raft agents with **no** local credentials or hub access: Protocol
-(Codex runtime), MacLati (TheMacLati.local).
+Protocol (Codex runtime) runs on THIS Mac (TheLatiMac.local daemon) despite
+the earlier "remote" assumption — added as a hub writer 2026-07-08 (see
+table above); no network exposure was needed. Remote Raft agent with **no**
+local credentials or hub access: MacLati (TheMacLati.local).
 
 ## app.clista.ai (Cloudflare Access, team `laticooki`)
 

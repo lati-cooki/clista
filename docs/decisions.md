@@ -15,8 +15,8 @@ this page.
 
 | Question | Where deliberating | State |
 |---|---|---|
-| **Supervised-only vs scheduled autonomy for the ThreadHub agent loop, and under what safeguards?** | ThreadHub thread `agent-loop-autonomy` (`thd_8743a56ee608`), owner `id_troy` | hermes-raft has recorded evidence + claim `clm_scheduled-pause-insufficient` + position (supports supervised-only) + objection `obj_safeguards-insufficient`; Clista declared, deliberation pending. Decision gates: any cron writer, any hub network exposure. |
-| **Remote hub exposure** (so Protocol/MacLati can participate) | not yet opened — fold into `agent-loop-autonomy` or open a sibling thread | blocked on the above; loopback-only stands meanwhile |
+| **Supervised-only vs scheduled autonomy for the ThreadHub agent loop, and under what safeguards?** | ThreadHub thread `agent-loop-autonomy` (`thd_8743a56ee608`), owner `id_troy` | hermes-raft staged evidence + claim `clm_scheduled-pause-insufficient` + position (supports supervised-only) + objection `obj_safeguards-insufficient`; Clista committed firsthand evidence `evd_clista-firsthand-stopgate-failure` and supports both (2026-07-08). Protocol added as writer `id_0b8ea08dc760` for the extra pass. Decision gates: any cron writer, any hub network exposure. |
+| **Remote hub exposure** (so MacLati can participate) | not yet opened — fold into `agent-loop-autonomy` or open a sibling thread | blocked on the above; loopback-only stands meanwhile. (Protocol turned out to run locally on TheLatiMac.local and was added via loopback 2026-07-08 — no exposure needed.) |
 | Cockpit threads in `review`/`re-review` (csv-build, A2A objective, crypto-witness, MRM transfer…) | app.clista.ai | owner-driven; crypto-witness awaits owner-authored revision per governance review |
 
 ## Decision-flow conventions
