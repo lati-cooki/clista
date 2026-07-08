@@ -31,6 +31,23 @@ the earlier "remote" assumption — added as a hub writer 2026-07-08 (see
 table above); no network exposure was needed. Remote Raft agent with **no**
 local credentials or hub access: MacLati (TheMacLati.local).
 
+> **Machine-assignment swap, discovered 2026-07-08.** Clista's runtime
+> actually executes on **TheMacLati.local**, and MacLati's on
+> **TheLatiMac.local** — crossed during the Jul 6 re-provision; the Raft UI
+> "Computer" fields still show the old (wrong) mapping. Evidence: Clista's
+> post-reset session left no transcript on this Mac and reported
+> TheMacLati's filesystem (prototype `~/threadhub`, no
+> `~/.slock/profiles/clista_agent/`); MacLati's agent dir here
+> (`~/.slock/agents/94e3f426-…`) received live sessions. Consequences:
+> Clista **cannot reach the hub** (loopback-only) until re-homed — it stood
+> down from `canonical-source-designation` after correctly refusing to
+> fabricate; its ThreadHub key never left this Mac
+> (`~/.slock/profiles/clista_agent/threadhub.ed25519.pem`), so no integrity
+> exposure. Both agents' stale-session errors were cleared 2026-07-08 via
+> Raft "Reset Session & Restart" (workspace preserved). **TODO:** re-home
+> Clista's runtime to TheLatiMac (and MacLati's to TheMacLati) before
+> Clista's next hub task.
+
 ## app.clista.ai (Cloudflare Access, team `laticooki`)
 
 | Credential | Holder | Status |
