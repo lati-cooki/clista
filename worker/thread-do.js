@@ -156,6 +156,14 @@ export class ThreadDO extends DurableObject {
     return { ok: true, count: chained.length, head_hash: chained.at(-1)?.content_hash ?? null };
   }
 
+  // The raw, chained event log — the archival export. Unlike the projected
+  // views this is the source of truth verbatim (event ids, hashes, chain
+  // fields included), so an external archive (e.g. ThreadHub ingest) stores
+  // exactly what this DO holds and stays independently re-verifiable.
+  export() {
+    return this._readAll();
+  }
+
   // Projected thread state (clista.threadState.v0).
   state(threadId) {
     return engine.selectThreadState(engine.projectEvents(this._readAll()), threadId);
