@@ -596,6 +596,9 @@ export default {
             if (action === 'summary') return json(await stub.summary(threadId));
             if (action === 'audit') return json(await stub.audit(threadId));
             if (action === 'validate') return json(await stub.validate());
+            // Raw chained event log, verbatim — the archival export consumed
+            // by scripts/archive-thread.mjs (ThreadHub ingest).
+            if (action === 'export') return json(await stub.export());
           }
 
           if (request.method === 'POST') {
