@@ -14,12 +14,24 @@ is only the "where we left off" delta on top of it.
   objection `obj_supremacy-enforceability`) · 7 Troy amendment adding rule 5
   (CI pin validation) that resolves the objection. Chain valid.
   Local DR copy: `docs/decisions/DR-2026-07-08-canonical-source.md`.
-- **Troy intends to SEAL after Protocol's second challenge pass.** Protocol
-  (Codex, hub writer `id_0b8ea08dc760`, runs on THIS Mac) was woken at
-  ~10:45 AM with an independent-scrutiny brief (stress-test rule 5,
-  rule conflicts, unstated obligations on clista-protocol). A background
-  watch was polling for records > 8; if the session died, check
-  `curl -s http://127.0.0.1:7777/t/canonical-source-designation/verify`.
+- **Troy intends to SEAL after Protocol's second challenge pass — BLOCKED
+  on the dead raft-daemon.** Protocol was woken 10:36 AM, claimed the task,
+  then blocked at 10:38: its wake executed on **TheMacLati.local** (same
+  wrong-filesystem fingerprint as Clista's blocker — prototype `~/threadhub`
+  with only founding-architecture / ship-the-support-beta, no hub, no key).
+  Cause: this Mac's raft-daemon (npx `@botiverse/raft-daemon`, machine
+  `machine-c1478b2f1988ce95`, hostname TheLatiMac.local) **died ~10:04 AM**;
+  wakes then route to the other machine's daemon. Protocol refused to
+  fork/guess keys and asked to be re-homed — correct behavior.
+- **TO UNBLOCK (Troy, ~2 min): restart the raft-daemon on this Mac** —
+  `raft-daemon --server-url https://api.raft.build --api-key <key>` (the
+  key is the one from the original setup; Raft UI → the "DETECT RUNTIME"
+  dialog → "Show setup command" re-displays it. Claude deliberately did not
+  touch key material). Then re-wake Protocol in its DM ("wake Protocol —
+  daemon restored, resume the canonical-source-designation second pass, see
+  the 10:36 brief"). Then check
+  `curl -s http://127.0.0.1:7777/t/canonical-source-designation/verify`
+  for records > 8.
 - **On seal** (owner record by Troy on the hub thread): implement rules 1–5
   across the atlas — README supremacy clause, per-page provenance pins
   (repo + commit), single-entry-point language, CI pin validation — and move
