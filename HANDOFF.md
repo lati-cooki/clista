@@ -21,10 +21,11 @@ The daemon/machine-swap blocker below is RESOLVED (details:
   supervised-only holds); a closing decision record by Troy is pending.
 - The "re-wake Protocol" step below now means: **DM @ProtocolCodex** to run
   the canonical-source-designation second challenge pass.
-- Pending chores: `raft-computer stop` on TheMacLati; `raft-computer
-  restart` here at a quiet moment (service 0.72.0 vs CLI 0.72.1); delete the
-  stale key copy in `~/.slock/agents/4c17b9be-…/` after verifying
-  ProtocolCodex writes.
+- Chores: DONE — `raft-computer stop` on TheMacLati (Troy) and
+  `raft-computer restart` here (service 0.72.1, doctor all-green,
+  all three agents active). Remaining: delete the stale key copy in
+  `~/.slock/agents/4c17b9be-…/` after ProtocolCodex's first verified
+  hub write.
 
 ## State as of 2026-07-08 ~10:50 AM (historical — superseded above)
 
