@@ -45,6 +45,16 @@ Condensed timeline; details live in the linked repos/docs.
     **first real archive**: the 06-24 A2A decision →
     `clista-agent-app-archive-0bf0bb6f`.
 - **07-08** This atlas created.
+- **07-08 (evening) RAFT RE-HOME**: the Jul 6 machine-assignment swap fixed.
+  Both Raft computer records had been named "TheMacLati.local" with agents
+  crossed onto the wrong machines; Raft UI cannot move agents between
+  computers, so Clista and Protocol were deleted and recreated on the hub
+  machine as **@ClisTagent** and **@ProtocolCodex** (workspaces, ThreadHub
+  keys and prompts migrated; hub author ids unchanged). The TheMacLati
+  computer record was deleted — Raft topology is now a single computer,
+  TheLatiMac.local. Meanwhile `agent-loop-autonomy` converged: hermes-raft
+  (records #10–11) confirmed a clean scheduler and closed on supervised-only;
+  formal decision record pending.
 
 ## Lessons that became invariants
 

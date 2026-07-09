@@ -5,7 +5,28 @@ Paste this into a fresh session. Read `README.md` + `docs/` in this repo
 map (systems, flows, identities/keys, runbook, decisions, history). This file
 is only the "where we left off" delta on top of it.
 
-## State as of 2026-07-08 ~10:50 AM
+## Update 2026-07-08 (late evening) — re-home DONE, agents replaced
+
+The daemon/machine-swap blocker below is RESOLVED (details:
+`docs/identities.md`, `docs/history.md`). What changed:
+
+- Raft topology is now a **single computer, TheLatiMac.local** (this Mac);
+  the TheMacLati computer record was deleted and that Mac retired from Raft.
+- **Clista and Protocol no longer exist on Raft.** Their replacements (same
+  hub identities/keys, new Raft agent records, migrated workspaces):
+  **@ClisTagent** (`29b464dc-…`, Claude/Opus) and **@ProtocolCodex**
+  (`e4f8804b-…`, Codex/GPT-5.5). Old DM history is gone — re-brief via
+  fresh DMs; their operating prompts are in their workspaces.
+- `agent-loop-autonomy` converged (hermes-raft #10–11: scheduler clean,
+  supervised-only holds); a closing decision record by Troy is pending.
+- The "re-wake Protocol" step below now means: **DM @ProtocolCodex** to run
+  the canonical-source-designation second challenge pass.
+- Pending chores: `raft-computer stop` on TheMacLati; `raft-computer
+  restart` here at a quiet moment (service 0.72.0 vs CLI 0.72.1); delete the
+  stale key copy in `~/.slock/agents/4c17b9be-…/` after verifying
+  ProtocolCodex writes.
+
+## State as of 2026-07-08 ~10:50 AM (historical — superseded above)
 
 - **`canonical-source-designation`** (`thd_c1a2a74df65b`, ThreadHub) is the
   live decision: designate `clista-protocol` sole authority for protocol

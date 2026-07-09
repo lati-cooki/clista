@@ -9,7 +9,7 @@
 | **ThreadHub** | `~/ThreadHub` · [lati-club/ThreadHub](https://github.com/lati-club/ThreadHub) (private) | The notary: zero-dependency signed/hash-chained/content-addressed record store. Runs locally via launchd on `127.0.0.1:7777`, store at `~/ThreadHub/data/hub.db`. Treats ClisTa events as opaque payloads — the protocol proves reasoning is well-formed, the hub proves the record is untampered and yours. |
 | **Octopus** | source `~/octopus`, installed `~/.hermes/plugins/octopus` | Hermes plugin: regenerative multi-arm build orchestration. Its arm seal/recovery transitions are forwarded to ThreadHub as build decisions. |
 | **Hermes** | `~/.hermes` | The local agent gateway/runtime (Telegram + Raft bridges connected). Hosts Octopus; powers the `hermes-raft` Raft agent. |
-| **Raft** | app.raft.build, space **clista** (CLI `raft`, profiles `~/.slock/profiles/`) | Agent-team coordination: channels, tasks, wakes. Members: Troy + agents Clista, Protocol (Codex), MacLati (Claude), hermes-raft. |
+| **Raft** | app.raft.build, space **clista** (CLI `raft`, profiles `~/.slock/profiles/`) | Agent-team coordination: channels, tasks, wakes. Members: Troy + agents ClisTagent (Claude), ProtocolCodex (Codex), MacLati (Claude), hermes-raft. Since 2026-07-08 all daemon-run agents live on the single computer **TheLatiMac.local** (the hub machine); TheMacLati is retired from Raft. |
 | **Moltbook** | www.moltbook.com | RETIRED surface (2026-07-07). Historical solicitation posts only; account no longer monitored. |
 
 ## Data flows (every arrow that exists)
@@ -46,15 +46,16 @@
 ### Agents → ThreadHub (deliberation, supervised, per-agent keys)
 - `ThreadHub/adapters/octopus-cli.js send` — the GENERIC non-custodial write:
   keygen/register/send. Each agent signs with its own ed25519 key; the hub
-  holds only public keys. Active writers: hermes-raft, Clista (see
-  [identities.md](identities.md)). Woken via Raft, act only in interactive
-  sessions with Troy.
+  holds only public keys. Active writers: hermes-raft, ClisTagent,
+  ProtocolCodex (see [identities.md](identities.md)). Woken via Raft, act
+  only in interactive sessions with Troy.
 
 ### Raft → Hermes (wakes)
 - The Raft bridge (`RAFT_PROFILE=hermes-raft` in `~/.hermes/.env`) delivers
   wake notices to the gateway; the gateway pulls message bodies via the raft
-  CLI. Remote Raft agents (Protocol, MacLati) CANNOT reach the loopback hub —
-  by design, pending the autonomy/exposure decision.
+  CLI. Since the 2026-07-08 re-home there are no remote Raft agents; the hub
+  stays loopback-only (no network exposure was ever added), and every agent
+  reaches it locally on TheLatiMac.
 
 ### Public → App (intake, quarantined)
 - `POST /api/intake/submit` (Turnstile + rate limit) → quarantine inbox →
