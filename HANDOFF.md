@@ -35,9 +35,10 @@ The daemon/machine-swap blocker below is RESOLVED (details:
   is discharged.
 - Chores: DONE — `raft-computer stop` on TheMacLati (Troy) and
   `raft-computer restart` here (service 0.72.1, doctor all-green,
-  all three agents active). Remaining: delete the stale key copy in
-  `~/.slock/agents/4c17b9be-…/` after ProtocolCodex's first verified
-  hub write.
+  all three agents active). Stale key copy in `~/.slock/agents/4c17b9be-…/`
+  DELETED 2026-07-09 (verified byte-identical to the canonical copy first;
+  ProtocolCodex's seq 8–11 writes had already proven the canonical key).
+  NOTHING REMAINS OPEN from the 07-08 re-home / canonical-source arc.
 
 ## State as of 2026-07-08 ~10:50 AM (historical — superseded above)
 

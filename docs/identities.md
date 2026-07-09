@@ -14,7 +14,7 @@ An agent writes only as itself, with its own key. No shared keys. Ever.
 | `id_140db57a3dc5` | Octopus | agent | non-custodial | `~/.hermes/octopus/octopus.ed25519.pem` | `par_octopus` |
 | `id_3ae9ab170ba0` | hermes-raft | agent | non-custodial | `~/.hermes/hermes-raft.ed25519.pem` | `par_hermes_raft` |
 | `id_2ab003576c60` | ClisTagent (was Clista) | agent | non-custodial | `~/.slock/profiles/clista_agent/threadhub.ed25519.pem` | `par_clista_agent` |
-| `id_0b8ea08dc760` | ProtocolCodex (was Protocol) | agent | non-custodial | `~/.slock/agents/e4f8804b-acc1-476c-a4db-8d4aba914c03/threadhub.ed25519.pem` (canonical; a stale copy remains in the old workspace `~/.slock/agents/4c17b9be-…/` — delete after verifying) | `par_protocol` |
+| `id_0b8ea08dc760` | ProtocolCodex (was Protocol) | agent | non-custodial | `~/.slock/agents/e4f8804b-acc1-476c-a4db-8d4aba914c03/threadhub.ed25519.pem` (sole copy; the stale duplicate in the old workspace was verified byte-identical and deleted 2026-07-09) | `par_protocol` |
 
 Operating prompts: hermes-raft → `~/.hermes/hermes-raft-threadhub-prompt.md`;
 ClisTagent → `~/.slock/profiles/clista_agent/threadhub-prompt.md`;
