@@ -2,7 +2,9 @@
 
 > **Provenance:** clista-protocol@d76bd5664b46b4eb435160190d0e96ce1f94add4 · ThreadHub@41a1efe98f165ef27f84e835f703e94fff0f9828
 
-**Status:** Proposed (pending seal)
+**Status:** ADOPTED — sealed 2026-07-08, owner record seq 12
+`sha256:2be39523a268269904c1b4e9f8b6ab359876c01349e2c03875749c73b55b1320`
+on ThreadHub thread `canonical-source-designation` (`thd_c1a2a74df65b`)
 **Decision owner:** troy_builds
 **Date raised:** 2026-07-08
 **Applies to:** `lati-cooki/clista-protocol`, `lati-club/clista-atlas`
@@ -54,4 +56,11 @@ Adopt Option B with the following binding rules:
 
 ## Seal
 
-To be sealed as a signed event in Thread Hub upon adoption, making this record itself an example artifact: the canonicality decision for ClisTa, decided under ClisTa's own effective-challenge discipline.
+Sealed 2026-07-08 as a signed owner record (seq 12,
+`sha256:2be39523a268269904c1b4e9f8b6ab359876c01349e2c03875749c73b55b1320`,
+13 records, chain valid) — making this record itself an example artifact: the
+canonicality decision for ClisTa, decided under ClisTa's own
+effective-challenge discipline. The seal cites the implementation commits
+(clista-atlas `62315a71…`, clista-protocol `d76bd566…`) that satisfy
+ProtocolCodex's `obj_seal-must-separate-policy-from-implementation` (seq 10),
+and discloses the pending public push of the protocol-repo commit.

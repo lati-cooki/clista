@@ -22,14 +22,14 @@ The daemon/machine-swap blocker below is RESOLVED (details:
 - `agent-loop-autonomy` fully converged (21 records, head `4b062e8f…`):
   hermes-raft + ClisTagent + ProtocolCodex all land on supervised-only with
   `clm_no-unattended-append-authority`; Troy's closing decision record pending.
-- `canonical-source-designation`: ProtocolCodex second pass DONE (seq 8–11,
-  12 records, head `d3df2631…`) — supports Option B, objection
-  `obj_seal-must-separate-policy-from-implementation`. **Rules 1–5 were then
-  implemented** (atlas supremacy clause, per-page provenance pins, scoped
-  same-commit rule, protocol-repo entry point @ `d76bd566` local commit, CI
-  pin validation via `scripts/validate-pins.mjs` — passing). Troy's seal can
-  now cite the implementation commits and retire the objection. Push of
-  clista-protocol `d76bd566` (public repo) awaits Troy.
+- `canonical-source-designation`: **SEALED 2026-07-08** — owner record seq 12
+  `sha256:2be39523a268269904c1b4e9f8b6ab359876c01349e2c03875749c73b55b1320`
+  (13 records, chain valid). Full arc: DR seq 1 → hermes-raft challenge 2–6 →
+  amendment seq 7 (rule 5) → ProtocolCodex pass 8–11 (implementation gate) →
+  rules 1–5 implemented (atlas `62315a71…`, protocol `d76bd566…`) → seal
+  citing those commits. decisions.md row moved to Decided; DR local copy
+  marked ADOPTED. Remaining: Troy pushes clista-protocol `d76bd566` (public;
+  until then rule 4 isn't live externally — disclosed in the seal).
 - Chores: DONE — `raft-computer stop` on TheMacLati (Troy) and
   `raft-computer restart` here (service 0.72.1, doctor all-green,
   all three agents active). Remaining: delete the stale key copy in
