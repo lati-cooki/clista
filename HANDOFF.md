@@ -30,8 +30,9 @@ The daemon/machine-swap blocker below is RESOLVED (details:
   amendment seq 7 (rule 5) → ProtocolCodex pass 8–11 (implementation gate) →
   rules 1–5 implemented (atlas `62315a71…`, protocol `d76bd566…`) → seal
   citing those commits. decisions.md row moved to Decided; DR local copy
-  marked ADOPTED. Remaining: Troy pushes clista-protocol `d76bd566` (public;
-  until then rule 4 isn't live externally — disclosed in the seal).
+  marked ADOPTED. clista-protocol `d76bd566` PUSHED to the public remote
+  2026-07-09 — rule 4 is live externally; the seal's pending-push disclosure
+  is discharged.
 - Chores: DONE — `raft-computer stop` on TheMacLati (Troy) and
   `raft-computer restart` here (service 0.72.1, doctor all-green,
   all three agents active). Remaining: delete the stale key copy in
