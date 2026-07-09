@@ -1,5 +1,7 @@
 # History — how this system got here
 
+> **Provenance:** clista-protocol@d76bd5664b46b4eb435160190d0e96ce1f94add4 · ThreadHub@41a1efe98f165ef27f84e835f703e94fff0f9828 · clista-ai-app@8c0570866882f7b4a0f56a7a3857657b15998904
+
 Condensed timeline; details live in the linked repos/docs.
 
 ## 2026-06 — consolidation and going public

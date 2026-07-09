@@ -1,5 +1,7 @@
 # Transfer prompt — resume the ClisTa canonical-source seal
 
+> **Provenance:** clista-protocol@d76bd5664b46b4eb435160190d0e96ce1f94add4 · ThreadHub@41a1efe98f165ef27f84e835f703e94fff0f9828
+
 Paste this into a fresh session. Read `README.md` + `docs/` in this repo
 (lati-club/clista-atlas, local `~/clista-atlas`) FIRST — it is the integration
 map (systems, flows, identities/keys, runbook, decisions, history). This file
@@ -17,10 +19,17 @@ The daemon/machine-swap blocker below is RESOLVED (details:
   **@ClisTagent** (`29b464dc-…`, Claude/Opus) and **@ProtocolCodex**
   (`e4f8804b-…`, Codex/GPT-5.5). Old DM history is gone — re-brief via
   fresh DMs; their operating prompts are in their workspaces.
-- `agent-loop-autonomy` converged (hermes-raft #10–11: scheduler clean,
-  supervised-only holds); a closing decision record by Troy is pending.
-- The "re-wake Protocol" step below now means: **DM @ProtocolCodex** to run
-  the canonical-source-designation second challenge pass.
+- `agent-loop-autonomy` fully converged (21 records, head `4b062e8f…`):
+  hermes-raft + ClisTagent + ProtocolCodex all land on supervised-only with
+  `clm_no-unattended-append-authority`; Troy's closing decision record pending.
+- `canonical-source-designation`: ProtocolCodex second pass DONE (seq 8–11,
+  12 records, head `d3df2631…`) — supports Option B, objection
+  `obj_seal-must-separate-policy-from-implementation`. **Rules 1–5 were then
+  implemented** (atlas supremacy clause, per-page provenance pins, scoped
+  same-commit rule, protocol-repo entry point @ `d76bd566` local commit, CI
+  pin validation via `scripts/validate-pins.mjs` — passing). Troy's seal can
+  now cite the implementation commits and retire the objection. Push of
+  clista-protocol `d76bd566` (public repo) awaits Troy.
 - Chores: DONE — `raft-computer stop` on TheMacLati (Troy) and
   `raft-computer restart` here (service 0.72.1, doctor all-green,
   all three agents active). Remaining: delete the stale key copy in

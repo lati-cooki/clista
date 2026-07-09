@@ -1,5 +1,7 @@
 # Identities & credentials — who writes where, as whom, with which key
 
+> **Provenance:** ThreadHub@41a1efe98f165ef27f84e835f703e94fff0f9828 · clista-ai-app@8c0570866882f7b4a0f56a7a3857657b15998904
+
 The single invariant behind this page: **semantic author = transport writer.**
 An agent writes only as itself, with its own key. No shared keys. Ever.
 

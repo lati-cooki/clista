@@ -1,12 +1,28 @@
 # ClisTa Atlas
 
+> **Provenance:** clista-protocol@d76bd5664b46b4eb435160190d0e96ce1f94add4 · ThreadHub@41a1efe98f165ef27f84e835f703e94fff0f9828 · clista-ai-app@8c0570866882f7b4a0f56a7a3857657b15998904
+
 The integration map for the ClisTa ecosystem — every repo, service, agent,
 identity, and data flow, in one place. **Private.** This is the answer to
 "what talks to what, as whom, with which key."
 
+> **Supremacy clause** *(canonical-source decision, `canonical-source-designation`
+> / `thd_c1a2a74df65b`, 2026-07-08)*. This atlas is **derivative**: authoritative
+> for navigation, never for facts. In any conflict, the artifact repo —
+> [clista-protocol](https://github.com/lati-club/ClisTa-Protocol),
+> [ThreadHub](https://github.com/lati-club/ThreadHub),
+> [clista-ai-app](https://github.com/lati-club/clista-ai-app) — governs and the
+> atlas yields. Protocol facts have one canonical home:
+> **[lati-club/ClisTa-Protocol](https://github.com/lati-club/ClisTa-Protocol)**,
+> which is also the single external entry point to the ecosystem docs; the
+> atlas is linked from it, never presented in parallel.
+
 > Maintenance rule: any session that changes an integration (new writer, new
 > identity, new flow, a retirement) updates the atlas in the same PR/commit
-> as the change. A stale map is worse than no map.
+> as the change. A stale map is worse than no map. **Scope:** the same-commit
+> rule binds *within this atlas repo* only; cross-repo freshness is tracked by
+> each page's **Provenance** pin (repo@commit it was written against) and the
+> CI staleness report (`scripts/validate-pins.mjs`) — disclosed, not promised.
 
 ## The one-paragraph version
 
