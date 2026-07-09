@@ -1,0 +1,31 @@
+name: Tests
+
+# Gate every PR (and pushes to main) on the full suite. The deploy workflow
+# runs only `npm test` (node engine-parity) post-merge; the worker/vitest tests
+# — which prove the DO behaviors like re-review owner resolution (#21) — were
+# never run in CI until this job. test:all = node tests + vitest worker tests.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Full test suite (node + worker)
+        run: npm run test:all
