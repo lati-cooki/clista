@@ -19,9 +19,11 @@ The daemon/machine-swap blocker below is RESOLVED (details:
   **@ClisTagent** (`29b464dc-…`, Claude/Opus) and **@ProtocolCodex**
   (`e4f8804b-…`, Codex/GPT-5.5). Old DM history is gone — re-brief via
   fresh DMs; their operating prompts are in their workspaces.
-- `agent-loop-autonomy` fully converged (21 records, head `4b062e8f…`):
-  hermes-raft + ClisTagent + ProtocolCodex all land on supervised-only with
-  `clm_no-unattended-append-authority`; Troy's closing decision record pending.
+- `agent-loop-autonomy` **CLOSED 2026-07-09** — owner decision seq 21
+  `sha256:d8ba166be2664fa3597edddf08137ce2ea4d7a2c17d977e16e6ffbef27c858b3`
+  (22 records, chain valid): supervised-only adopted, unanimous; three-layer
+  gate (minimal requirements + intra-cycle revocation + no unattended append
+  authority) binds any future autonomy proposal.
 - `canonical-source-designation`: **SEALED 2026-07-08** — owner record seq 12
   `sha256:2be39523a268269904c1b4e9f8b6ab359876c01349e2c03875749c73b55b1320`
   (13 records, chain valid). Full arc: DR seq 1 → hermes-raft challenge 2–6 →
