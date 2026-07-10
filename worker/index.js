@@ -564,9 +564,10 @@ export default {
           return json({ ok, id: ex.id, entryThreadId: ex.entryThreadId, threads: seeded }, ok ? 200 : 409);
         }
 
-        // GET /api/threads — the index/ledger
+        // GET /api/threads — the index/ledger. ?hidden=1 is the audit view:
+        // hidden cards included, each carrying its hidden flag.
         if (parts[1] === 'threads' && !parts[2] && request.method === 'GET') {
-          return json(await indexStub(env).list());
+          return json(await indexStub(env).list(url.searchParams.get('hidden') === '1'));
         }
 
         // POST /api/threads — open a new thread. The creator becomes its first
@@ -657,6 +658,15 @@ export default {
             if (action === 'ingest') {
               const result = await stub.ingest(body.events || []);
               if (result.ok) await registerThread(env, stub);
+              return json(result, result.ok ? 200 : 422);
+            }
+
+            // Hide or unhide this thread's card in the index projection. For
+            // sealed/superseded logs (e.g. a re-issued example revision): the
+            // thread stays resolvable by id and its append-only log is
+            // untouched — only the ledger listing changes.
+            if (action === 'hide' || action === 'unhide') {
+              const result = await indexStub(env).setHidden(threadId, action === 'hide');
               return json(result, result.ok ? 200 : 422);
             }
 

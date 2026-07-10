@@ -19,6 +19,9 @@ export class IndexDO extends DurableObject {
         updated_ms INTEGER
       )`
     );
+    // Back-fill the hidden column on DOs created before it existed.
+    const threadCols = new Set(this.sql.exec('PRAGMA table_info(threads)').toArray().map((r) => r.name));
+    if (!threadCols.has('hidden')) this.sql.exec('ALTER TABLE threads ADD COLUMN hidden INTEGER DEFAULT 0');
     // Per-thread status rows (DO metadata, NOT protocol events — kept out of
     // the append-only log so the chain stays clean). Originally the clistahermes
     // deliberation flag queue (agent automation retired 2026-07-07; the queue/
@@ -116,11 +119,33 @@ export class IndexDO extends DurableObject {
     return { ok: true };
   }
 
-  list() {
-    const threads = this.sql
-      .exec('SELECT id, title, question, status, owner, events, last FROM threads ORDER BY updated_ms DESC')
-      .toArray();
+  // Default view filters hidden cards out and keeps the wire shape unchanged;
+  // includeHidden is the audit view — every card plus its hidden flag.
+  list(includeHidden = false) {
+    const threads = includeHidden
+      ? this.sql
+          .exec(
+            'SELECT id, title, question, status, owner, events, last, COALESCE(hidden, 0) AS hidden FROM threads ORDER BY updated_ms DESC'
+          )
+          .toArray()
+      : this.sql
+          .exec(
+            'SELECT id, title, question, status, owner, events, last FROM threads WHERE COALESCE(hidden, 0) = 0 ORDER BY updated_ms DESC'
+          )
+          .toArray();
     return { threads };
+  }
+
+  // Hide/unhide a thread card in the list projection. DO metadata only — the
+  // per-thread log is untouched and the thread stays resolvable by id. For
+  // sealed/superseded logs (e.g. a re-issued example revision). upsert() never
+  // writes `hidden`, so re-registration on a later append keeps the flag.
+  setHidden(id, hidden) {
+    if (!id) return { ok: false };
+    const rows = this.sql
+      .exec('UPDATE threads SET hidden = ? WHERE id = ? RETURNING id', hidden ? 1 : 0, id)
+      .toArray();
+    return rows.length ? { ok: true, id, hidden: !!hidden } : { ok: false, reason: 'not in index' };
   }
 
 
