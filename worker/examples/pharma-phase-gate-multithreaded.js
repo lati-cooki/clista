@@ -6,16 +6,16 @@ export const example = {
   "summary": "A parent go/no-go that imports four arm-level decisions as CrossThreadEvidence. Three dissents survive the parent approval: two objections propagate from the arms (safety stopping rules, subgroup discipline) with the biostatistician minority report traceable two threads deep by hash, and a third originates at the go/no-go itself — the independent DSMB chair objecting that a single ~500-patient pivotal is an inadequate labeling safety database for a known hepatic signal (a dissent on whether to advance, not just how).",
   "kind": "multi-thread",
   "domain": "pharma",
-  "entryThreadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+  "entryThreadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
   "threads": [
     {
       "role": "parent",
-      "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+      "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
       "events": [
         {
           "event_id": "evt_participantadded_par_cmo_mqyzlq90_8f838408",
           "event_type": "ParticipantAdded",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_cmo",
           "timestamp": "2026-06-29T09:00:01.760Z",
           "payload": {
@@ -29,12 +29,12 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "content_hash": "sha256:8ba33d2b798b3881bca6624821d7d8e78ffc421938b611c6348a0e5bf3e7dfa1"
+          "content_hash": "sha256:1f9a5a6ff6329f776c0f2f7d0d2ca5923e6992c2a1a8327e45c6c0a6266773d6"
         },
         {
           "event_id": "evt_participantadded_par_biostat_mqyzlq9m_94b22202",
           "event_type": "ParticipantAdded",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_biostat",
           "timestamp": "2026-06-29T09:00:01.782Z",
           "payload": {
@@ -48,13 +48,13 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:8ba33d2b798b3881bca6624821d7d8e78ffc421938b611c6348a0e5bf3e7dfa1",
-          "content_hash": "sha256:52126e56ffad33208d54a7a7ef5d60bf941033caedcd2c31ab951923d14ba8e3"
+          "previous_hash": "sha256:1f9a5a6ff6329f776c0f2f7d0d2ca5923e6992c2a1a8327e45c6c0a6266773d6",
+          "content_hash": "sha256:8f6f92a821a482879ff1a2800901ccf788fb85a8f0c707bdddb8e78f7ec7ab14"
         },
         {
           "event_id": "evt_participantadded_par_clin_pharm_mqyzlqa8_c015334c",
           "event_type": "ParticipantAdded",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_clin_pharm",
           "timestamp": "2026-06-29T09:00:01.804Z",
           "payload": {
@@ -68,13 +68,13 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:52126e56ffad33208d54a7a7ef5d60bf941033caedcd2c31ab951923d14ba8e3",
-          "content_hash": "sha256:0377425464af12b4b27b404546738ff1c74fd805bb269ff184e0dc6b87bc542a"
+          "previous_hash": "sha256:8f6f92a821a482879ff1a2800901ccf788fb85a8f0c707bdddb8e78f7ec7ab14",
+          "content_hash": "sha256:bffabcc062a805ed595e2a699d286fbb404bdc5583b3f8375195f03f929e36d6"
         },
         {
           "event_id": "evt_participantadded_par_reg_affairs_mqyzlqau_4297deaf",
           "event_type": "ParticipantAdded",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_reg_affairs",
           "timestamp": "2026-06-29T09:00:01.826Z",
           "payload": {
@@ -88,13 +88,13 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:0377425464af12b4b27b404546738ff1c74fd805bb269ff184e0dc6b87bc542a",
-          "content_hash": "sha256:25503499121191e1b0421aba24ab73bfd95bb479ccd65ba5e4c61266f6be54f3"
+          "previous_hash": "sha256:bffabcc062a805ed595e2a699d286fbb404bdc5583b3f8375195f03f929e36d6",
+          "content_hash": "sha256:c6eb225691780a66ea08a6ee16641dcde76dcd71edbeadb348a595aaeb1f260d"
         },
         {
           "event_id": "evt_participantadded_par_safety_officer_mqyzlqbg_2d62dfc1",
           "event_type": "ParticipantAdded",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_safety_officer",
           "timestamp": "2026-06-29T09:00:01.848Z",
           "payload": {
@@ -108,13 +108,13 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:25503499121191e1b0421aba24ab73bfd95bb479ccd65ba5e4c61266f6be54f3",
-          "content_hash": "sha256:fa2c91e295dbcd865994f7a53843c341eb7a781f45d2a164f5baf32e331fba8a"
+          "previous_hash": "sha256:c6eb225691780a66ea08a6ee16641dcde76dcd71edbeadb348a595aaeb1f260d",
+          "content_hash": "sha256:2a895c662b6b6c5770438c73724484146391c3cf4a02a23920f727677df7fa92"
         },
         {
           "event_id": "evt_participantadded_par_dsmb_chair_mqyzlqc2_b07e0fcc",
           "event_type": "ParticipantAdded",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_dsmb_chair",
           "timestamp": "2026-06-29T09:00:01.870Z",
           "payload": {
@@ -128,13 +128,13 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:fa2c91e295dbcd865994f7a53843c341eb7a781f45d2a164f5baf32e331fba8a",
-          "content_hash": "sha256:8d261da6716db08721af87962caa49c32b116d912d81ed6675cd5b4d5f383a91"
+          "previous_hash": "sha256:2a895c662b6b6c5770438c73724484146391c3cf4a02a23920f727677df7fa92",
+          "content_hash": "sha256:ba591a7f16eebbb787fab7082e174ee85963daf5db3f69dd030df7b48d321dc1"
         },
         {
           "event_id": "evt_participantadded_par_octopus_mqyzlqco_bc4890ea",
           "event_type": "ParticipantAdded",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_octopus",
           "timestamp": "2026-06-29T09:00:01.892Z",
           "payload": {
@@ -148,18 +148,18 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:8d261da6716db08721af87962caa49c32b116d912d81ed6675cd5b4d5f383a91",
-          "content_hash": "sha256:898cad98044ce98ea898867e0f5274421dc097a003cb842374b99c0cccd2f061"
+          "previous_hash": "sha256:ba591a7f16eebbb787fab7082e174ee85963daf5db3f69dd030df7b48d321dc1",
+          "content_hash": "sha256:23bf92a6fd5cada3d508cbc40b93734b3e1d410ea123007c869e9a42011a1045"
         },
         {
-          "event_id": "evt_threadcreated_thd_phase2_to_phase3_go_nogo_ltn4481_mqyzlqda_a9dfd702",
+          "event_id": "evt_threadcreated_thd_phase2_to_phase3_go_nogo_ltn4481_r2_mqyzlqda_773ba7f8",
           "event_type": "ThreadCreated",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_cmo",
           "timestamp": "2026-06-29T09:00:01.914Z",
           "payload": {
             "thread": {
-              "id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "object": "thread",
               "title": "Phase II/III Go/No-Go — LTN-4481 (Moderate-to-Severe Ulcerative Colitis)",
               "question": "Should LTN-4481 advance from Phase II to Phase III based on arm-level workstream outputs?",
@@ -179,28 +179,28 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:898cad98044ce98ea898867e0f5274421dc097a003cb842374b99c0cccd2f061",
-          "content_hash": "sha256:53839bb18478f631a66707d6962ac55d0b01b411d6743afa2a94ac02af07c753"
+          "previous_hash": "sha256:23bf92a6fd5cada3d508cbc40b93734b3e1d410ea123007c869e9a42011a1045",
+          "content_hash": "sha256:c02020e278161364c02a167e17fcecded2ceba86ada7f8e7688351c1b045062c"
         },
         {
           "event_id": "evt_delegationgranted_dlg_pkpd_mqyzlqdw_7dcd5b00",
           "event_type": "DelegationGranted",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_cmo",
           "timestamp": "2026-06-29T09:00:01.936Z",
           "payload": {
             "delegationGrant": {
               "id": "dlg_pkpd",
               "object": "delegationGrant",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "delegatorParticipantId": "par_cmo",
               "delegateId": "par_octopus",
               "delegateType": "participant",
               "action": "pkpd-modeling",
-              "scope": "thread:thd_phase2_to_phase3_go_nogo_ltn4481",
+              "scope": "thread:thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "authorityRequired": "decision_owner",
               "limits": [
-                "scope:thread:thd_phase2_to_phase3_go_nogo_ltn4481"
+                "scope:thread:thd_phase2_to_phase3_go_nogo_ltn4481_r2"
               ],
               "summary": "Octopus delegated to execute PK/PD modeling arm",
               "status": "active",
@@ -221,28 +221,28 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:53839bb18478f631a66707d6962ac55d0b01b411d6743afa2a94ac02af07c753",
-          "content_hash": "sha256:ef18999a3362084eac17cfd767413565d93538bb008ccb6d6829c08895683066"
+          "previous_hash": "sha256:c02020e278161364c02a167e17fcecded2ceba86ada7f8e7688351c1b045062c",
+          "content_hash": "sha256:30b54acf04d717e31f7cce79030699479fad8b2080e03d1f16e2551c85087633"
         },
         {
           "event_id": "evt_delegationgranted_dlg_safety_mqyzlqei_0c5407c5",
           "event_type": "DelegationGranted",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_cmo",
           "timestamp": "2026-06-29T09:00:01.980Z",
           "payload": {
             "delegationGrant": {
               "id": "dlg_safety",
               "object": "delegationGrant",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "delegatorParticipantId": "par_cmo",
               "delegateId": "par_octopus",
               "delegateType": "participant",
               "action": "safety-signal-assessment",
-              "scope": "thread:thd_phase2_to_phase3_go_nogo_ltn4481",
+              "scope": "thread:thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "authorityRequired": "decision_owner",
               "limits": [
-                "scope:thread:thd_phase2_to_phase3_go_nogo_ltn4481"
+                "scope:thread:thd_phase2_to_phase3_go_nogo_ltn4481_r2"
               ],
               "summary": "Octopus delegated to execute safety signal assessment arm",
               "status": "active",
@@ -263,28 +263,28 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:ef18999a3362084eac17cfd767413565d93538bb008ccb6d6829c08895683066",
-          "content_hash": "sha256:8024bb9ed65463f5f16ad0fb4283f44793f2551d17f6e85556448a8a8984b766"
+          "previous_hash": "sha256:30b54acf04d717e31f7cce79030699479fad8b2080e03d1f16e2551c85087633",
+          "content_hash": "sha256:4df67adad50f8791c610eed53253062742dc21d2f83040ba527489855af1a1e1"
         },
         {
           "event_id": "evt_delegationgranted_dlg_subgroup_mqyzlqf4_44249e76",
           "event_type": "DelegationGranted",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_cmo",
           "timestamp": "2026-06-29T09:00:02.024Z",
           "payload": {
             "delegationGrant": {
               "id": "dlg_subgroup",
               "object": "delegationGrant",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "delegatorParticipantId": "par_cmo",
               "delegateId": "par_octopus",
               "delegateType": "participant",
               "action": "subgroup-analysis-review",
-              "scope": "thread:thd_phase2_to_phase3_go_nogo_ltn4481",
+              "scope": "thread:thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "authorityRequired": "decision_owner",
               "limits": [
-                "scope:thread:thd_phase2_to_phase3_go_nogo_ltn4481"
+                "scope:thread:thd_phase2_to_phase3_go_nogo_ltn4481_r2"
               ],
               "summary": "Octopus delegated to execute subgroup analysis review arm",
               "status": "active",
@@ -305,28 +305,28 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:8024bb9ed65463f5f16ad0fb4283f44793f2551d17f6e85556448a8a8984b766",
-          "content_hash": "sha256:0405c7f877fde58c7c9c010e71a038d64794fb074b0fe257ca0f3b5ec9fad6c8"
+          "previous_hash": "sha256:4df67adad50f8791c610eed53253062742dc21d2f83040ba527489855af1a1e1",
+          "content_hash": "sha256:61cac438518a9c6de9184dc0d4880174ee8589bbabf9e5b154a34c263f5ca14e"
         },
         {
           "event_id": "evt_delegationgranted_dlg_reg_mqyzlqfq_3add5745",
           "event_type": "DelegationGranted",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_cmo",
           "timestamp": "2026-06-29T09:00:02.068Z",
           "payload": {
             "delegationGrant": {
               "id": "dlg_reg",
               "object": "delegationGrant",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "delegatorParticipantId": "par_cmo",
               "delegateId": "par_octopus",
               "delegateType": "participant",
               "action": "regulatory-strategy",
-              "scope": "thread:thd_phase2_to_phase3_go_nogo_ltn4481",
+              "scope": "thread:thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "authorityRequired": "decision_owner",
               "limits": [
-                "scope:thread:thd_phase2_to_phase3_go_nogo_ltn4481"
+                "scope:thread:thd_phase2_to_phase3_go_nogo_ltn4481_r2"
               ],
               "summary": "Octopus delegated to execute regulatory strategy arm",
               "status": "active",
@@ -347,20 +347,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:0405c7f877fde58c7c9c010e71a038d64794fb074b0fe257ca0f3b5ec9fad6c8",
-          "content_hash": "sha256:802c7993d197f0a8373fc9c538242ab04cff09b17751d4a68295d2159e62b4ff"
+          "previous_hash": "sha256:61cac438518a9c6de9184dc0d4880174ee8589bbabf9e5b154a34c263f5ca14e",
+          "content_hash": "sha256:aea262347e8a542e68387b826750501895ddae716c5732ebd82e9d96f2b5e46b"
         },
         {
           "event_id": "evt_executionstarted_exe_pkpd_mqyzlqgc_c9e82126",
           "event_type": "ExecutionStarted",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_octopus",
           "timestamp": "2026-06-29T09:00:02.112Z",
           "payload": {
             "executionRecord": {
               "id": "exe_pkpd",
               "object": "executionRecord",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "actorId": "par_octopus",
               "authorizationRef": {
                 "type": "delegation",
@@ -368,9 +368,9 @@ export const example = {
               },
               "decisionId": null,
               "actionType": "pkpd-modeling",
-              "scope": "thread:thd_phase2_to_phase3_go_nogo_ltn4481",
+              "scope": "thread:thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "constraints": [
-                "scope:thread:thd_phase2_to_phase3_go_nogo_ltn4481"
+                "scope:thread:thd_phase2_to_phase3_go_nogo_ltn4481_r2"
               ],
               "status": "active",
               "startedAt": "2026-06-29T09:00:02.134Z",
@@ -388,20 +388,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:802c7993d197f0a8373fc9c538242ab04cff09b17751d4a68295d2159e62b4ff",
-          "content_hash": "sha256:4f2e302d65a4d696f0337938b7167405f728ba92771c5abb04accfa8311de647"
+          "previous_hash": "sha256:aea262347e8a542e68387b826750501895ddae716c5732ebd82e9d96f2b5e46b",
+          "content_hash": "sha256:3f9f2283cc04de409fb75f0adb0fb322a91ed4a9b419da6215b8e50ec31b0362"
         },
         {
           "event_id": "evt_executionstarted_exe_safety_mqyzlqgy_8fd3b362",
           "event_type": "ExecutionStarted",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_octopus",
           "timestamp": "2026-06-29T09:00:02.156Z",
           "payload": {
             "executionRecord": {
               "id": "exe_safety",
               "object": "executionRecord",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "actorId": "par_octopus",
               "authorizationRef": {
                 "type": "delegation",
@@ -409,9 +409,9 @@ export const example = {
               },
               "decisionId": null,
               "actionType": "safety-signal-assessment",
-              "scope": "thread:thd_phase2_to_phase3_go_nogo_ltn4481",
+              "scope": "thread:thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "constraints": [
-                "scope:thread:thd_phase2_to_phase3_go_nogo_ltn4481"
+                "scope:thread:thd_phase2_to_phase3_go_nogo_ltn4481_r2"
               ],
               "status": "active",
               "startedAt": "2026-06-29T09:00:02.178Z",
@@ -429,20 +429,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:4f2e302d65a4d696f0337938b7167405f728ba92771c5abb04accfa8311de647",
-          "content_hash": "sha256:bb777838af5a4702a022c6dc6d6eed1f48d50e985afed39abc6fd9c0cc709ea2"
+          "previous_hash": "sha256:3f9f2283cc04de409fb75f0adb0fb322a91ed4a9b419da6215b8e50ec31b0362",
+          "content_hash": "sha256:0eecd254d5cd3b5734c5920a9befdbb517a938565142cf70da61a69f34e8c8ef"
         },
         {
           "event_id": "evt_executionstarted_exe_subgroup_mqyzlqhk_fac22e55",
           "event_type": "ExecutionStarted",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_octopus",
           "timestamp": "2026-06-29T09:00:02.200Z",
           "payload": {
             "executionRecord": {
               "id": "exe_subgroup",
               "object": "executionRecord",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "actorId": "par_octopus",
               "authorizationRef": {
                 "type": "delegation",
@@ -450,9 +450,9 @@ export const example = {
               },
               "decisionId": null,
               "actionType": "subgroup-analysis-review",
-              "scope": "thread:thd_phase2_to_phase3_go_nogo_ltn4481",
+              "scope": "thread:thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "constraints": [
-                "scope:thread:thd_phase2_to_phase3_go_nogo_ltn4481"
+                "scope:thread:thd_phase2_to_phase3_go_nogo_ltn4481_r2"
               ],
               "status": "active",
               "startedAt": "2026-06-29T09:00:02.222Z",
@@ -470,20 +470,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:bb777838af5a4702a022c6dc6d6eed1f48d50e985afed39abc6fd9c0cc709ea2",
-          "content_hash": "sha256:de75dd3b71e0d1f4a5958e7ce56b75a747b476baa6662e92a6c2bb77cd6d628b"
+          "previous_hash": "sha256:0eecd254d5cd3b5734c5920a9befdbb517a938565142cf70da61a69f34e8c8ef",
+          "content_hash": "sha256:928666015987dbdaa1cd648efd7df1f966febcc4ebe330ed12b4f073668b6552"
         },
         {
           "event_id": "evt_executionstarted_exe_reg_mqyzlqi6_f0da9153",
           "event_type": "ExecutionStarted",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_octopus",
           "timestamp": "2026-06-29T09:00:02.244Z",
           "payload": {
             "executionRecord": {
               "id": "exe_reg",
               "object": "executionRecord",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "actorId": "par_octopus",
               "authorizationRef": {
                 "type": "delegation",
@@ -491,9 +491,9 @@ export const example = {
               },
               "decisionId": null,
               "actionType": "regulatory-strategy",
-              "scope": "thread:thd_phase2_to_phase3_go_nogo_ltn4481",
+              "scope": "thread:thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "constraints": [
-                "scope:thread:thd_phase2_to_phase3_go_nogo_ltn4481"
+                "scope:thread:thd_phase2_to_phase3_go_nogo_ltn4481_r2"
               ],
               "status": "active",
               "startedAt": "2026-06-29T09:00:02.266Z",
@@ -511,23 +511,23 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:de75dd3b71e0d1f4a5958e7ce56b75a747b476baa6662e92a6c2bb77cd6d628b",
-          "content_hash": "sha256:16801e4c22a20dffca169e61de0acfa3e0329aee37e712a4ed654b5dda4a9b7d"
+          "previous_hash": "sha256:928666015987dbdaa1cd648efd7df1f966febcc4ebe330ed12b4f073668b6552",
+          "content_hash": "sha256:010c08e8caeb69a3d87eeb80e5ac3ef443c168fc288258642d296351dfd3fa9d"
         },
         {
           "event_id": "evt_crossthreadevidence_cte_pkpd_output_mqyzlqis_da0b90ae",
           "event_type": "CrossThreadEvidence",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_clin_pharm",
           "timestamp": "2026-06-29T09:00:02.288Z",
           "payload": {
             "crossThreadEvidence": {
               "id": "cte_pkpd_output",
               "object": "crossThreadEvidence",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
-              "sourceThreadId": "thd_arm_pkpd_modeling_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
+              "sourceThreadId": "thd_arm_pkpd_modeling_ltn4481_r2",
               "sourceDecisionRecordId": "dcr_pkpd_dose_confirmed",
-              "sourceEventHash": "sha256:d63ab532dae873091e72af85de8c4c9f83c12176a4f0705d3c2b60f4011af14f",
+              "sourceEventHash": "sha256:2e9a666f6eeee065b1ee62bbbb5b25c0265b4b27746a92d2206eaf0e5f3f8d68",
               "derivation": "decision_output",
               "finding": "200mg Q4W dose confirmed by exposure-response modeling. Cmin correlates with endoscopic improvement (R-squared 0.71). Early PK sampling at weeks 4 and 12 required. Dose adjustment pathway triggers if observed exposure deviates more than 30 percent from model prediction.",
               "confidence": 0.84,
@@ -538,23 +538,23 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:16801e4c22a20dffca169e61de0acfa3e0329aee37e712a4ed654b5dda4a9b7d",
-          "content_hash": "sha256:ffff8b6a1f35f89c5fe97a9c56ef80f056bb75561ea7e5dfc437e09c9497d27c"
+          "previous_hash": "sha256:010c08e8caeb69a3d87eeb80e5ac3ef443c168fc288258642d296351dfd3fa9d",
+          "content_hash": "sha256:f95c07c3e48d1383a6e2a72923775dfc70a382f5b13ea508681eca151bd27b56"
         },
         {
           "event_id": "evt_crossthreadevidence_cte_safety_output_mqyzlqje_1512423c",
           "event_type": "CrossThreadEvidence",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_safety_officer",
           "timestamp": "2026-06-29T09:00:02.310Z",
           "payload": {
             "crossThreadEvidence": {
               "id": "cte_safety_output",
               "object": "crossThreadEvidence",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
-              "sourceThreadId": "thd_arm_safety_assessment_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
+              "sourceThreadId": "thd_arm_safety_assessment_ltn4481_r2",
               "sourceDecisionRecordId": "dcr_safety_acceptable",
-              "sourceEventHash": "sha256:7db7d90f21a043a1e5a2dc5d3709620c98b776c6bf1b1e96018224910ed51eda",
+              "sourceEventHash": "sha256:eb2487f635c59d268075a202ce625722d72bc448e5fe7a946d88d7cf3102034b",
               "derivation": "decision_output",
               "finding": "Safety profile acceptable for Phase III with three hard-gated conditions: baseline ALT greater than 2x ULN exclusion, biweekly ALT/AST monitoring for 12 weeks, and quantitative hepatic stopping rules finalized before first patient dosed. Stopping rules condition is a preserved objection from the safety arm.",
               "confidence": 0.79,
@@ -565,23 +565,23 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:ffff8b6a1f35f89c5fe97a9c56ef80f056bb75561ea7e5dfc437e09c9497d27c",
-          "content_hash": "sha256:a852ccdad8cd1e63d72b1290b69e7bf0d2997674cae405e54cb1c46926e6d02e"
+          "previous_hash": "sha256:f95c07c3e48d1383a6e2a72923775dfc70a382f5b13ea508681eca151bd27b56",
+          "content_hash": "sha256:65e91fc4bbc9d6330ff072c0e9a03d010bcf20945e7f1ff1dad80b22dadd29bd"
         },
         {
           "event_id": "evt_crossthreadevidence_cte_safety_objection_mqyzlqk0_9feb8109",
           "event_type": "CrossThreadEvidence",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_safety_officer",
           "timestamp": "2026-06-29T09:00:02.332Z",
           "payload": {
             "crossThreadEvidence": {
               "id": "cte_safety_objection",
               "object": "crossThreadEvidence",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
-              "sourceThreadId": "thd_arm_safety_assessment_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
+              "sourceThreadId": "thd_arm_safety_assessment_ltn4481_r2",
               "sourceDecisionRecordId": "dcr_safety_acceptable",
-              "sourceEventHash": "sha256:7db7d90f21a043a1e5a2dc5d3709620c98b776c6bf1b1e96018224910ed51eda",
+              "sourceEventHash": "sha256:eb2487f635c59d268075a202ce625722d72bc448e5fe7a946d88d7cf3102034b",
               "derivation": "preserved_objection",
               "finding": "Hepatic stopping rules must be finalized before first patient dosed. Monitoring without quantitative stopping criteria is not a safety plan. This objection survived the arm-level decision and propagates to the parent.",
               "confidence": 0.91,
@@ -592,23 +592,23 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:a852ccdad8cd1e63d72b1290b69e7bf0d2997674cae405e54cb1c46926e6d02e",
-          "content_hash": "sha256:add2d10e2fd78cda2021190258c5cbe208f42b76a19c4628d40297ce7d3c54f0"
+          "previous_hash": "sha256:65e91fc4bbc9d6330ff072c0e9a03d010bcf20945e7f1ff1dad80b22dadd29bd",
+          "content_hash": "sha256:eb5f07f7a8993a6aa3f3fdf44b459b7d821d9f47b2174ed6def87162c2e3e4df"
         },
         {
           "event_id": "evt_crossthreadevidence_cte_subgroup_output_mqyzlqkm_fb22d7e4",
           "event_type": "CrossThreadEvidence",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_biostat",
           "timestamp": "2026-06-29T09:00:02.354Z",
           "payload": {
             "crossThreadEvidence": {
               "id": "cte_subgroup_output",
               "object": "crossThreadEvidence",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
-              "sourceThreadId": "thd_arm_subgroup_review_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
+              "sourceThreadId": "thd_arm_subgroup_review_ltn4481_r2",
               "sourceDecisionRecordId": "dcr_subgroup_exploratory",
-              "sourceEventHash": "sha256:a5f9103437abca655d87f3b55d9c772c37356241155c7466cb20be02139adf47",
+              "sourceEventHash": "sha256:fd40249839eb18c00bccbfe93a689d10ef5a2005f15a86e4895e76f5cf3c6081",
               "derivation": "decision_output",
               "finding": "Bio-failure subgroup designated exploratory only. No alpha allocation, no enrichment, no stratification in Phase III primary analysis. Lead biostatistician filed proactive minority report documenting risk of organizational pressure to promote the finding.",
               "confidence": 0.72,
@@ -619,23 +619,23 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:add2d10e2fd78cda2021190258c5cbe208f42b76a19c4628d40297ce7d3c54f0",
-          "content_hash": "sha256:4dedef8df1da0358053238253d4452af21dfe630fad9dfe687865295cabea708"
+          "previous_hash": "sha256:eb5f07f7a8993a6aa3f3fdf44b459b7d821d9f47b2174ed6def87162c2e3e4df",
+          "content_hash": "sha256:3a049a33f8aad3d4f3fa67c9c9651fae7c034f03fd2b1ad417f38ea5c9b4daea"
         },
         {
           "event_id": "evt_crossthreadevidence_cte_subgroup_minority_mqyzlql8_d619f7d1",
           "event_type": "CrossThreadEvidence",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_biostat",
           "timestamp": "2026-06-29T09:00:02.376Z",
           "payload": {
             "crossThreadEvidence": {
               "id": "cte_subgroup_minority",
               "object": "crossThreadEvidence",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
-              "sourceThreadId": "thd_arm_subgroup_review_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
+              "sourceThreadId": "thd_arm_subgroup_review_ltn4481_r2",
               "sourceDecisionRecordId": "dcr_subgroup_exploratory",
-              "sourceEventHash": "sha256:a5f9103437abca655d87f3b55d9c772c37356241155c7466cb20be02139adf47",
+              "sourceEventHash": "sha256:fd40249839eb18c00bccbfe93a689d10ef5a2005f15a86e4895e76f5cf3c6081",
               "derivation": "minority_report",
               "finding": "Biostatistician minority report: any future protocol amendment promoting the bio-failure subgroup from exploratory to confirmatory was flagged as a statistical integrity risk at the earliest decision point. Traceable for TMF.",
               "confidence": 0.95,
@@ -646,23 +646,23 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:4dedef8df1da0358053238253d4452af21dfe630fad9dfe687865295cabea708",
-          "content_hash": "sha256:83f978f699ca44b25c43068166d2bf302e7470e5f8bdc409b6b4ad2c8920efc2"
+          "previous_hash": "sha256:3a049a33f8aad3d4f3fa67c9c9651fae7c034f03fd2b1ad417f38ea5c9b4daea",
+          "content_hash": "sha256:2ea1aee68575beaa459ff63a3cacb99483a19088fe2c433243e6fcf4ff2264d2"
         },
         {
           "event_id": "evt_crossthreadevidence_cte_reg_output_mqyzlqlu_8b37e5af",
           "event_type": "CrossThreadEvidence",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_reg_affairs",
           "timestamp": "2026-06-29T09:00:02.398Z",
           "payload": {
             "crossThreadEvidence": {
               "id": "cte_reg_output",
               "object": "crossThreadEvidence",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
-              "sourceThreadId": "thd_arm_regulatory_strategy_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
+              "sourceThreadId": "thd_arm_regulatory_strategy_ltn4481_r2",
               "sourceDecisionRecordId": "dcr_reg_strategy_confirmed",
-              "sourceEventHash": "sha256:e6466f7151fc97f0e03616a746626bb4bbc10d55e966a988a642e2b52b93d9ae",
+              "sourceEventHash": "sha256:0d6645ab540d1592e4a5223f4b4d1d5b91043a0fd3f96f765bd3780adcb038c8",
               "derivation": "decision_output",
               "finding": "Single pivotal trial strategy confirmed. Adaptive design with interim futility, at least 500 patients, hepatic monitoring plan per FDA Type B meeting alignment. IND amendment to reference meeting minutes.",
               "confidence": 0.95,
@@ -673,20 +673,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:83f978f699ca44b25c43068166d2bf302e7470e5f8bdc409b6b4ad2c8920efc2",
-          "content_hash": "sha256:96ed2433d7884c3f03a661cc86a597a2b92e2f7e2d4d7089d7edc25d63a45995"
+          "previous_hash": "sha256:2ea1aee68575beaa459ff63a3cacb99483a19088fe2c433243e6fcf4ff2264d2",
+          "content_hash": "sha256:e2397ae0bb176082c5a9aa0651a4e949fe65169044e8e81b3e132b190089eebc"
         },
         {
           "event_id": "evt_evidencecommitted_evd_phase2_topline_mqyzlqmg_e7d1f2c4",
           "event_type": "EvidenceCommitted",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_cmo",
           "timestamp": "2026-06-29T09:00:02.420Z",
           "payload": {
             "evidence": {
               "id": "evd_phase2_topline",
               "object": "evidence",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "source": "LTN-4481 Phase II top-line results (Study 4481-201, N=347)",
               "finding": "Modified Mayo Score remission at week 16: 38.2 percent (200mg) vs 12.1 percent (placebo), p<0.001. Endoscopic improvement: 52.4 percent vs 21.8 percent.",
               "confidence": 0.91,
@@ -698,20 +698,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:96ed2433d7884c3f03a661cc86a597a2b92e2f7e2d4d7089d7edc25d63a45995",
-          "content_hash": "sha256:03ef498a3be4b4b00551510ce251809547960e52e3a1fcbdfa4f3618423dc3fb"
+          "previous_hash": "sha256:e2397ae0bb176082c5a9aa0651a4e949fe65169044e8e81b3e132b190089eebc",
+          "content_hash": "sha256:05448aad068d72efeaaec7e0fe5e3d195e5ad72b47aad0bc7238c1a01f55bf1b"
         },
         {
           "event_id": "evt_assumptiondeclared_asm_arms_converge_mqyzlqn2_52936097",
           "event_type": "AssumptionDeclared",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_cmo",
           "timestamp": "2026-06-29T09:00:02.442Z",
           "payload": {
             "assumption": {
               "id": "asm_arms_converge",
               "object": "assumption",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "text": "All four arm-level decisions support advancement, each with binding conditions. Advancement is conditional, not unconditional: the safety arm's hepatic stopping-rules gate is a hard precondition, so 'no blocking finding' overstates — no arm blocked outright, but the safety gate must clear before dosing.",
               "status": "active",
               "evidenceIds": [
@@ -728,20 +728,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:03ef498a3be4b4b00551510ce251809547960e52e3a1fcbdfa4f3618423dc3fb",
-          "content_hash": "sha256:0bbdbf09af8d97b126c7ee112a7eb935c5f74910ce441ef0913b7d866f1a7409"
+          "previous_hash": "sha256:05448aad068d72efeaaec7e0fe5e3d195e5ad72b47aad0bc7238c1a01f55bf1b",
+          "content_hash": "sha256:e9fbf2ac96be93c84647e8a7889e30138ab420ad7db4b6e2aa6c9a1e90f2da53"
         },
         {
           "event_id": "evt_claimcreated_clm_go_supported_mqyzlqno_d3b9ef18",
           "event_type": "ClaimCreated",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_cmo",
           "timestamp": "2026-06-29T09:00:02.464Z",
           "payload": {
             "claim": {
               "id": "clm_go_supported",
               "object": "claim",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "text": "Phase III advancement is supported by converging arm-level decisions on dose, safety, subgroup discipline, and regulatory path.",
               "status": "endorsed",
               "evidenceIds": [
@@ -761,20 +761,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:0bbdbf09af8d97b126c7ee112a7eb935c5f74910ce441ef0913b7d866f1a7409",
-          "content_hash": "sha256:49b1786edd81a1aa5441b1a52648e829ca49798fb4eb7f29e440ed416c36ba36"
+          "previous_hash": "sha256:e9fbf2ac96be93c84647e8a7889e30138ab420ad7db4b6e2aa6c9a1e90f2da53",
+          "content_hash": "sha256:30c86e52069964885d7bc89b10e235c4f20ba23a4d694d1a72c5d9cf49abd0f1"
         },
         {
           "event_id": "evt_positiontaken_par_cmo_mqyzlqoa_74726b36",
           "event_type": "PositionTaken",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_cmo",
           "timestamp": "2026-06-29T09:00:02.508Z",
           "payload": {
             "position": {
               "id": "pos_cmo_support",
               "object": "position",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "participantId": "par_cmo",
               "targetObjectId": "clm_go_supported",
               "targetObjectType": "claim",
@@ -785,20 +785,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:49b1786edd81a1aa5441b1a52648e829ca49798fb4eb7f29e440ed416c36ba36",
-          "content_hash": "sha256:9508d0ab99a7ebc3efcdee865aa19458961b52a5e9e61a141afe1aa07da12052"
+          "previous_hash": "sha256:30c86e52069964885d7bc89b10e235c4f20ba23a4d694d1a72c5d9cf49abd0f1",
+          "content_hash": "sha256:3e56e812d43308bdcd65fb89cf0e002cff74d6443adf511b3cde6b10079de792"
         },
         {
           "event_id": "evt_positiontaken_par_biostat_mqyzlqow_acd6b374",
           "event_type": "PositionTaken",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_biostat",
           "timestamp": "2026-06-29T09:00:02.552Z",
           "payload": {
             "position": {
               "id": "pos_biostat_support",
               "object": "position",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "participantId": "par_biostat",
               "targetObjectId": "clm_go_supported",
               "targetObjectType": "claim",
@@ -809,20 +809,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:9508d0ab99a7ebc3efcdee865aa19458961b52a5e9e61a141afe1aa07da12052",
-          "content_hash": "sha256:2857ec9e36d4bb6b423d1c916cb081a0e6eeb697f7126e0a5cd97cc59064e9ec"
+          "previous_hash": "sha256:3e56e812d43308bdcd65fb89cf0e002cff74d6443adf511b3cde6b10079de792",
+          "content_hash": "sha256:7c7e72d3cc7b0de4db59515499c576ca691329ca395c6ed5d0060b69fd068f4c"
         },
         {
           "event_id": "evt_positiontaken_par_clin_pharm_mqyzlqpi_beedb8bb",
           "event_type": "PositionTaken",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_clin_pharm",
           "timestamp": "2026-06-29T09:00:02.596Z",
           "payload": {
             "position": {
               "id": "pos_clin_pharm_support",
               "object": "position",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "participantId": "par_clin_pharm",
               "targetObjectId": "clm_go_supported",
               "targetObjectType": "claim",
@@ -833,20 +833,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:2857ec9e36d4bb6b423d1c916cb081a0e6eeb697f7126e0a5cd97cc59064e9ec",
-          "content_hash": "sha256:e978a7c8aee3a96700c642eb1ced26dc1c24bde3fea4c144cef71d9246a4a6f2"
+          "previous_hash": "sha256:7c7e72d3cc7b0de4db59515499c576ca691329ca395c6ed5d0060b69fd068f4c",
+          "content_hash": "sha256:0a5fd9cfeaa845f60ecda199f07705912f0c5369518b0f70bd905a63cea51d98"
         },
         {
           "event_id": "evt_positiontaken_par_safety_officer_mqyzlqq4_7f65cdbd",
           "event_type": "PositionTaken",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_safety_officer",
           "timestamp": "2026-06-29T09:00:02.640Z",
           "payload": {
             "position": {
               "id": "pos_safety_officer_support",
               "object": "position",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "participantId": "par_safety_officer",
               "targetObjectId": "clm_go_supported",
               "targetObjectType": "claim",
@@ -857,20 +857,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:e978a7c8aee3a96700c642eb1ced26dc1c24bde3fea4c144cef71d9246a4a6f2",
-          "content_hash": "sha256:c424f2e80e7040ee20ee81db536d19cc11fc2a6754afdce953909663371db602"
+          "previous_hash": "sha256:0a5fd9cfeaa845f60ecda199f07705912f0c5369518b0f70bd905a63cea51d98",
+          "content_hash": "sha256:9f8aee0f11892769c6b6dec7a056157c9b1bb3e0c575f82d04f91fc9f6edb6f9"
         },
         {
           "event_id": "evt_positiontaken_par_reg_affairs_mqyzlqqq_ca78627b",
           "event_type": "PositionTaken",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_reg_affairs",
           "timestamp": "2026-06-29T09:00:02.684Z",
           "payload": {
             "position": {
               "id": "pos_reg_affairs_support",
               "object": "position",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "participantId": "par_reg_affairs",
               "targetObjectId": "clm_go_supported",
               "targetObjectType": "claim",
@@ -881,20 +881,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:c424f2e80e7040ee20ee81db536d19cc11fc2a6754afdce953909663371db602",
-          "content_hash": "sha256:1be19ca62f2e1ba0e8f265c751a8345114708d252b9304f2bb0024ddb679ee9d"
+          "previous_hash": "sha256:9f8aee0f11892769c6b6dec7a056157c9b1bb3e0c575f82d04f91fc9f6edb6f9",
+          "content_hash": "sha256:0e342320f2e899d7301a3b10e761be678e8677173d478f3684e00799b6d65b10"
         },
         {
           "event_id": "evt_positiontaken_par_dsmb_chair_mqyzlqrc_7dbbfb71",
           "event_type": "PositionTaken",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_dsmb_chair",
           "timestamp": "2026-06-29T09:00:02.728Z",
           "payload": {
             "position": {
               "id": "pos_dsmb_chair_oppose",
               "object": "position",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "participantId": "par_dsmb_chair",
               "targetObjectId": "clm_go_supported",
               "targetObjectType": "claim",
@@ -905,20 +905,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:1be19ca62f2e1ba0e8f265c751a8345114708d252b9304f2bb0024ddb679ee9d",
-          "content_hash": "sha256:e5dd05c71288ad19b6ed5f21d36abc314d3abac001dddbdc539053e479f4c56a"
+          "previous_hash": "sha256:0e342320f2e899d7301a3b10e761be678e8677173d478f3684e00799b6d65b10",
+          "content_hash": "sha256:17a9516d7fd6e36ac03b49769689c3a9116997f52a9cf3e82ff2ee8f6ee6eefe"
         },
         {
           "event_id": "evt_objectionraised_advancement_premature_mqyzlqry_893b171f",
           "event_type": "ObjectionRaised",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_dsmb_chair",
           "timestamp": "2026-06-29T09:00:02.772Z",
           "payload": {
             "objection": {
               "id": "obj_advancement_premature",
               "object": "objection",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "participantId": "par_dsmb_chair",
               "targetObjectId": "clm_go_supported",
               "targetObjectType": "claim",
@@ -930,70 +930,70 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:e5dd05c71288ad19b6ed5f21d36abc314d3abac001dddbdc539053e479f4c56a",
-          "content_hash": "sha256:fc2acc1f60935da5c9270f7da182ba54615e2e5e2a23dd287d44c0008e155776"
+          "previous_hash": "sha256:17a9516d7fd6e36ac03b49769689c3a9116997f52a9cf3e82ff2ee8f6ee6eefe",
+          "content_hash": "sha256:3cb5bc811effa931a3c5562effe0ef4bd3a11595aeea27d40c72cefe471012fa"
         },
         {
           "event_id": "evt_objectionraised_propagated_stopping_mqyzlqsk_4ccee63b",
           "event_type": "ObjectionRaised",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_safety_officer",
           "timestamp": "2026-06-29T09:00:02.816Z",
           "payload": {
             "objection": {
               "id": "obj_stopping_rules_propagated",
               "object": "objection",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "participantId": "par_safety_officer",
               "targetObjectId": "clm_go_supported",
               "targetObjectType": "claim",
               "assumption": "Arm-level safety conditions will be enforced in the parent decision.",
-              "text": "Propagated from safety arm (thd_arm_safety_assessment_ltn4481): hepatic stopping rules must be finalized before first patient dosed. This is a hard gate, not a timeline target. If organizational pressure accelerates enrollment before stopping rules are complete, this decision record documents the safety officer identified it as a non-negotiable precondition.",
+              "text": "Propagated from safety arm (thd_arm_safety_assessment_ltn4481_r2): hepatic stopping rules must be finalized before first patient dosed. This is a hard gate, not a timeline target. If organizational pressure accelerates enrollment before stopping rules are complete, this decision record documents the safety officer identified it as a non-negotiable precondition.",
               "status": "open",
               "raisedAt": "2026-06-29T09:00:02.838Z"
             }
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:fc2acc1f60935da5c9270f7da182ba54615e2e5e2a23dd287d44c0008e155776",
-          "content_hash": "sha256:665a1b9c917530f3e88808351528b9e85343f073aba37cbc43d081266e9804fd"
+          "previous_hash": "sha256:3cb5bc811effa931a3c5562effe0ef4bd3a11595aeea27d40c72cefe471012fa",
+          "content_hash": "sha256:57520651ce631b59292990d6434665785c3c0cbb1577b99d05afa5e73cec273d"
         },
         {
           "event_id": "evt_objectionraised_propagated_subgroup_mqyzlqt6_b1644704",
           "event_type": "ObjectionRaised",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_biostat",
           "timestamp": "2026-06-29T09:00:02.860Z",
           "payload": {
             "objection": {
               "id": "obj_subgroup_discipline_propagated",
               "object": "objection",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "participantId": "par_biostat",
               "targetObjectId": "clm_go_supported",
               "targetObjectType": "claim",
               "assumption": "The exploratory-only designation for the bio-failure subgroup will hold against organizational pressure.",
-              "text": "Propagated from subgroup arm (thd_arm_subgroup_review_ltn4481): any future protocol amendment promoting the bio-failure subgroup from exploratory to confirmatory was flagged as a statistical integrity risk. This objection is recorded at the go/no-go level to ensure the escalation path is documented.",
+              "text": "Propagated from subgroup arm (thd_arm_subgroup_review_ltn4481_r2): any future protocol amendment promoting the bio-failure subgroup from exploratory to confirmatory was flagged as a statistical integrity risk. This objection is recorded at the go/no-go level to ensure the escalation path is documented.",
               "status": "open",
               "raisedAt": "2026-06-29T09:00:02.882Z"
             }
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:665a1b9c917530f3e88808351528b9e85343f073aba37cbc43d081266e9804fd",
-          "content_hash": "sha256:07665d189eabd5f90eaff54a478299d4ea5c95f7e906d25b77debd373afa296c"
+          "previous_hash": "sha256:57520651ce631b59292990d6434665785c3c0cbb1577b99d05afa5e73cec273d",
+          "content_hash": "sha256:665ba6dc33fd362cceed2d83b5e286ab5297ee5e41858e179e16df027fa83793"
         },
         {
           "event_id": "evt_decisionrequestopened_drq_go_nogo_ltn4481_mqyzlqts_060824e7",
           "event_type": "DecisionRequestOpened",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_cmo",
           "timestamp": "2026-06-29T09:00:02.904Z",
           "payload": {
             "decisionRequest": {
               "id": "drq_go_nogo_ltn4481",
               "object": "decisionRequest",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "proposal": "Advance LTN-4481 to Phase III with all arm-level conditions incorporated as binding.",
               "status": "review",
               "supportingEvidenceIds": [
@@ -1022,20 +1022,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:07665d189eabd5f90eaff54a478299d4ea5c95f7e906d25b77debd373afa296c",
-          "content_hash": "sha256:592e240dc2fa63776ba4def6dffaded41c53dfa0727a5850770c04f3e8ddfe04"
+          "previous_hash": "sha256:665ba6dc33fd362cceed2d83b5e286ab5297ee5e41858e179e16df027fa83793",
+          "content_hash": "sha256:82c40fa767a8e7dfed576a9cc2f08b75cb5431ef0a4aea2318647edcd30481c3"
         },
         {
           "event_id": "evt_reviewsubmitted_rev_biostat_parent_mqyzlque_fe1d9581",
           "event_type": "ReviewSubmitted",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_biostat",
           "timestamp": "2026-06-29T09:00:02.948Z",
           "payload": {
             "review": {
               "id": "rev_biostat_parent",
               "object": "review",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "decisionRequestId": "drq_go_nogo_ltn4481",
               "reviewerParticipantId": "par_biostat",
               "status": "approve_with_conditions",
@@ -1049,20 +1049,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:592e240dc2fa63776ba4def6dffaded41c53dfa0727a5850770c04f3e8ddfe04",
-          "content_hash": "sha256:0c0bee6bb459ddda82467699465b125494987de99e7c3fd34cbcd92bd432ebf1"
+          "previous_hash": "sha256:82c40fa767a8e7dfed576a9cc2f08b75cb5431ef0a4aea2318647edcd30481c3",
+          "content_hash": "sha256:a2ab5192c742c219e109405410dfe986f6abbc6913ce1b2b1e0852c3fa43b96e"
         },
         {
           "event_id": "evt_reviewsubmitted_rev_safety_parent_mqyzlqv0_bc2aef69",
           "event_type": "ReviewSubmitted",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_safety_officer",
           "timestamp": "2026-06-29T09:00:02.992Z",
           "payload": {
             "review": {
               "id": "rev_safety_parent",
               "object": "review",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "decisionRequestId": "drq_go_nogo_ltn4481",
               "reviewerParticipantId": "par_safety_officer",
               "status": "approve_with_conditions",
@@ -1076,20 +1076,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:0c0bee6bb459ddda82467699465b125494987de99e7c3fd34cbcd92bd432ebf1",
-          "content_hash": "sha256:8234a732177b34ec0f1bb7bde136db58c9faec51316b678201259ac94c7303c6"
+          "previous_hash": "sha256:a2ab5192c742c219e109405410dfe986f6abbc6913ce1b2b1e0852c3fa43b96e",
+          "content_hash": "sha256:1a4e3054d61e9882971f70d0cf23ba07c934a5186d726232145c315208b59d24"
         },
         {
           "event_id": "evt_reviewsubmitted_rev_reg_parent_mqyzlqvm_68643adb",
           "event_type": "ReviewSubmitted",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_reg_affairs",
           "timestamp": "2026-06-29T09:00:03.036Z",
           "payload": {
             "review": {
               "id": "rev_reg_parent",
               "object": "review",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "decisionRequestId": "drq_go_nogo_ltn4481",
               "reviewerParticipantId": "par_reg_affairs",
               "status": "approve_with_conditions",
@@ -1103,20 +1103,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:8234a732177b34ec0f1bb7bde136db58c9faec51316b678201259ac94c7303c6",
-          "content_hash": "sha256:864c32bc339905c456687511a06ebd5477e2f1e78de84e877d031872befa3189"
+          "previous_hash": "sha256:1a4e3054d61e9882971f70d0cf23ba07c934a5186d726232145c315208b59d24",
+          "content_hash": "sha256:9fa344a953f5ac603fa9ea96a82abe005c956e2e00a120629a3dbf980f5af784"
         },
         {
           "event_id": "evt_decisionmerged_dcr_go_nogo_ltn4481_mqyzlqw8_bff824e6",
           "event_type": "DecisionMerged",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_cmo",
           "timestamp": "2026-06-29T09:00:03.080Z",
           "payload": {
             "decisionRecord": {
               "id": "dcr_go_nogo_ltn4481",
               "object": "decisionRecord",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "decisionRequestId": "drq_go_nogo_ltn4481",
               "status": "approved",
               "summary": "LTN-4481 advances to Phase III. Single pivotal trial, 200mg Q4W, adaptive design. All arm-level conditions are binding. Scope narrower than requested: subgroup exploratory only, enrollment capped pre-interim, stopping rules before FPD.",
@@ -1181,23 +1181,23 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:864c32bc339905c456687511a06ebd5477e2f1e78de84e877d031872befa3189",
-          "content_hash": "sha256:db1c2ab93c5ee5255d8c6cd81efa51473919610c67e2be78d36051e13af35c3c"
+          "previous_hash": "sha256:9fa344a953f5ac603fa9ea96a82abe005c956e2e00a120629a3dbf980f5af784",
+          "content_hash": "sha256:3f1875e42a988f4412a79de8e10dab7dab1b232c53c84b88927232dfdb9c2f82"
         },
         {
           "event_id": "evt_minorityreportfiled_parent_dissent_mqyzlqwu_1a89773c",
           "event_type": "MinorityReportFiled",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_biostat",
           "timestamp": "2026-06-29T09:00:03.124Z",
           "payload": {
             "minorityReport": {
               "id": "mnr_parent_biostat_discipline",
               "object": "minorityReport",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "decisionRecordId": "dcr_go_nogo_ltn4481",
               "participantId": "par_biostat",
-              "text": "This minority report propagates and reinforces the arm-level dissent from thd_arm_subgroup_review_ltn4481. At the go/no-go level, the risk is compounded: now that the program has a green light to Phase III, the commercial and timeline pressures to incorporate the bio-failure subgroup finding into the design will intensify. This report documents that the lead biostatistician objects to any protocol amendment that promotes the subgroup from exploratory to confirmatory, and that the stopping-rules hard gate from the safety arm must not be softened under enrollment pressure. Both objections survive the approval and are traceable through cross-thread provenance to the arm-level decisions that originated them.",
+              "text": "This minority report propagates and reinforces the arm-level dissent from thd_arm_subgroup_review_ltn4481_r2. At the go/no-go level, the risk is compounded: now that the program has a green light to Phase III, the commercial and timeline pressures to incorporate the bio-failure subgroup finding into the design will intensify. This report documents that the lead biostatistician objects to any protocol amendment that promotes the subgroup from exploratory to confirmatory, and that the stopping-rules hard gate from the safety arm must not be softened under enrollment pressure. Both objections survive the approval and are traceable through cross-thread provenance to the arm-level decisions that originated them.",
               "objectionIds": [
                 "obj_stopping_rules_propagated",
                 "obj_subgroup_discipline_propagated"
@@ -1208,20 +1208,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:db1c2ab93c5ee5255d8c6cd81efa51473919610c67e2be78d36051e13af35c3c",
-          "content_hash": "sha256:73975cfa8e0f048efe6d5de110b5a079d680c79371d1c07ad257908c24fb8e41"
+          "previous_hash": "sha256:3f1875e42a988f4412a79de8e10dab7dab1b232c53c84b88927232dfdb9c2f82",
+          "content_hash": "sha256:6520ec264ade67461675528a973a9151e62742f682829515a2a0e5a911a37acf"
         },
         {
           "event_id": "evt_minorityreportfiled_advancement_dissent_mqyzlqxg_a910192c",
           "event_type": "MinorityReportFiled",
-          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481",
+          "thread_id": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
           "actor_id": "par_dsmb_chair",
           "timestamp": "2026-06-29T09:00:03.168Z",
           "payload": {
             "minorityReport": {
               "id": "mnr_parent_advancement_dissent",
               "object": "minorityReport",
-              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481",
+              "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
               "decisionRecordId": "dcr_go_nogo_ltn4481",
               "participantId": "par_dsmb_chair",
               "text": "The independent DSMB chair dissents from the advancement decision as scoped. The program is advancing to Phase III on a single ~500-patient pivotal that will also serve as the labeling safety database for a drug with two serious transaminase elevations in Phase II. ICH E1 expects roughly 1000-1500 exposed for a chronic, non-life-threatening indication, and a live hepatic signal argues for more, not fewer. This report records that the chair recommended an enlarged safety database or a second confirmatory study before committing, that the decision proceeded on the FDA-aligned single-pivotal path notwithstanding, and that this dissent is on whether to advance — not merely on the conditions of advancement.",
@@ -1234,19 +1234,19 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:73975cfa8e0f048efe6d5de110b5a079d680c79371d1c07ad257908c24fb8e41",
-          "content_hash": "sha256:34450313f887036000acc55831648f69e214f5e912874fc27e40f18c2c6d0571"
+          "previous_hash": "sha256:6520ec264ade67461675528a973a9151e62742f682829515a2a0e5a911a37acf",
+          "content_hash": "sha256:a9d90fbae0ba6425d0968c271b3bf826884d8a72ad4303df20e8f00a7c1d3a0a"
         }
       ]
     },
     {
       "role": "arm",
-      "threadId": "thd_arm_pkpd_modeling_ltn4481",
+      "threadId": "thd_arm_pkpd_modeling_ltn4481_r2",
       "events": [
         {
           "event_id": "evt_participantadded_par_clin_pharm_mqyzlpc0_f0d642c8",
           "event_type": "ParticipantAdded",
-          "thread_id": "thd_arm_pkpd_modeling_ltn4481",
+          "thread_id": "thd_arm_pkpd_modeling_ltn4481_r2",
           "actor_id": "par_clin_pharm",
           "timestamp": "2026-06-29T09:00:00.000Z",
           "payload": {
@@ -1260,12 +1260,12 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "content_hash": "sha256:8588be71735226503ef1ff5eb22e39408525c52c2b78b172ab68192cdeba5e15"
+          "content_hash": "sha256:bff36612bde0a678b009daf3d0dd7b633eb985b355dbecdd6b4d957d6eedf826"
         },
         {
           "event_id": "evt_participantadded_par_pk_modeler_mqyzlpcm_9af1f5fd",
           "event_type": "ParticipantAdded",
-          "thread_id": "thd_arm_pkpd_modeling_ltn4481",
+          "thread_id": "thd_arm_pkpd_modeling_ltn4481_r2",
           "actor_id": "par_pk_modeler",
           "timestamp": "2026-06-29T09:00:00.022Z",
           "payload": {
@@ -1279,18 +1279,18 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:8588be71735226503ef1ff5eb22e39408525c52c2b78b172ab68192cdeba5e15",
-          "content_hash": "sha256:cb401c06b8b1928ff1d0ad3e4621dcf4718fa831ad5188edabb9a5ec76736032"
+          "previous_hash": "sha256:bff36612bde0a678b009daf3d0dd7b633eb985b355dbecdd6b4d957d6eedf826",
+          "content_hash": "sha256:4c4c1dcbdf22a2621b3b21aeaf79c9d9af6f5b0830a880343a5c7254c930cbdc"
         },
         {
-          "event_id": "evt_threadcreated_thd_arm_pkpd_modeling_ltn4481_mqyzlpd8_48f9db72",
+          "event_id": "evt_threadcreated_thd_arm_pkpd_modeling_ltn4481_r2_mqyzlpd8_66c57861",
           "event_type": "ThreadCreated",
-          "thread_id": "thd_arm_pkpd_modeling_ltn4481",
+          "thread_id": "thd_arm_pkpd_modeling_ltn4481_r2",
           "actor_id": "par_clin_pharm",
           "timestamp": "2026-06-29T09:00:00.044Z",
           "payload": {
             "thread": {
-              "id": "thd_arm_pkpd_modeling_ltn4481",
+              "id": "thd_arm_pkpd_modeling_ltn4481_r2",
               "object": "thread",
               "title": "PK/PD Modeling — LTN-4481 Dose Confirmation",
               "question": "Is the 200mg Q4W dose supported by exposure-response data for Phase III?",
@@ -1305,20 +1305,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:cb401c06b8b1928ff1d0ad3e4621dcf4718fa831ad5188edabb9a5ec76736032",
-          "content_hash": "sha256:de7995c87595e0d790188740f1519ab4b99acbd0c5eab6a85f51a36801a79a71"
+          "previous_hash": "sha256:4c4c1dcbdf22a2621b3b21aeaf79c9d9af6f5b0830a880343a5c7254c930cbdc",
+          "content_hash": "sha256:079fa134842a46f287f45217837fdb443640f818d81d2d8011e6b26c010a1b46"
         },
         {
           "event_id": "evt_evidencecommitted_evd_pkpd_pop_model_mqyzlpdu_d3028a72",
           "event_type": "EvidenceCommitted",
-          "thread_id": "thd_arm_pkpd_modeling_ltn4481",
+          "thread_id": "thd_arm_pkpd_modeling_ltn4481_r2",
           "actor_id": "par_pk_modeler",
           "timestamp": "2026-06-29T09:00:00.066Z",
           "payload": {
             "evidence": {
               "id": "evd_pkpd_pop_model",
               "object": "evidence",
-              "threadId": "thd_arm_pkpd_modeling_ltn4481",
+              "threadId": "thd_arm_pkpd_modeling_ltn4481_r2",
               "source": "Population PK/PD analysis (4481-PK-002)",
               "finding": "Exposure-response modeling on Phase II data (N=347). Cmin at steady state correlates with endoscopic improvement (R-squared 0.71). 200mg Q4W predicts 85 percent of patients achieve target exposure.",
               "confidence": 0.84,
@@ -1330,20 +1330,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:de7995c87595e0d790188740f1519ab4b99acbd0c5eab6a85f51a36801a79a71",
-          "content_hash": "sha256:4861bdf270cdd3d5663557eff39302d0dc74e83c5aeda706df38914e63c8ccc1"
+          "previous_hash": "sha256:079fa134842a46f287f45217837fdb443640f818d81d2d8011e6b26c010a1b46",
+          "content_hash": "sha256:18f1d47a15e76f04d7d72ef82f49949659508bee44fd7fe13f927cddbb17e425"
         },
         {
           "event_id": "evt_evidencecommitted_evd_pkpd_internal_validation_mqyzlpeg_511bd8bd",
           "event_type": "EvidenceCommitted",
-          "thread_id": "thd_arm_pkpd_modeling_ltn4481",
+          "thread_id": "thd_arm_pkpd_modeling_ltn4481_r2",
           "actor_id": "par_pk_modeler",
           "timestamp": "2026-06-29T09:00:00.088Z",
           "payload": {
             "evidence": {
               "id": "evd_pkpd_internal_validation",
               "object": "evidence",
-              "threadId": "thd_arm_pkpd_modeling_ltn4481",
+              "threadId": "thd_arm_pkpd_modeling_ltn4481_r2",
               "source": "Internal model validation (bootstrap, VPC)",
               "finding": "1000-replicate bootstrap shows parameter stability. Visual predictive check covers 90 percent of observed data within prediction interval. No external dataset available for external validation.",
               "confidence": 0.79,
@@ -1355,20 +1355,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:4861bdf270cdd3d5663557eff39302d0dc74e83c5aeda706df38914e63c8ccc1",
-          "content_hash": "sha256:ff6ae4ea32f890aaa20faf253efdbfa95ab01bc26c046b9194c097dc5871113c"
+          "previous_hash": "sha256:18f1d47a15e76f04d7d72ef82f49949659508bee44fd7fe13f927cddbb17e425",
+          "content_hash": "sha256:ed94dbc1381a5a9fd6fdd269d06a25923ee77a6ca014dbace0af8cc0e30a6565"
         },
         {
           "event_id": "evt_evidencecommitted_evd_dose_response_phase2_mqyzlpf2_ed045dd8",
           "event_type": "EvidenceCommitted",
-          "thread_id": "thd_arm_pkpd_modeling_ltn4481",
+          "thread_id": "thd_arm_pkpd_modeling_ltn4481_r2",
           "actor_id": "par_clin_pharm",
           "timestamp": "2026-06-29T09:00:00.110Z",
           "payload": {
             "evidence": {
               "id": "evd_dose_response_phase2",
               "object": "evidence",
-              "threadId": "thd_arm_pkpd_modeling_ltn4481",
+              "threadId": "thd_arm_pkpd_modeling_ltn4481_r2",
               "source": "Phase II dose-response (100mg vs 200mg vs placebo)",
               "finding": "Clear dose-response: placebo 12.1 percent, 100mg 24.7 percent, 200mg 38.2 percent remission. Exposure-response is monotonic and still rising at 200mg — the top of the dose-response was not characterized above 200mg (only two active levels tested).",
               "confidence": 0.91,
@@ -1380,20 +1380,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:ff6ae4ea32f890aaa20faf253efdbfa95ab01bc26c046b9194c097dc5871113c",
-          "content_hash": "sha256:0947288beaceb5ade30e922d0334c44264264cf956ae74a103ba18477dd0381e"
+          "previous_hash": "sha256:ed94dbc1381a5a9fd6fdd269d06a25923ee77a6ca014dbace0af8cc0e30a6565",
+          "content_hash": "sha256:4d9aa8a4077ac606f15acda48b7ff98eaa92c67b86ddc42b4d75d02605e93f2f"
         },
         {
           "event_id": "evt_evidencecommitted_evd_hepatic_exposure_response_mqyzlpfo_c078f851",
           "event_type": "EvidenceCommitted",
-          "thread_id": "thd_arm_pkpd_modeling_ltn4481",
+          "thread_id": "thd_arm_pkpd_modeling_ltn4481_r2",
           "actor_id": "par_pk_modeler",
           "timestamp": "2026-06-29T09:00:00.132Z",
           "payload": {
             "evidence": {
               "id": "evd_hepatic_exposure_response",
               "object": "evidence",
-              "threadId": "thd_arm_pkpd_modeling_ltn4481",
+              "threadId": "thd_arm_pkpd_modeling_ltn4481_r2",
               "source": "Hepatic safety exposure-response check (4481-PK-005)",
               "finding": "Both serious transaminase elevations occurred at 200mg, but with two active dose levels and n=2 events no exposure-response for hepatotoxicity could be established. Dose selection therefore rests on the efficacy exposure-response; the hepatic signal is managed by monitoring and stopping rules, not by dose reduction.",
               "confidence": 0.61,
@@ -1405,20 +1405,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:0947288beaceb5ade30e922d0334c44264264cf956ae74a103ba18477dd0381e",
-          "content_hash": "sha256:cbd7efd41ee784afb42ee47514532b5294fdc797b0226c95aa476404ff18b008"
+          "previous_hash": "sha256:4d9aa8a4077ac606f15acda48b7ff98eaa92c67b86ddc42b4d75d02605e93f2f",
+          "content_hash": "sha256:db167900b4c8dc4a813fc40ad4836027d30e8321021b2dc86c72b1137d7f6bc4"
         },
         {
           "event_id": "evt_assumptiondeclared_asm_pkpd_model_generalizes_mqyzlpga_3fe5d61c",
           "event_type": "AssumptionDeclared",
-          "thread_id": "thd_arm_pkpd_modeling_ltn4481",
+          "thread_id": "thd_arm_pkpd_modeling_ltn4481_r2",
           "actor_id": "par_clin_pharm",
           "timestamp": "2026-06-29T09:00:00.154Z",
           "payload": {
             "assumption": {
               "id": "asm_pkpd_model_generalizes",
               "object": "assumption",
-              "threadId": "thd_arm_pkpd_modeling_ltn4481",
+              "threadId": "thd_arm_pkpd_modeling_ltn4481_r2",
               "text": "The PK/PD model developed on Phase II data will generalize to the larger, more heterogeneous Phase III population without external validation.",
               "status": "active",
               "evidenceIds": [
@@ -1432,20 +1432,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:cbd7efd41ee784afb42ee47514532b5294fdc797b0226c95aa476404ff18b008",
-          "content_hash": "sha256:daf5905f0035ce3a0a9051af1369084d0f5b80c3352007daeb47ab6323f6f1be"
+          "previous_hash": "sha256:db167900b4c8dc4a813fc40ad4836027d30e8321021b2dc86c72b1137d7f6bc4",
+          "content_hash": "sha256:96cfe0829db3b1a71895a521b5b5f01d0ecafa49f0b23dc0c01e90e2c6f97c6e"
         },
         {
           "event_id": "evt_assumptiondeclared_asm_no_hepatic_exposure_response_mqyzlpgw_a4a492ad",
           "event_type": "AssumptionDeclared",
-          "thread_id": "thd_arm_pkpd_modeling_ltn4481",
+          "thread_id": "thd_arm_pkpd_modeling_ltn4481_r2",
           "actor_id": "par_clin_pharm",
           "timestamp": "2026-06-29T09:00:00.176Z",
           "payload": {
             "assumption": {
               "id": "asm_no_hepatic_exposure_response",
               "object": "assumption",
-              "threadId": "thd_arm_pkpd_modeling_ltn4481",
+              "threadId": "thd_arm_pkpd_modeling_ltn4481_r2",
               "text": "No dose-safety exposure-response was established for the hepatic signal; the 200mg selection is efficacy-driven, and dose is not being used as a lever to manage hepatotoxicity.",
               "status": "active",
               "evidenceIds": [
@@ -1459,20 +1459,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:daf5905f0035ce3a0a9051af1369084d0f5b80c3352007daeb47ab6323f6f1be",
-          "content_hash": "sha256:78a9b9d485a19e1ff20c9164969750bd4581260bd5de4655bc3c5f3683789794"
+          "previous_hash": "sha256:96cfe0829db3b1a71895a521b5b5f01d0ecafa49f0b23dc0c01e90e2c6f97c6e",
+          "content_hash": "sha256:66ca5104330c5b48618f41ce562b8c8c0638292891a92901ebbb817d3e4b3575"
         },
         {
           "event_id": "evt_claimcreated_clm_dose_confirmed_mqyzlphi_7fa708cd",
           "event_type": "ClaimCreated",
-          "thread_id": "thd_arm_pkpd_modeling_ltn4481",
+          "thread_id": "thd_arm_pkpd_modeling_ltn4481_r2",
           "actor_id": "par_clin_pharm",
           "timestamp": "2026-06-29T09:00:00.198Z",
           "payload": {
             "claim": {
               "id": "clm_dose_confirmed",
               "object": "claim",
-              "threadId": "thd_arm_pkpd_modeling_ltn4481",
+              "threadId": "thd_arm_pkpd_modeling_ltn4481_r2",
               "text": "200mg Q4W is the confirmed Phase III maintenance dose (with a defined induction regimen through week 12) based on the efficacy exposure-response and FDA alignment; safety is managed by monitoring rather than a dose-safety relationship.",
               "status": "endorsed",
               "evidenceIds": [
@@ -1490,20 +1490,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:78a9b9d485a19e1ff20c9164969750bd4581260bd5de4655bc3c5f3683789794",
-          "content_hash": "sha256:bcdcb6be343bfd1d3f6352294265a72bfda17dd8c119c69d7d7ba9a37b9d33c7"
+          "previous_hash": "sha256:66ca5104330c5b48618f41ce562b8c8c0638292891a92901ebbb817d3e4b3575",
+          "content_hash": "sha256:df275d2fe7191c5e6157541f5e89bad8994aa9428d5ba81eb42aac32d9a7c820"
         },
         {
           "event_id": "evt_positiontaken_par_pk_modeler_mqyzlpi4_eb5c69ae",
           "event_type": "PositionTaken",
-          "thread_id": "thd_arm_pkpd_modeling_ltn4481",
+          "thread_id": "thd_arm_pkpd_modeling_ltn4481_r2",
           "actor_id": "par_pk_modeler",
           "timestamp": "2026-06-29T09:00:00.242Z",
           "payload": {
             "position": {
               "id": "pos_pk_modeler_support",
               "object": "position",
-              "threadId": "thd_arm_pkpd_modeling_ltn4481",
+              "threadId": "thd_arm_pkpd_modeling_ltn4481_r2",
               "participantId": "par_pk_modeler",
               "targetObjectId": "clm_dose_confirmed",
               "targetObjectType": "claim",
@@ -1514,20 +1514,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:bcdcb6be343bfd1d3f6352294265a72bfda17dd8c119c69d7d7ba9a37b9d33c7",
-          "content_hash": "sha256:a2dfe0060c32b2ed54f51ace1004845b9bdacd3e69e8105493fef3ef932a84af"
+          "previous_hash": "sha256:df275d2fe7191c5e6157541f5e89bad8994aa9428d5ba81eb42aac32d9a7c820",
+          "content_hash": "sha256:63f4150ad61ec932ce3fca32de7f63cbb0e64a881196b0e26af4783908e1d820"
         },
         {
           "event_id": "evt_positiontaken_par_clin_pharm_mqyzlpiq_1c92c956",
           "event_type": "PositionTaken",
-          "thread_id": "thd_arm_pkpd_modeling_ltn4481",
+          "thread_id": "thd_arm_pkpd_modeling_ltn4481_r2",
           "actor_id": "par_clin_pharm",
           "timestamp": "2026-06-29T09:00:00.286Z",
           "payload": {
             "position": {
               "id": "pos_clin_pharm_support",
               "object": "position",
-              "threadId": "thd_arm_pkpd_modeling_ltn4481",
+              "threadId": "thd_arm_pkpd_modeling_ltn4481_r2",
               "participantId": "par_clin_pharm",
               "targetObjectId": "clm_dose_confirmed",
               "targetObjectType": "claim",
@@ -1538,20 +1538,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:a2dfe0060c32b2ed54f51ace1004845b9bdacd3e69e8105493fef3ef932a84af",
-          "content_hash": "sha256:7001e3b29d2ab9db4250f3333be11da4dd079c20e4ae3f88d0cec43276947ded"
+          "previous_hash": "sha256:63f4150ad61ec932ce3fca32de7f63cbb0e64a881196b0e26af4783908e1d820",
+          "content_hash": "sha256:98034e9e9269aca3d41ba4e38201246347196a8a88e3bccbd21bda98f0f1ca3c"
         },
         {
           "event_id": "evt_decisionrequestopened_drq_pkpd_dose_confirm_mqyzlpjc_e5042433",
           "event_type": "DecisionRequestOpened",
-          "thread_id": "thd_arm_pkpd_modeling_ltn4481",
+          "thread_id": "thd_arm_pkpd_modeling_ltn4481_r2",
           "actor_id": "par_clin_pharm",
           "timestamp": "2026-06-29T09:00:00.330Z",
           "payload": {
             "decisionRequest": {
               "id": "drq_pkpd_dose_confirm",
               "object": "decisionRequest",
-              "threadId": "thd_arm_pkpd_modeling_ltn4481",
+              "threadId": "thd_arm_pkpd_modeling_ltn4481_r2",
               "proposal": "Confirm 200mg Q4W for Phase III with protocol-specified early PK sampling for model validation.",
               "status": "review",
               "supportingEvidenceIds": [
@@ -1572,20 +1572,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:7001e3b29d2ab9db4250f3333be11da4dd079c20e4ae3f88d0cec43276947ded",
-          "content_hash": "sha256:c6dc2c0617bbab4c540650298f5d6a915474a417e68b6f222b801b7ebad60e0e"
+          "previous_hash": "sha256:98034e9e9269aca3d41ba4e38201246347196a8a88e3bccbd21bda98f0f1ca3c",
+          "content_hash": "sha256:c2ecfbbd49d5a7dc10635d012f70d2270d5a645900ea40a452f9c328b1981c68"
         },
         {
           "event_id": "evt_reviewsubmitted_rev_pk_modeler_mqyzlpjy_d8d1ae66",
           "event_type": "ReviewSubmitted",
-          "thread_id": "thd_arm_pkpd_modeling_ltn4481",
+          "thread_id": "thd_arm_pkpd_modeling_ltn4481_r2",
           "actor_id": "par_pk_modeler",
           "timestamp": "2026-06-29T09:00:00.374Z",
           "payload": {
             "review": {
               "id": "rev_pk_modeler",
               "object": "review",
-              "threadId": "thd_arm_pkpd_modeling_ltn4481",
+              "threadId": "thd_arm_pkpd_modeling_ltn4481_r2",
               "decisionRequestId": "drq_pkpd_dose_confirm",
               "reviewerParticipantId": "par_pk_modeler",
               "status": "approve_with_conditions",
@@ -1599,20 +1599,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:c6dc2c0617bbab4c540650298f5d6a915474a417e68b6f222b801b7ebad60e0e",
-          "content_hash": "sha256:d7d1f30866543ae78cae9882f652589018ad150bdb35cf5d7eb5bcddae2f2d88"
+          "previous_hash": "sha256:c2ecfbbd49d5a7dc10635d012f70d2270d5a645900ea40a452f9c328b1981c68",
+          "content_hash": "sha256:b18cfd2fe3b62c2a7b6e0edca990816ae31014cff66e0d9a2caf0d8ccedd29c3"
         },
         {
           "event_id": "evt_decisionmerged_dcr_pkpd_dose_confirmed_mqyzlpkk_9f70b872",
           "event_type": "DecisionMerged",
-          "thread_id": "thd_arm_pkpd_modeling_ltn4481",
+          "thread_id": "thd_arm_pkpd_modeling_ltn4481_r2",
           "actor_id": "par_clin_pharm",
           "timestamp": "2026-06-29T09:00:00.418Z",
           "payload": {
             "decisionRecord": {
               "id": "dcr_pkpd_dose_confirmed",
               "object": "decisionRecord",
-              "threadId": "thd_arm_pkpd_modeling_ltn4481",
+              "threadId": "thd_arm_pkpd_modeling_ltn4481_r2",
               "decisionRequestId": "drq_pkpd_dose_confirm",
               "status": "approved",
               "summary": "200mg Q4W confirmed for Phase III. Early PK sampling and dose adjustment pathway required.",
@@ -1653,19 +1653,19 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:d7d1f30866543ae78cae9882f652589018ad150bdb35cf5d7eb5bcddae2f2d88",
-          "content_hash": "sha256:d63ab532dae873091e72af85de8c4c9f83c12176a4f0705d3c2b60f4011af14f"
+          "previous_hash": "sha256:b18cfd2fe3b62c2a7b6e0edca990816ae31014cff66e0d9a2caf0d8ccedd29c3",
+          "content_hash": "sha256:2e9a666f6eeee065b1ee62bbbb5b25c0265b4b27746a92d2206eaf0e5f3f8d68"
         }
       ]
     },
     {
       "role": "arm",
-      "threadId": "thd_arm_safety_assessment_ltn4481",
+      "threadId": "thd_arm_safety_assessment_ltn4481_r2",
       "events": [
         {
           "event_id": "evt_participantadded_par_safety_officer_mqyzlpl6_39cf4ce0",
           "event_type": "ParticipantAdded",
-          "thread_id": "thd_arm_safety_assessment_ltn4481",
+          "thread_id": "thd_arm_safety_assessment_ltn4481_r2",
           "actor_id": "par_safety_officer",
           "timestamp": "2026-06-29T09:00:00.462Z",
           "payload": {
@@ -1679,12 +1679,12 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "content_hash": "sha256:f43dca42e1d978f1929e9962a35bf1107194c77d48dbb0abda45c447e9046f9e"
+          "content_hash": "sha256:c4c56349c806c5c78d9e2f824f6e29eab4fa5c401721ed0e0ac4d60a17fbf95f"
         },
         {
           "event_id": "evt_participantadded_par_dili_panel_mqyzlpls_174e5468",
           "event_type": "ParticipantAdded",
-          "thread_id": "thd_arm_safety_assessment_ltn4481",
+          "thread_id": "thd_arm_safety_assessment_ltn4481_r2",
           "actor_id": "par_dili_panel",
           "timestamp": "2026-06-29T09:00:00.484Z",
           "payload": {
@@ -1698,18 +1698,18 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:f43dca42e1d978f1929e9962a35bf1107194c77d48dbb0abda45c447e9046f9e",
-          "content_hash": "sha256:2f15a3d0dff01247c2ddfcbf636d7d80147992a26e9c23e7f85a594136dd2b22"
+          "previous_hash": "sha256:c4c56349c806c5c78d9e2f824f6e29eab4fa5c401721ed0e0ac4d60a17fbf95f",
+          "content_hash": "sha256:ce0194d6b866c5b8884852f7c8b25d34a30986e4ddcf7b800af042c3ae57e5b9"
         },
         {
-          "event_id": "evt_threadcreated_thd_arm_safety_assessment_ltn4481_mqyzlpme_7d637ed4",
+          "event_id": "evt_threadcreated_thd_arm_safety_assessment_ltn4481_r2_mqyzlpme_aa0a20ad",
           "event_type": "ThreadCreated",
-          "thread_id": "thd_arm_safety_assessment_ltn4481",
+          "thread_id": "thd_arm_safety_assessment_ltn4481_r2",
           "actor_id": "par_safety_officer",
           "timestamp": "2026-06-29T09:00:00.506Z",
           "payload": {
             "thread": {
-              "id": "thd_arm_safety_assessment_ltn4481",
+              "id": "thd_arm_safety_assessment_ltn4481_r2",
               "object": "thread",
               "title": "Safety Signal Assessment — LTN-4481 Hepatotoxicity",
               "question": "Is the hepatotoxicity signal manageable for Phase III advancement?",
@@ -1724,20 +1724,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:2f15a3d0dff01247c2ddfcbf636d7d80147992a26e9c23e7f85a594136dd2b22",
-          "content_hash": "sha256:c00ffa6759be8f1179473c574a5172081b7eeff5f36d1c1c97ea8fe3ea96ac6e"
+          "previous_hash": "sha256:ce0194d6b866c5b8884852f7c8b25d34a30986e4ddcf7b800af042c3ae57e5b9",
+          "content_hash": "sha256:58c691b53ab239e9bdb1ea578ee31f1dc20b4ac09bbd4c5ceaa18858b02204be"
         },
         {
           "event_id": "evt_evidencecommitted_evd_integrated_safety_mqyzlpn0_45aaf41c",
           "event_type": "EvidenceCommitted",
-          "thread_id": "thd_arm_safety_assessment_ltn4481",
+          "thread_id": "thd_arm_safety_assessment_ltn4481_r2",
           "actor_id": "par_safety_officer",
           "timestamp": "2026-06-29T09:00:00.528Z",
           "payload": {
             "evidence": {
               "id": "evd_integrated_safety",
               "object": "evidence",
-              "threadId": "thd_arm_safety_assessment_ltn4481",
+              "threadId": "thd_arm_safety_assessment_ltn4481_r2",
               "source": "Integrated safety database (4481-ISS-001, N=612)",
               "finding": "SAE rate 6.8 percent vs 5.2 percent placebo. Two serious hepatotoxicity cases (ALT greater than 10x ULN) in 200mg arm; in both, total bilirubin remained below 2x ULN, so neither met Hy's Law criteria (isolated transaminase elevation, Temple's Corollary), and both resolved on discontinuation. No deaths. Infection rate 14.3 percent vs 11.7 percent placebo.",
               "confidence": 0.88,
@@ -1749,20 +1749,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:c00ffa6759be8f1179473c574a5172081b7eeff5f36d1c1c97ea8fe3ea96ac6e",
-          "content_hash": "sha256:8628fa828c1a9a24714f6afa6de67f737a40c4f1eb5959e66f0f4af653384ac6"
+          "previous_hash": "sha256:58c691b53ab239e9bdb1ea578ee31f1dc20b4ac09bbd4c5ceaa18858b02204be",
+          "content_hash": "sha256:a6664a3636867c615eab2b6979b75dfff853c05d956fe4b1c0f351579ac0a2e4"
         },
         {
           "event_id": "evt_evidencecommitted_evd_dili_panel_review_mqyzlpnm_824ba2d5",
           "event_type": "EvidenceCommitted",
-          "thread_id": "thd_arm_safety_assessment_ltn4481",
+          "thread_id": "thd_arm_safety_assessment_ltn4481_r2",
           "actor_id": "par_dili_panel",
           "timestamp": "2026-06-29T09:00:00.550Z",
           "payload": {
             "evidence": {
               "id": "evd_dili_panel_review",
               "object": "evidence",
-              "threadId": "thd_arm_safety_assessment_ltn4481",
+              "threadId": "thd_arm_safety_assessment_ltn4481_r2",
               "source": "DILI expert panel assessment (4481-SA-003)",
               "finding": "Panel consensus: probable drug-related hepatotoxicity (RUCAM 'probable'). Baseline hepatic steatosis was considered and rejected as sole cause — steatosis does not produce ALT greater than 10x ULN. Recommends excluding baseline ALT greater than 2x ULN, biweekly liver monitoring for first 12 weeks, and protocol-defined Hy's Law stopping and rechallenge rules.",
               "confidence": 0.79,
@@ -1774,20 +1774,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:8628fa828c1a9a24714f6afa6de67f737a40c4f1eb5959e66f0f4af653384ac6",
-          "content_hash": "sha256:84a543910b0d988fc4d52b219327211fd05a172e5582f23f39799b36ac9022e5"
+          "previous_hash": "sha256:a6664a3636867c615eab2b6979b75dfff853c05d956fe4b1c0f351579ac0a2e4",
+          "content_hash": "sha256:79f69cc78fb9dba28250d18b3fdbe827476b1b2f84c9d3cbda46d1a6274505d8"
         },
         {
           "event_id": "evt_evidencecommitted_evd_class_context_mqyzlpo8_940d55ab",
           "event_type": "EvidenceCommitted",
-          "thread_id": "thd_arm_safety_assessment_ltn4481",
+          "thread_id": "thd_arm_safety_assessment_ltn4481_r2",
           "actor_id": "par_safety_officer",
           "timestamp": "2026-06-29T09:00:00.572Z",
           "payload": {
             "evidence": {
               "id": "evd_class_context",
               "object": "evidence",
-              "threadId": "thd_arm_safety_assessment_ltn4481",
+              "threadId": "thd_arm_safety_assessment_ltn4481_r2",
               "source": "Hepatotoxicity class context (FDA safety communications 2024-2026)",
               "finding": "FDA has issued two safety-based label changes for UC drugs in the past 18 months related to hepatic signals. Heightened scrutiny expected.",
               "confidence": 0.86,
@@ -1799,20 +1799,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:84a543910b0d988fc4d52b219327211fd05a172e5582f23f39799b36ac9022e5",
-          "content_hash": "sha256:9bd187f809b0549fc44cc7e0212dfe91943505bd8a50a72c864a2c152719240f"
+          "previous_hash": "sha256:79f69cc78fb9dba28250d18b3fdbe827476b1b2f84c9d3cbda46d1a6274505d8",
+          "content_hash": "sha256:d2ff3e43b16ffca8e83b7b679668a354aa0c14067863ebd38d99719a9b1a7e8d"
         },
         {
           "event_id": "evt_assumptiondeclared_asm_monitoring_sufficient_mqyzlpou_04485337",
           "event_type": "AssumptionDeclared",
-          "thread_id": "thd_arm_safety_assessment_ltn4481",
+          "thread_id": "thd_arm_safety_assessment_ltn4481_r2",
           "actor_id": "par_safety_officer",
           "timestamp": "2026-06-29T09:00:00.594Z",
           "payload": {
             "assumption": {
               "id": "asm_monitoring_sufficient",
               "object": "assumption",
-              "threadId": "thd_arm_safety_assessment_ltn4481",
+              "threadId": "thd_arm_safety_assessment_ltn4481_r2",
               "text": "Enhanced monitoring (biweekly ALT/AST for 12 weeks) and exclusion criteria (baseline ALT greater than 2x ULN) are sufficient to manage the hepatotoxicity risk in Phase III.",
               "status": "active",
               "evidenceIds": [
@@ -1827,20 +1827,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:9bd187f809b0549fc44cc7e0212dfe91943505bd8a50a72c864a2c152719240f",
-          "content_hash": "sha256:95a8fe24655eee0f7048c9245197d5858f3ca8f955121c6991dbee6f03b5cb93"
+          "previous_hash": "sha256:d2ff3e43b16ffca8e83b7b679668a354aa0c14067863ebd38d99719a9b1a7e8d",
+          "content_hash": "sha256:42583a6f016e6d1586e727cf09725209b853dcba4a686744342a6a079adce8ed"
         },
         {
           "event_id": "evt_claimcreated_clm_safety_manageable_mqyzlppg_c390b3d7",
           "event_type": "ClaimCreated",
-          "thread_id": "thd_arm_safety_assessment_ltn4481",
+          "thread_id": "thd_arm_safety_assessment_ltn4481_r2",
           "actor_id": "par_safety_officer",
           "timestamp": "2026-06-29T09:00:00.616Z",
           "payload": {
             "claim": {
               "id": "clm_safety_manageable",
               "object": "claim",
-              "threadId": "thd_arm_safety_assessment_ltn4481",
+              "threadId": "thd_arm_safety_assessment_ltn4481_r2",
               "text": "Hepatotoxicity signal is manageable for Phase III with protocol-level mitigation per DILI panel recommendations.",
               "status": "endorsed",
               "evidenceIds": [
@@ -1857,20 +1857,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:95a8fe24655eee0f7048c9245197d5858f3ca8f955121c6991dbee6f03b5cb93",
-          "content_hash": "sha256:944e74f21439f4ebaec2bbb8c7d76ec388a3b517c739cfd3dfe87da249a86d29"
+          "previous_hash": "sha256:42583a6f016e6d1586e727cf09725209b853dcba4a686744342a6a079adce8ed",
+          "content_hash": "sha256:4c4dcb7e6222671fb934691c61c33aeae146fa1ae5ff340a6b2f0b8126864d2e"
         },
         {
           "event_id": "evt_positiontaken_par_dili_panel_mqyzlpq2_d2b708dd",
           "event_type": "PositionTaken",
-          "thread_id": "thd_arm_safety_assessment_ltn4481",
+          "thread_id": "thd_arm_safety_assessment_ltn4481_r2",
           "actor_id": "par_dili_panel",
           "timestamp": "2026-06-29T09:00:00.660Z",
           "payload": {
             "position": {
               "id": "pos_dili_panel_support",
               "object": "position",
-              "threadId": "thd_arm_safety_assessment_ltn4481",
+              "threadId": "thd_arm_safety_assessment_ltn4481_r2",
               "participantId": "par_dili_panel",
               "targetObjectId": "clm_safety_manageable",
               "targetObjectType": "claim",
@@ -1881,20 +1881,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:944e74f21439f4ebaec2bbb8c7d76ec388a3b517c739cfd3dfe87da249a86d29",
-          "content_hash": "sha256:1b5798cdbf80e04b8ab1e98665b5ede2bddf8af6df3ff45eddc9d6c628ff2d14"
+          "previous_hash": "sha256:4c4dcb7e6222671fb934691c61c33aeae146fa1ae5ff340a6b2f0b8126864d2e",
+          "content_hash": "sha256:7f61c21752ba2092f967b3e0aa03e29eb880a6969b327d726f9d317f7aa071f6"
         },
         {
           "event_id": "evt_objectionraised_stopping_rules_mqyzlpqo_8e092359",
           "event_type": "ObjectionRaised",
-          "thread_id": "thd_arm_safety_assessment_ltn4481",
+          "thread_id": "thd_arm_safety_assessment_ltn4481_r2",
           "actor_id": "par_safety_officer",
           "timestamp": "2026-06-29T09:00:00.704Z",
           "payload": {
             "objection": {
               "id": "obj_arm_stopping_rules",
               "object": "objection",
-              "threadId": "thd_arm_safety_assessment_ltn4481",
+              "threadId": "thd_arm_safety_assessment_ltn4481_r2",
               "participantId": "par_safety_officer",
               "targetObjectId": "clm_safety_manageable",
               "targetObjectType": "claim",
@@ -1906,20 +1906,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:1b5798cdbf80e04b8ab1e98665b5ede2bddf8af6df3ff45eddc9d6c628ff2d14",
-          "content_hash": "sha256:16c6c004a73c42245bfc63b172130adc79dab041f2f92ed4dbe67e8e590fefc2"
+          "previous_hash": "sha256:7f61c21752ba2092f967b3e0aa03e29eb880a6969b327d726f9d317f7aa071f6",
+          "content_hash": "sha256:f0d584b9c0ac57864a1f015f079ea5431355907e6d170df36510b341bd1eb615"
         },
         {
           "event_id": "evt_decisionrequestopened_drq_safety_assessment_mqyzlpra_f3f28381",
           "event_type": "DecisionRequestOpened",
-          "thread_id": "thd_arm_safety_assessment_ltn4481",
+          "thread_id": "thd_arm_safety_assessment_ltn4481_r2",
           "actor_id": "par_safety_officer",
           "timestamp": "2026-06-29T09:00:00.748Z",
           "payload": {
             "decisionRequest": {
               "id": "drq_safety_assessment",
               "object": "decisionRequest",
-              "threadId": "thd_arm_safety_assessment_ltn4481",
+              "threadId": "thd_arm_safety_assessment_ltn4481_r2",
               "proposal": "Safety profile is acceptable for Phase III with DILI panel mitigation measures and hepatic stopping rules.",
               "status": "review",
               "supportingEvidenceIds": [
@@ -1942,20 +1942,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:16c6c004a73c42245bfc63b172130adc79dab041f2f92ed4dbe67e8e590fefc2",
-          "content_hash": "sha256:e807966d6b165181b5331bdab870fc19949a38879735f881115af6ecd67147ef"
+          "previous_hash": "sha256:f0d584b9c0ac57864a1f015f079ea5431355907e6d170df36510b341bd1eb615",
+          "content_hash": "sha256:928ef8763d8946a29e410eab89e3ee73a9ad12bcfc21d035e4967d0e7f991143"
         },
         {
           "event_id": "evt_reviewsubmitted_rev_dili_panel_mqyzlprw_facf8eed",
           "event_type": "ReviewSubmitted",
-          "thread_id": "thd_arm_safety_assessment_ltn4481",
+          "thread_id": "thd_arm_safety_assessment_ltn4481_r2",
           "actor_id": "par_dili_panel",
           "timestamp": "2026-06-29T09:00:00.792Z",
           "payload": {
             "review": {
               "id": "rev_dili_panel",
               "object": "review",
-              "threadId": "thd_arm_safety_assessment_ltn4481",
+              "threadId": "thd_arm_safety_assessment_ltn4481_r2",
               "decisionRequestId": "drq_safety_assessment",
               "reviewerParticipantId": "par_dili_panel",
               "status": "approve_with_conditions",
@@ -1970,20 +1970,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:e807966d6b165181b5331bdab870fc19949a38879735f881115af6ecd67147ef",
-          "content_hash": "sha256:230f95c76c5d25296ddd58fcb958dc1cc7644a3683c48e2420589f2a1f76244f"
+          "previous_hash": "sha256:928ef8763d8946a29e410eab89e3ee73a9ad12bcfc21d035e4967d0e7f991143",
+          "content_hash": "sha256:aa4c0322518f2254d31c625d2ef9d3eb3c35ea756aafbc74a1892f33582b4daf"
         },
         {
           "event_id": "evt_decisionmerged_dcr_safety_acceptable_mqyzlpsi_fd0bd071",
           "event_type": "DecisionMerged",
-          "thread_id": "thd_arm_safety_assessment_ltn4481",
+          "thread_id": "thd_arm_safety_assessment_ltn4481_r2",
           "actor_id": "par_safety_officer",
           "timestamp": "2026-06-29T09:00:00.836Z",
           "payload": {
             "decisionRecord": {
               "id": "dcr_safety_acceptable",
               "object": "decisionRecord",
-              "threadId": "thd_arm_safety_assessment_ltn4481",
+              "threadId": "thd_arm_safety_assessment_ltn4481_r2",
               "decisionRequestId": "drq_safety_assessment",
               "status": "approved",
               "summary": "Safety profile acceptable for Phase III with three hard-gated conditions.",
@@ -2031,20 +2031,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:230f95c76c5d25296ddd58fcb958dc1cc7644a3683c48e2420589f2a1f76244f",
-          "content_hash": "sha256:7db7d90f21a043a1e5a2dc5d3709620c98b776c6bf1b1e96018224910ed51eda"
+          "previous_hash": "sha256:aa4c0322518f2254d31c625d2ef9d3eb3c35ea756aafbc74a1892f33582b4daf",
+          "content_hash": "sha256:eb2487f635c59d268075a202ce625722d72bc448e5fe7a946d88d7cf3102034b"
         },
         {
           "event_id": "evt_minorityreportfiled_stopping_rules_mqyzlpt4_19a8e09b",
           "event_type": "MinorityReportFiled",
-          "thread_id": "thd_arm_safety_assessment_ltn4481",
+          "thread_id": "thd_arm_safety_assessment_ltn4481_r2",
           "actor_id": "par_safety_officer",
           "timestamp": "2026-06-29T09:00:00.880Z",
           "payload": {
             "minorityReport": {
               "id": "mnr_arm_stopping_rules_gate",
               "object": "minorityReport",
-              "threadId": "thd_arm_safety_assessment_ltn4481",
+              "threadId": "thd_arm_safety_assessment_ltn4481_r2",
               "decisionRecordId": "dcr_safety_acceptable",
               "participantId": "par_safety_officer",
               "text": "The safety officer files this report to ensure the stopping-rules condition is treated as a hard gate. Monitoring without quantitative decision criteria is surveillance without a trigger. If enrollment begins before stopping rules are finalized, this record documents that the risk was identified and the condition was explicitly designated as non-negotiable.",
@@ -2057,19 +2057,19 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:7db7d90f21a043a1e5a2dc5d3709620c98b776c6bf1b1e96018224910ed51eda",
-          "content_hash": "sha256:236c2a760c8db4aba8b2357452401c56001b43d62e34114d26ddae68a7e46681"
+          "previous_hash": "sha256:eb2487f635c59d268075a202ce625722d72bc448e5fe7a946d88d7cf3102034b",
+          "content_hash": "sha256:610a9f499ed58f9dcd2f1377bfb3eae4073f5263f064c50237e0cc9ee38a703a"
         }
       ]
     },
     {
       "role": "arm",
-      "threadId": "thd_arm_subgroup_review_ltn4481",
+      "threadId": "thd_arm_subgroup_review_ltn4481_r2",
       "events": [
         {
           "event_id": "evt_participantadded_par_biostat_mqyzlptq_5481cb46",
           "event_type": "ParticipantAdded",
-          "thread_id": "thd_arm_subgroup_review_ltn4481",
+          "thread_id": "thd_arm_subgroup_review_ltn4481_r2",
           "actor_id": "par_biostat",
           "timestamp": "2026-06-29T09:00:00.924Z",
           "payload": {
@@ -2083,12 +2083,12 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "content_hash": "sha256:0b66e7ce0c00f2adee8672cff6545bdf562a66cc8332902802dddbae7c42ef34"
+          "content_hash": "sha256:a908aac5de9603e92626d8f73bda6618870a61dfdee72ea08aea1cbb7d89a773"
         },
         {
           "event_id": "evt_participantadded_par_cmo_mqyzlpuc_83d6aebd",
           "event_type": "ParticipantAdded",
-          "thread_id": "thd_arm_subgroup_review_ltn4481",
+          "thread_id": "thd_arm_subgroup_review_ltn4481_r2",
           "actor_id": "par_cmo",
           "timestamp": "2026-06-29T09:00:00.946Z",
           "payload": {
@@ -2102,18 +2102,18 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:0b66e7ce0c00f2adee8672cff6545bdf562a66cc8332902802dddbae7c42ef34",
-          "content_hash": "sha256:39363d1187b4dd9bab9b9cf24c5d79524ba0c5c5960ad077279acfa81205f82a"
+          "previous_hash": "sha256:a908aac5de9603e92626d8f73bda6618870a61dfdee72ea08aea1cbb7d89a773",
+          "content_hash": "sha256:674d205c254909751245876708f799f1b373e7e578df5450d9d1d2b37699a00b"
         },
         {
-          "event_id": "evt_threadcreated_thd_arm_subgroup_review_ltn4481_mqyzlpuy_22690fa1",
+          "event_id": "evt_threadcreated_thd_arm_subgroup_review_ltn4481_r2_mqyzlpuy_c467f226",
           "event_type": "ThreadCreated",
-          "thread_id": "thd_arm_subgroup_review_ltn4481",
+          "thread_id": "thd_arm_subgroup_review_ltn4481_r2",
           "actor_id": "par_biostat",
           "timestamp": "2026-06-29T09:00:00.968Z",
           "payload": {
             "thread": {
-              "id": "thd_arm_subgroup_review_ltn4481",
+              "id": "thd_arm_subgroup_review_ltn4481_r2",
               "object": "thread",
               "title": "Subgroup Analysis Review — LTN-4481 Bio-Failure Responders",
               "question": "Should the post-hoc bio-failure subgroup finding influence Phase III trial design?",
@@ -2128,20 +2128,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:39363d1187b4dd9bab9b9cf24c5d79524ba0c5c5960ad077279acfa81205f82a",
-          "content_hash": "sha256:6476adfbda9eadc783f6daa23b133c7c484817fb745947bcf298275c963abffb"
+          "previous_hash": "sha256:674d205c254909751245876708f799f1b373e7e578df5450d9d1d2b37699a00b",
+          "content_hash": "sha256:b5c44778fbaee8885cf9f93eab075e5fb2a7731d584e8058f151e9afcac1a4a6"
         },
         {
           "event_id": "evt_evidencecommitted_evd_subgroup_data_mqyzlpvk_88a3128c",
           "event_type": "EvidenceCommitted",
-          "thread_id": "thd_arm_subgroup_review_ltn4481",
+          "thread_id": "thd_arm_subgroup_review_ltn4481_r2",
           "actor_id": "par_biostat",
           "timestamp": "2026-06-29T09:00:00.990Z",
           "payload": {
             "evidence": {
               "id": "evd_subgroup_data",
               "object": "evidence",
-              "threadId": "thd_arm_subgroup_review_ltn4481",
+              "threadId": "thd_arm_subgroup_review_ltn4481_r2",
               "source": "Post-hoc subgroup analysis (4481-201-SGA)",
               "finding": "Bio-failure patients (n=89) showed 46.3 percent remission (95 percent CI 35.9-56.7, Wald) vs 34.1 percent in bio-naive patients (n=258). Post-hoc, not pre-specified; the treatment-by-subgroup interaction is not statistically significant and the nominal difference is unadjusted for multiplicity. Sample size inadequate for confirmatory inference.",
               "confidence": 0.62,
@@ -2153,20 +2153,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:6476adfbda9eadc783f6daa23b133c7c484817fb745947bcf298275c963abffb",
-          "content_hash": "sha256:e60539ebe8955c0924b73c05465e90b7c26d929e9b79687567e5dc79b3dc0ad2"
+          "previous_hash": "sha256:b5c44778fbaee8885cf9f93eab075e5fb2a7731d584e8058f151e9afcac1a4a6",
+          "content_hash": "sha256:845cac406f5525252210428d0ca64ed360d722ca8f71963be12b98667444173f"
         },
         {
           "event_id": "evt_evidencecommitted_evd_fda_subgroup_guidance_mqyzlpw6_02062690",
           "event_type": "EvidenceCommitted",
-          "thread_id": "thd_arm_subgroup_review_ltn4481",
+          "thread_id": "thd_arm_subgroup_review_ltn4481_r2",
           "actor_id": "par_biostat",
           "timestamp": "2026-06-29T09:00:01.012Z",
           "payload": {
             "evidence": {
               "id": "evd_fda_subgroup_guidance",
               "object": "evidence",
-              "threadId": "thd_arm_subgroup_review_ltn4481",
+              "threadId": "thd_arm_subgroup_review_ltn4481_r2",
               "source": "FDA guidance on subgroup analyses in clinical trials (2023)",
               "finding": "FDA expects subgroup analyses to be pre-specified in the SAP. Post-hoc findings may be hypothesis-generating but should not drive primary endpoint strategy or enrichment without independent confirmation.",
               "confidence": 0.93,
@@ -2178,20 +2178,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:e60539ebe8955c0924b73c05465e90b7c26d929e9b79687567e5dc79b3dc0ad2",
-          "content_hash": "sha256:0516e5930a976c592ba169aff8464431051cbfd25882b1dae4977c3256a8ced8"
+          "previous_hash": "sha256:845cac406f5525252210428d0ca64ed360d722ca8f71963be12b98667444173f",
+          "content_hash": "sha256:04beba9f47ef859fbed392bc1df343eddfa79c64f7c5baeb1239d4f288d17b01"
         },
         {
           "event_id": "evt_assumptiondeclared_asm_subgroup_exploratory_only_mqyzlpws_a43c19d0",
           "event_type": "AssumptionDeclared",
-          "thread_id": "thd_arm_subgroup_review_ltn4481",
+          "thread_id": "thd_arm_subgroup_review_ltn4481_r2",
           "actor_id": "par_biostat",
           "timestamp": "2026-06-29T09:00:01.034Z",
           "payload": {
             "assumption": {
               "id": "asm_subgroup_exploratory_only",
               "object": "assumption",
-              "threadId": "thd_arm_subgroup_review_ltn4481",
+              "threadId": "thd_arm_subgroup_review_ltn4481_r2",
               "text": "The bio-failure subgroup finding is hypothesis-generating only and should not drive Phase III enrichment, stratification, or primary endpoint strategy.",
               "status": "active",
               "evidenceIds": [
@@ -2206,20 +2206,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:0516e5930a976c592ba169aff8464431051cbfd25882b1dae4977c3256a8ced8",
-          "content_hash": "sha256:e77b86c1619f1c87caf4c4ce0a40bfb24a13dfa01f73e895078c4ac0b5672d03"
+          "previous_hash": "sha256:04beba9f47ef859fbed392bc1df343eddfa79c64f7c5baeb1239d4f288d17b01",
+          "content_hash": "sha256:dda774f6cf3a6e7539743096e23b15febda044183a2edae11840be402c2e7a34"
         },
         {
           "event_id": "evt_claimcreated_clm_no_subgroup_design_influence_mqyzlpxe_42ad3d7d",
           "event_type": "ClaimCreated",
-          "thread_id": "thd_arm_subgroup_review_ltn4481",
+          "thread_id": "thd_arm_subgroup_review_ltn4481_r2",
           "actor_id": "par_biostat",
           "timestamp": "2026-06-29T09:00:01.056Z",
           "payload": {
             "claim": {
               "id": "clm_no_subgroup_design_influence",
               "object": "claim",
-              "threadId": "thd_arm_subgroup_review_ltn4481",
+              "threadId": "thd_arm_subgroup_review_ltn4481_r2",
               "text": "Phase III design must not incorporate the post-hoc bio-failure finding as anything other than an exploratory objective with no alpha allocation.",
               "status": "endorsed",
               "evidenceIds": [
@@ -2236,20 +2236,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:e77b86c1619f1c87caf4c4ce0a40bfb24a13dfa01f73e895078c4ac0b5672d03",
-          "content_hash": "sha256:59818e3d222785280cc72663543c405ff7ab79e1215a897676ccbafee0f39006"
+          "previous_hash": "sha256:dda774f6cf3a6e7539743096e23b15febda044183a2edae11840be402c2e7a34",
+          "content_hash": "sha256:9bf1a82c5af73a473f45001c6cd12a2798ff53a1c667e0109152f577553bb02e"
         },
         {
           "event_id": "evt_positiontaken_par_biostat_mqyzlpy0_04c7e8db",
           "event_type": "PositionTaken",
-          "thread_id": "thd_arm_subgroup_review_ltn4481",
+          "thread_id": "thd_arm_subgroup_review_ltn4481_r2",
           "actor_id": "par_biostat",
           "timestamp": "2026-06-29T09:00:01.100Z",
           "payload": {
             "position": {
               "id": "pos_biostat_support",
               "object": "position",
-              "threadId": "thd_arm_subgroup_review_ltn4481",
+              "threadId": "thd_arm_subgroup_review_ltn4481_r2",
               "participantId": "par_biostat",
               "targetObjectId": "clm_no_subgroup_design_influence",
               "targetObjectType": "claim",
@@ -2260,20 +2260,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:59818e3d222785280cc72663543c405ff7ab79e1215a897676ccbafee0f39006",
-          "content_hash": "sha256:ccd0e5d059ba556d9818b940b52c3044604051266f31cd22937f25fba564fd91"
+          "previous_hash": "sha256:9bf1a82c5af73a473f45001c6cd12a2798ff53a1c667e0109152f577553bb02e",
+          "content_hash": "sha256:8d87ba74834ea47f5da1e3dccc2c15b035ebfdee38c7c58a2ff13a3f3362547f"
         },
         {
           "event_id": "evt_positiontaken_par_cmo_mqyzlpym_ba02c28a",
           "event_type": "PositionTaken",
-          "thread_id": "thd_arm_subgroup_review_ltn4481",
+          "thread_id": "thd_arm_subgroup_review_ltn4481_r2",
           "actor_id": "par_cmo",
           "timestamp": "2026-06-29T09:00:01.144Z",
           "payload": {
             "position": {
               "id": "pos_cmo_support",
               "object": "position",
-              "threadId": "thd_arm_subgroup_review_ltn4481",
+              "threadId": "thd_arm_subgroup_review_ltn4481_r2",
               "participantId": "par_cmo",
               "targetObjectId": "clm_no_subgroup_design_influence",
               "targetObjectType": "claim",
@@ -2284,20 +2284,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:ccd0e5d059ba556d9818b940b52c3044604051266f31cd22937f25fba564fd91",
-          "content_hash": "sha256:069e8e2d5ea45c751e4ffddede3508f243e42f66111e7fa0b73347723464523b"
+          "previous_hash": "sha256:8d87ba74834ea47f5da1e3dccc2c15b035ebfdee38c7c58a2ff13a3f3362547f",
+          "content_hash": "sha256:8959f354102ad2f81d09202dae1be21cd05a5c94da33827ff228dd1d8d9d5dfb"
         },
         {
           "event_id": "evt_decisionrequestopened_drq_subgroup_designation_mqyzlpz8_42489972",
           "event_type": "DecisionRequestOpened",
-          "thread_id": "thd_arm_subgroup_review_ltn4481",
+          "thread_id": "thd_arm_subgroup_review_ltn4481_r2",
           "actor_id": "par_biostat",
           "timestamp": "2026-06-29T09:00:01.188Z",
           "payload": {
             "decisionRequest": {
               "id": "drq_subgroup_designation",
               "object": "decisionRequest",
-              "threadId": "thd_arm_subgroup_review_ltn4481",
+              "threadId": "thd_arm_subgroup_review_ltn4481_r2",
               "proposal": "Designate bio-failure subgroup as exploratory only in Phase III.",
               "status": "review",
               "supportingEvidenceIds": [
@@ -2317,20 +2317,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:069e8e2d5ea45c751e4ffddede3508f243e42f66111e7fa0b73347723464523b",
-          "content_hash": "sha256:89886626ca678c5d020bca7171c431c79892fc6eaad671fa88cda52ecc75f389"
+          "previous_hash": "sha256:8959f354102ad2f81d09202dae1be21cd05a5c94da33827ff228dd1d8d9d5dfb",
+          "content_hash": "sha256:47031315d015a0f05528c1cc7951090795db431bb77e04eff2eac01ab8aaf977"
         },
         {
           "event_id": "evt_reviewsubmitted_rev_cmo_subgroup_mqyzlpzu_136e80ea",
           "event_type": "ReviewSubmitted",
-          "thread_id": "thd_arm_subgroup_review_ltn4481",
+          "thread_id": "thd_arm_subgroup_review_ltn4481_r2",
           "actor_id": "par_cmo",
           "timestamp": "2026-06-29T09:00:01.232Z",
           "payload": {
             "review": {
               "id": "rev_cmo_subgroup",
               "object": "review",
-              "threadId": "thd_arm_subgroup_review_ltn4481",
+              "threadId": "thd_arm_subgroup_review_ltn4481_r2",
               "decisionRequestId": "drq_subgroup_designation",
               "reviewerParticipantId": "par_cmo",
               "status": "approve",
@@ -2341,20 +2341,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:89886626ca678c5d020bca7171c431c79892fc6eaad671fa88cda52ecc75f389",
-          "content_hash": "sha256:3659364de23810ad35cbddab89ae869850c3f73a35f6f3e132e8632540e98ba2"
+          "previous_hash": "sha256:47031315d015a0f05528c1cc7951090795db431bb77e04eff2eac01ab8aaf977",
+          "content_hash": "sha256:476a6aa143626b963cc666b656c8c376dc7407d0c5d60acd3e88d1a41f98880e"
         },
         {
           "event_id": "evt_decisionmerged_dcr_subgroup_exploratory_mqyzlq0g_50d07910",
           "event_type": "DecisionMerged",
-          "thread_id": "thd_arm_subgroup_review_ltn4481",
+          "thread_id": "thd_arm_subgroup_review_ltn4481_r2",
           "actor_id": "par_biostat",
           "timestamp": "2026-06-29T09:00:01.276Z",
           "payload": {
             "decisionRecord": {
               "id": "dcr_subgroup_exploratory",
               "object": "decisionRecord",
-              "threadId": "thd_arm_subgroup_review_ltn4481",
+              "threadId": "thd_arm_subgroup_review_ltn4481_r2",
               "decisionRequestId": "drq_subgroup_designation",
               "status": "approved",
               "summary": "Bio-failure subgroup designated exploratory only. No alpha allocation, no enrichment, no stratification in Phase III primary analysis.",
@@ -2395,20 +2395,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:3659364de23810ad35cbddab89ae869850c3f73a35f6f3e132e8632540e98ba2",
-          "content_hash": "sha256:a5f9103437abca655d87f3b55d9c772c37356241155c7466cb20be02139adf47"
+          "previous_hash": "sha256:476a6aa143626b963cc666b656c8c376dc7407d0c5d60acd3e88d1a41f98880e",
+          "content_hash": "sha256:fd40249839eb18c00bccbfe93a689d10ef5a2005f15a86e4895e76f5cf3c6081"
         },
         {
           "event_id": "evt_minorityreportfiled_subgroup_discipline_mqyzlq12_130ead46",
           "event_type": "MinorityReportFiled",
-          "thread_id": "thd_arm_subgroup_review_ltn4481",
+          "thread_id": "thd_arm_subgroup_review_ltn4481_r2",
           "actor_id": "par_biostat",
           "timestamp": "2026-06-29T09:00:01.320Z",
           "payload": {
             "minorityReport": {
               "id": "mnr_arm_subgroup_discipline",
               "object": "minorityReport",
-              "threadId": "thd_arm_subgroup_review_ltn4481",
+              "threadId": "thd_arm_subgroup_review_ltn4481_r2",
               "decisionRecordId": "dcr_subgroup_exploratory",
               "participantId": "par_biostat",
               "text": "This minority report is filed proactively for the trial master file. The bio-failure subgroup finding (46.3 percent remission, n=89, 95 percent CI 35.9-56.7) will generate organizational pressure to promote it from exploratory to confirmatory — as enrichment, stratification, or a co-primary endpoint. Any such promotion would compromise the statistical integrity of the Phase III trial and create regulatory risk. This dissent is recorded at the arm-level decision so that if a future protocol amendment attempts to change the subgroup designation, there is a traceable record that the lead biostatistician objected at the earliest decision point.",
@@ -2419,19 +2419,19 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:a5f9103437abca655d87f3b55d9c772c37356241155c7466cb20be02139adf47",
-          "content_hash": "sha256:f1d575bba0c5fc0f4678d21a04bde9a4f9364c8ecb437ccabff06888e5e3933d"
+          "previous_hash": "sha256:fd40249839eb18c00bccbfe93a689d10ef5a2005f15a86e4895e76f5cf3c6081",
+          "content_hash": "sha256:339ce5d14ad92ca30c9e34624b8320a6ce03c6226e64ea474e54c7cce2ddd662"
         }
       ]
     },
     {
       "role": "arm",
-      "threadId": "thd_arm_regulatory_strategy_ltn4481",
+      "threadId": "thd_arm_regulatory_strategy_ltn4481_r2",
       "events": [
         {
           "event_id": "evt_participantadded_par_reg_affairs_mqyzlq1o_477fedd9",
           "event_type": "ParticipantAdded",
-          "thread_id": "thd_arm_regulatory_strategy_ltn4481",
+          "thread_id": "thd_arm_regulatory_strategy_ltn4481_r2",
           "actor_id": "par_reg_affairs",
           "timestamp": "2026-06-29T09:00:01.364Z",
           "payload": {
@@ -2445,12 +2445,12 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "content_hash": "sha256:53c363f4b51093892e3c814ced279dcf95094c586cce8604739648787fc28168"
+          "content_hash": "sha256:bb29207a36ec5382dac613cddddf175527c44e86a12baf4e50a1f6daafd11466"
         },
         {
           "event_id": "evt_participantadded_par_reg_writer_mqyzlq2a_30922676",
           "event_type": "ParticipantAdded",
-          "thread_id": "thd_arm_regulatory_strategy_ltn4481",
+          "thread_id": "thd_arm_regulatory_strategy_ltn4481_r2",
           "actor_id": "par_reg_writer",
           "timestamp": "2026-06-29T09:00:01.386Z",
           "payload": {
@@ -2464,18 +2464,18 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:53c363f4b51093892e3c814ced279dcf95094c586cce8604739648787fc28168",
-          "content_hash": "sha256:dd4ab97232ee36cf0bfcd8cbe5d320ead33c575fbd523ab6053313adf07416df"
+          "previous_hash": "sha256:bb29207a36ec5382dac613cddddf175527c44e86a12baf4e50a1f6daafd11466",
+          "content_hash": "sha256:f02e6be57b6da6f09b2cee87affb5b645961056bbee741f3165f240965c65732"
         },
         {
-          "event_id": "evt_threadcreated_thd_arm_regulatory_strategy_ltn4481_mqyzlq2w_e7519f42",
+          "event_id": "evt_threadcreated_thd_arm_regulatory_strategy_ltn4481_r2_mqyzlq2w_8a8122c5",
           "event_type": "ThreadCreated",
-          "thread_id": "thd_arm_regulatory_strategy_ltn4481",
+          "thread_id": "thd_arm_regulatory_strategy_ltn4481_r2",
           "actor_id": "par_reg_affairs",
           "timestamp": "2026-06-29T09:00:01.408Z",
           "payload": {
             "thread": {
-              "id": "thd_arm_regulatory_strategy_ltn4481",
+              "id": "thd_arm_regulatory_strategy_ltn4481_r2",
               "object": "thread",
               "title": "Regulatory Strategy — LTN-4481 Phase III Path",
               "question": "What is the viable regulatory path for LTN-4481 Phase III?",
@@ -2490,20 +2490,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:dd4ab97232ee36cf0bfcd8cbe5d320ead33c575fbd523ab6053313adf07416df",
-          "content_hash": "sha256:ff91e0361bf6bd39f2623606e7ac9f914d1e4ea5ee06ab9144a69f8c90cc3fd2"
+          "previous_hash": "sha256:f02e6be57b6da6f09b2cee87affb5b645961056bbee741f3165f240965c65732",
+          "content_hash": "sha256:d9614fd19abf541a1848a4032ac148cc7ac1164677044c74b03cb6b37d185cb5"
         },
         {
           "event_id": "evt_evidencecommitted_evd_type_b_minutes_mqyzlq3i_59ee1bbb",
           "event_type": "EvidenceCommitted",
-          "thread_id": "thd_arm_regulatory_strategy_ltn4481",
+          "thread_id": "thd_arm_regulatory_strategy_ltn4481_r2",
           "actor_id": "par_reg_affairs",
           "timestamp": "2026-06-29T09:00:01.430Z",
           "payload": {
             "evidence": {
               "id": "evd_type_b_minutes",
               "object": "evidence",
-              "threadId": "thd_arm_regulatory_strategy_ltn4481",
+              "threadId": "thd_arm_regulatory_strategy_ltn4481_r2",
               "source": "FDA Type B End-of-Phase-2 meeting minutes (2026-02-14)",
               "finding": "FDA agreed 200mg Q4W reasonable. A single pivotal trial is acceptable as a treat-through study covering both induction and maintenance, at least 500 patients, with pre-specified interim futility — provided the induction study serves as the confirmatory source. Hepatic monitoring plan and stopping rules required.",
               "confidence": 0.95,
@@ -2515,20 +2515,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:ff91e0361bf6bd39f2623606e7ac9f914d1e4ea5ee06ab9144a69f8c90cc3fd2",
-          "content_hash": "sha256:0f820e5c9d566f7bb056afcbe74c46412826c89ff295a1bc3d7e1f4bf6df417c"
+          "previous_hash": "sha256:d9614fd19abf541a1848a4032ac148cc7ac1164677044c74b03cb6b37d185cb5",
+          "content_hash": "sha256:696f82f874d4147987eae84d72860874648f0c564341f8eff9c15bf6a711ee5a"
         },
         {
           "event_id": "evt_evidencecommitted_evd_competitive_landscape_mqyzlq44_7c0c65de",
           "event_type": "EvidenceCommitted",
-          "thread_id": "thd_arm_regulatory_strategy_ltn4481",
+          "thread_id": "thd_arm_regulatory_strategy_ltn4481_r2",
           "actor_id": "par_reg_writer",
           "timestamp": "2026-06-29T09:00:01.452Z",
           "payload": {
             "evidence": {
               "id": "evd_competitive_landscape",
               "object": "evidence",
-              "threadId": "thd_arm_regulatory_strategy_ltn4481",
+              "threadId": "thd_arm_regulatory_strategy_ltn4481_r2",
               "source": "Competitive landscape memo (2026-05-22)",
               "finding": "Three JAK inhibitors and two IL-23 inhibitors approved for UC. FDA heightened scrutiny on hepatotoxicity. Bio-failure enrichment viewed favorably if supported by pre-specified analysis.",
               "confidence": 0.86,
@@ -2540,20 +2540,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:0f820e5c9d566f7bb056afcbe74c46412826c89ff295a1bc3d7e1f4bf6df417c",
-          "content_hash": "sha256:6f609f42dc3d77767bb265dd11e0458505efbdefc74113a11112120530ac8405"
+          "previous_hash": "sha256:696f82f874d4147987eae84d72860874648f0c564341f8eff9c15bf6a711ee5a",
+          "content_hash": "sha256:3d64534274722e0dcbf85743a2d483a5f37968b85fa4b23dcfce7a92a523838e"
         },
         {
           "event_id": "evt_assumptiondeclared_asm_fda_alignment_holds_mqyzlq4q_1824cd09",
           "event_type": "AssumptionDeclared",
-          "thread_id": "thd_arm_regulatory_strategy_ltn4481",
+          "thread_id": "thd_arm_regulatory_strategy_ltn4481_r2",
           "actor_id": "par_reg_affairs",
           "timestamp": "2026-06-29T09:00:01.474Z",
           "payload": {
             "assumption": {
               "id": "asm_fda_alignment_holds",
               "object": "assumption",
-              "threadId": "thd_arm_regulatory_strategy_ltn4481",
+              "threadId": "thd_arm_regulatory_strategy_ltn4481_r2",
               "text": "FDA Type B meeting agreements will hold through IND amendment review. No material change in FDA regulatory posture on UC drugs is expected.",
               "status": "active",
               "evidenceIds": [
@@ -2567,20 +2567,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:6f609f42dc3d77767bb265dd11e0458505efbdefc74113a11112120530ac8405",
-          "content_hash": "sha256:a92321a88c847d12695d255b4e49108de2950aee3bf59deca77ea259839db26d"
+          "previous_hash": "sha256:3d64534274722e0dcbf85743a2d483a5f37968b85fa4b23dcfce7a92a523838e",
+          "content_hash": "sha256:8e8b6281a284420cc9e3b71e17b5fb90c12dd1343825c2e365b6d177bb50056b"
         },
         {
           "event_id": "evt_claimcreated_clm_single_pivotal_viable_mqyzlq5c_957b78ff",
           "event_type": "ClaimCreated",
-          "thread_id": "thd_arm_regulatory_strategy_ltn4481",
+          "thread_id": "thd_arm_regulatory_strategy_ltn4481_r2",
           "actor_id": "par_reg_affairs",
           "timestamp": "2026-06-29T09:00:01.496Z",
           "payload": {
             "claim": {
               "id": "clm_single_pivotal_viable",
               "object": "claim",
-              "threadId": "thd_arm_regulatory_strategy_ltn4481",
+              "threadId": "thd_arm_regulatory_strategy_ltn4481_r2",
               "text": "Single pivotal trial strategy is viable as a treat-through study covering induction and maintenance, with adaptive design, interim futility, and hepatic monitoring per FDA feedback; the induction phase supplies the confirmatory evidence the single-pivotal path requires.",
               "status": "endorsed",
               "evidenceIds": [
@@ -2597,20 +2597,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:a92321a88c847d12695d255b4e49108de2950aee3bf59deca77ea259839db26d",
-          "content_hash": "sha256:8c5e7628ef6f283d45c45f18556feed0048c393846ec1fc3c845bd0f4c4bc6d7"
+          "previous_hash": "sha256:8e8b6281a284420cc9e3b71e17b5fb90c12dd1343825c2e365b6d177bb50056b",
+          "content_hash": "sha256:eb6df8f1757958ed737763f28c6f873ac92b5faf064eb2d4707c0a7a66ac7dac"
         },
         {
           "event_id": "evt_positiontaken_par_reg_affairs_mqyzlq5y_118ac9de",
           "event_type": "PositionTaken",
-          "thread_id": "thd_arm_regulatory_strategy_ltn4481",
+          "thread_id": "thd_arm_regulatory_strategy_ltn4481_r2",
           "actor_id": "par_reg_affairs",
           "timestamp": "2026-06-29T09:00:01.540Z",
           "payload": {
             "position": {
               "id": "pos_reg_affairs_support",
               "object": "position",
-              "threadId": "thd_arm_regulatory_strategy_ltn4481",
+              "threadId": "thd_arm_regulatory_strategy_ltn4481_r2",
               "participantId": "par_reg_affairs",
               "targetObjectId": "clm_single_pivotal_viable",
               "targetObjectType": "claim",
@@ -2621,20 +2621,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:8c5e7628ef6f283d45c45f18556feed0048c393846ec1fc3c845bd0f4c4bc6d7",
-          "content_hash": "sha256:b11717e74306555f599cf4bd1127e95818f1f78523c096f88b9b27f92193ee9d"
+          "previous_hash": "sha256:eb6df8f1757958ed737763f28c6f873ac92b5faf064eb2d4707c0a7a66ac7dac",
+          "content_hash": "sha256:b71eba2d9bf9c781ab258ad11d93710f7f1abb61f781e3deb27aa10d349e109f"
         },
         {
           "event_id": "evt_positiontaken_par_reg_writer_mqyzlq6k_5e6547db",
           "event_type": "PositionTaken",
-          "thread_id": "thd_arm_regulatory_strategy_ltn4481",
+          "thread_id": "thd_arm_regulatory_strategy_ltn4481_r2",
           "actor_id": "par_reg_writer",
           "timestamp": "2026-06-29T09:00:01.584Z",
           "payload": {
             "position": {
               "id": "pos_reg_writer_support",
               "object": "position",
-              "threadId": "thd_arm_regulatory_strategy_ltn4481",
+              "threadId": "thd_arm_regulatory_strategy_ltn4481_r2",
               "participantId": "par_reg_writer",
               "targetObjectId": "clm_single_pivotal_viable",
               "targetObjectType": "claim",
@@ -2645,20 +2645,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:b11717e74306555f599cf4bd1127e95818f1f78523c096f88b9b27f92193ee9d",
-          "content_hash": "sha256:8599b352ba1940abb9168a5b73deadabc2965de2cbafb7d75ce11162e390f295"
+          "previous_hash": "sha256:b71eba2d9bf9c781ab258ad11d93710f7f1abb61f781e3deb27aa10d349e109f",
+          "content_hash": "sha256:7cb8c8f3fc0cbd209220192e81f6b6c82a1bc51803d3a82aef56ff0ded3a32d3"
         },
         {
           "event_id": "evt_decisionrequestopened_drq_reg_strategy_mqyzlq76_81809a81",
           "event_type": "DecisionRequestOpened",
-          "thread_id": "thd_arm_regulatory_strategy_ltn4481",
+          "thread_id": "thd_arm_regulatory_strategy_ltn4481_r2",
           "actor_id": "par_reg_affairs",
           "timestamp": "2026-06-29T09:00:01.628Z",
           "payload": {
             "decisionRequest": {
               "id": "drq_reg_strategy",
               "object": "decisionRequest",
-              "threadId": "thd_arm_regulatory_strategy_ltn4481",
+              "threadId": "thd_arm_regulatory_strategy_ltn4481_r2",
               "proposal": "Pursue single pivotal trial with adaptive design per FDA Type B alignment.",
               "status": "review",
               "supportingEvidenceIds": [
@@ -2676,20 +2676,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:8599b352ba1940abb9168a5b73deadabc2965de2cbafb7d75ce11162e390f295",
-          "content_hash": "sha256:8b58c70cf888b2d34a19d48eef60566c7f2de594c2db589a46884bb1cdf0e0e0"
+          "previous_hash": "sha256:7cb8c8f3fc0cbd209220192e81f6b6c82a1bc51803d3a82aef56ff0ded3a32d3",
+          "content_hash": "sha256:87d8db7bf9c5dc575a8d4cad21b7c824ce3020f65f81c38301d2b9a4326f1746"
         },
         {
           "event_id": "evt_reviewsubmitted_rev_reg_writer_mqyzlq7s_49e731d5",
           "event_type": "ReviewSubmitted",
-          "thread_id": "thd_arm_regulatory_strategy_ltn4481",
+          "thread_id": "thd_arm_regulatory_strategy_ltn4481_r2",
           "actor_id": "par_reg_writer",
           "timestamp": "2026-06-29T09:00:01.672Z",
           "payload": {
             "review": {
               "id": "rev_reg_writer",
               "object": "review",
-              "threadId": "thd_arm_regulatory_strategy_ltn4481",
+              "threadId": "thd_arm_regulatory_strategy_ltn4481_r2",
               "decisionRequestId": "drq_reg_strategy",
               "reviewerParticipantId": "par_reg_writer",
               "status": "approve",
@@ -2700,20 +2700,20 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:8b58c70cf888b2d34a19d48eef60566c7f2de594c2db589a46884bb1cdf0e0e0",
-          "content_hash": "sha256:9bc211eabff4f992f2bd5e1b31b72531e428501b7b04b370d8a2090b76a85b12"
+          "previous_hash": "sha256:87d8db7bf9c5dc575a8d4cad21b7c824ce3020f65f81c38301d2b9a4326f1746",
+          "content_hash": "sha256:8ca669336d598f0510a070323235f65c7e6e33af3adccdec29c47ad4a84ade6e"
         },
         {
           "event_id": "evt_decisionmerged_dcr_reg_strategy_confirmed_mqyzlq8e_cb76c431",
           "event_type": "DecisionMerged",
-          "thread_id": "thd_arm_regulatory_strategy_ltn4481",
+          "thread_id": "thd_arm_regulatory_strategy_ltn4481_r2",
           "actor_id": "par_reg_affairs",
           "timestamp": "2026-06-29T09:00:01.716Z",
           "payload": {
             "decisionRecord": {
               "id": "dcr_reg_strategy_confirmed",
               "object": "decisionRecord",
-              "threadId": "thd_arm_regulatory_strategy_ltn4481",
+              "threadId": "thd_arm_regulatory_strategy_ltn4481_r2",
               "decisionRequestId": "drq_reg_strategy",
               "status": "approved",
               "summary": "Single pivotal trial strategy confirmed. Adaptive design with interim futility, at least 500 patients, hepatic monitoring plan.",
@@ -2755,8 +2755,8 @@ export const example = {
           },
           "protocol_version": "clista.protocol.v0",
           "hash_version": "clista.event_hash.v1",
-          "previous_hash": "sha256:9bc211eabff4f992f2bd5e1b31b72531e428501b7b04b370d8a2090b76a85b12",
-          "content_hash": "sha256:e6466f7151fc97f0e03616a746626bb4bbc10d55e966a988a642e2b52b93d9ae"
+          "previous_hash": "sha256:8ca669336d598f0510a070323235f65c7e6e33af3adccdec29c47ad4a84ade6e",
+          "content_hash": "sha256:0d6645ab540d1592e4a5223f4b4d1d5b91043a0fd3f96f765bd3780adcb038c8"
         }
       ]
     }

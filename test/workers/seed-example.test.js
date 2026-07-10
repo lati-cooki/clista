@@ -11,7 +11,7 @@ import { examples as exampleRegistry } from '../../worker/examples/index.js';
 const EMAIL = 'troylati@gmail.com';
 const ORIGIN = 'https://app.clista.ai';
 const EXAMPLE_ID = 'pharma-phase-gate-multithreaded';
-const PARENT_THREAD = 'thd_phase2_to_phase3_go_nogo_ltn4481';
+const PARENT_THREAD = 'thd_phase2_to_phase3_go_nogo_ltn4481_r2';
 const authGet = (path) => SELF.fetch(`${ORIGIN}${path}`, { headers: { 'x-clista-email': EMAIL } });
 const authPost = (path, body) =>
   SELF.fetch(`${ORIGIN}${path}`, {
