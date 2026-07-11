@@ -7,6 +7,11 @@
     "test:protocol": "npm --prefix packages/protocol test",
     "test:threadhub": "npm --prefix packages/threadhub test",
     "test:app": "npm --prefix app run test:all",
-    "test": "npm run test:protocol && npm run test:threadhub && npm run test:app"
+    "test": "npm run test:protocol && npm run test:threadhub && npm run test:app",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^4.110.0"
   }
 }
