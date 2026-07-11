@@ -51,3 +51,6 @@ not the agent.
    (projector identity)
 4. `draft-4-minority-vina-drift.json` — `MinorityReportFiled`
    (receiver-compatibility interpretation drift)
+
+## Task #8 raw ordered DO rows (post-retirement closure)
+Independent replay evidence via raw ordered Durable Object rows for task #8 is unavailable (see clista-incident-task8-raw-rows-unavailable-20260707.md in this dir and the main clista-incident-20260704/ archive). Only task3 and task5 had raw-rows exports via the temporary forensic endpoint. No such dump for task #8 was produced or recoverable after token revocation and endpoint reversion. The append-only event log remains the protocol source of truth for replay.

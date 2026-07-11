@@ -1,0 +1,52 @@
+name: Deploy app.clista.ai
+
+# Build the SPA and deploy the Worker (+ Durable Objects) to app.clista.ai.
+# Monorepo port of clista-ai-app's deploy-app.yml (cutover 2026-07-10, per
+# the monorepo-consolidation-for-the-mrm-pivot decision).
+#
+# DISPATCH-ONLY during cutover: every production deploy is an explicit,
+# operator-triggered action until the monorepo pipeline is proven (staging
+# deploy + one manual production deploy verified). Then restore the push
+# trigger (same paths as the old repo, under app/) and freeze the old repo.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-app
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Require Cloudflare secrets
+        run: |
+          if [ -z "${{ secrets.CLOUDFLARE_API_TOKEN }}" ] || [ -z "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ]; then
+            echo "::error::Set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID repo secrets (see app/docs/DEPLOY.md §5)."
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - run: npm ci
+
+      - name: Engine parity tests
+        run: npm test
+
+      - name: Build SPA
+        run: npm run build
+
+      - name: Deploy Worker
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

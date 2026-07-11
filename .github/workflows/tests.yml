@@ -1,0 +1,118 @@
+name: Tests
+
+# Gate every PR and push to main on all three suites. Jobs are path-filtered
+# per package so a docs-only change doesn't burn CI, but any package change
+# runs that package's full suite (the same commands as `npm test` at root).
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      protocol: ${{ steps.filter.outputs.protocol }}
+      threadhub: ${{ steps.filter.outputs.threadhub }}
+      app: ${{ steps.filter.outputs.app }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            protocol:
+              - 'packages/protocol/**'
+              - '.github/workflows/tests.yml'
+            threadhub:
+              - 'packages/threadhub/**'
+              - '.github/workflows/tests.yml'
+            app:
+              - 'app/**'
+              - '.github/workflows/tests.yml'
+
+  protocol-js:
+    name: protocol · JS tests
+    needs: changes
+    if: needs.changes.outputs.protocol == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/protocol
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - run: npm test
+
+  protocol-python:
+    name: protocol · Python tests
+    needs: changes
+    if: needs.changes.outputs.protocol == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/protocol
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - run: python -m unittest discover -s tests -v
+
+  protocol-replay:
+    name: protocol · Clean-room replay
+    needs: changes
+    if: needs.changes.outputs.protocol == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/protocol
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - run: npm run replay
+
+  threadhub:
+    name: threadhub · tests
+    needs: changes
+    if: needs.changes.outputs.threadhub == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/threadhub
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - run: npm test
+
+  app:
+    name: app · node + worker tests
+    needs: changes
+    if: needs.changes.outputs.app == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci
+      - run: npm run test:all
