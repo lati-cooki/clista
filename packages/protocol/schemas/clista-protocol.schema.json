@@ -1,0 +1,8220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clista.local/schemas/clista-protocol.schema.json",
+  "title": "ClisTa Protocol Export",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "protocolVersion",
+    "exportedAt",
+    "integrity",
+    "threads",
+    "forks",
+    "participants",
+    "evidence",
+    "assumptions",
+    "claims",
+    "positions",
+    "objections",
+    "decisionRequests",
+    "reviews",
+    "decisionRecords",
+    "minorityReports",
+    "mergeRequests",
+    "mergeReviews",
+    "mergeConflicts",
+    "mergeConflictResolutions",
+    "mergeCompletions",
+    "expectedOutcomes",
+    "outcomeAudits",
+    "decisionScores",
+    "alignmentSnapshots",
+    "identity",
+    "participantRoles",
+    "activeAuthorities",
+    "revokedAuthorities",
+    "authorityHistory",
+    "attribution",
+    "contributionAttributions",
+    "attributionCorrections",
+    "attributionDisputes",
+    "attributionRevocations",
+    "provenance",
+    "contributionProvenance",
+    "learning",
+    "learningSignals",
+    "learningPatterns",
+    "learningRecommendations",
+    "adaptation",
+    "adaptationRecommendations",
+    "amendments",
+    "activeAmendments",
+    "amendmentHistory",
+    "compatibility",
+    "interoperability",
+    "federation",
+    "negotiation",
+    "delegation",
+    "execution",
+    "outcome",
+    "outcomeLearning",
+    "review",
+    "events",
+    "recovery"
+  ],
+  "properties": {
+    "schema": {
+      "const": "clista.protocol.v0"
+    },
+    "protocolVersion": {
+      "const": "clista.protocol.v0"
+    },
+    "exportedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "integrity": {
+      "$ref": "#/$defs/integrityReport"
+    },
+    "threads": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/thread"
+      }
+    },
+    "forks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/threadFork"
+      }
+    },
+    "participants": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/participant"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/evidence"
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/assumption"
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/claim"
+      }
+    },
+    "positions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/position"
+      }
+    },
+    "objections": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/objection"
+      }
+    },
+    "decisionRequests": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/decisionRequest"
+      }
+    },
+    "reviews": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/review"
+      }
+    },
+    "decisionRecords": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/decisionRecord"
+      }
+    },
+    "minorityReports": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/minorityReport"
+      }
+    },
+    "mergeRequests": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/mergeRequest"
+      }
+    },
+    "mergeReviews": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/mergeReview"
+      }
+    },
+    "mergeConflicts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/mergeConflict"
+      }
+    },
+    "mergeConflictResolutions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/mergeConflictResolution"
+      }
+    },
+    "mergeCompletions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/mergeCompletion"
+      }
+    },
+    "expectedOutcomes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/expectedOutcome"
+      }
+    },
+    "outcomeAudits": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/outcomeAudit"
+      }
+    },
+    "decisionScores": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/decisionScore"
+      }
+    },
+    "alignmentSnapshots": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/alignmentSnapshot"
+      }
+    },
+    "identity": {
+      "$ref": "#/$defs/identityProjection"
+    },
+    "participantRoles": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/participantRole"
+      }
+    },
+    "activeAuthorities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/participantAuthority"
+      }
+    },
+    "revokedAuthorities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/participantAuthority"
+      }
+    },
+    "authorityHistory": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/participantAuthorityHistory"
+      }
+    },
+    "attribution": {
+      "$ref": "#/$defs/attributionProjection"
+    },
+    "contributionAttributions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/contributionAttribution"
+      }
+    },
+    "attributionCorrections": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/attributionCorrection"
+      }
+    },
+    "attributionDisputes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/attributionDispute"
+      }
+    },
+    "attributionRevocations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/attributionRevocation"
+      }
+    },
+    "provenance": {
+      "$ref": "#/$defs/provenanceProjection"
+    },
+    "contributionProvenance": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/contributionProvenance"
+      }
+    },
+    "learning": {
+      "$ref": "#/$defs/learningProjection"
+    },
+    "learningSignals": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/learningSignal"
+      }
+    },
+    "learningPatterns": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/learningPattern"
+      }
+    },
+    "learningRecommendations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/learningRecommendation"
+      }
+    },
+    "adaptation": {
+      "$ref": "#/$defs/adaptationProjection"
+    },
+    "adaptationRecommendations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/adaptationRecommendation"
+      }
+    },
+    "amendments": {
+      "$ref": "#/$defs/amendmentProjection"
+    },
+    "activeAmendments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/protocolAmendment"
+      }
+    },
+    "amendmentHistory": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "compatibility": {
+      "$ref": "#/$defs/compatibilityProjection"
+    },
+    "interoperability": {
+      "$ref": "#/$defs/interoperabilityProjection"
+    },
+    "federation": {
+      "$ref": "#/$defs/federationProjection"
+    },
+    "negotiation": {
+      "$ref": "#/$defs/negotiationProjection"
+    },
+    "delegation": {
+      "$ref": "#/$defs/delegationProjection"
+    },
+    "execution": {
+      "$ref": "#/$defs/executionProjection"
+    },
+    "outcome": {
+      "$ref": "#/$defs/outcomeProjection"
+    },
+    "outcomeLearning": {
+      "$ref": "#/$defs/outcomeLearningProjection"
+    },
+    "review": {
+      "$ref": "#/$defs/reviewProjection"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/event"
+      }
+    },
+    "recovery": {
+      "$ref": "#/$defs/recoveryProjection"
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z]{3}_[a-zA-Z0-9][a-zA-Z0-9_-]*$"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "negotiationStatus": {
+      "enum": [
+        "proposed",
+        "accepted",
+        "degraded",
+        "rejected"
+      ]
+    },
+    "negotiationRequest": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "packetHash",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "negotiationRequest"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "packetHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "status": {
+          "$ref": "#/$defs/negotiationStatus"
+        },
+        "negotiationStatus": {
+          "$ref": "#/$defs/negotiationStatus"
+        }
+      }
+    },
+    "negotiationConstraint": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "negotiationId",
+        "constraintType",
+        "description"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "negotiationConstraint"
+        },
+        "negotiationId": {
+          "$ref": "#/$defs/id"
+        },
+        "constraintType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "negotiationDifference": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "negotiationId",
+        "differenceType",
+        "field",
+        "reason"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "negotiationDifference"
+        },
+        "negotiationId": {
+          "$ref": "#/$defs/id"
+        },
+        "differenceType": {
+          "enum": [
+            "capability",
+            "amendment",
+            "validation_requirement",
+            "interoperability_profile",
+            "compatibility_status",
+            "interoperability_status",
+            "federation_status"
+          ]
+        },
+        "field": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "negotiationTerms": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "negotiationId",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "negotiationTerms"
+        },
+        "negotiationId": {
+          "$ref": "#/$defs/id"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "status": {
+          "$ref": "#/$defs/negotiationStatus"
+        },
+        "exchangeTerms": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "exchangeTerms"
+          ]
+        },
+        {
+          "required": [
+            "summary"
+          ]
+        }
+      ]
+    },
+    "negotiationFailure": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "negotiationId",
+        "reason"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "negotiationFailure"
+        },
+        "negotiationId": {
+          "$ref": "#/$defs/id"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "$ref": "#/$defs/negotiationStatus"
+        }
+      }
+    },
+    "delegationStatus": {
+      "enum": [
+        "active",
+        "revoked",
+        "expired",
+        "violated"
+      ]
+    },
+    "delegateType": {
+      "enum": [
+        "participant",
+        "agent",
+        "tool",
+        "context"
+      ]
+    },
+    "delegationGrant": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "delegatorParticipantId",
+        "delegateId",
+        "delegateType",
+        "action",
+        "scope",
+        "limits",
+        "authorityRequired",
+        "attributionRequired",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "delegationGrant"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "delegatorParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "delegateId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "delegateType": {
+          "$ref": "#/$defs/delegateType"
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "limits": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "authorityRequired": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attributionRequired": {
+          "const": true
+        },
+        "status": {
+          "$ref": "#/$defs/delegationStatus"
+        }
+      }
+    },
+    "delegatedAction": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "delegationId",
+        "threadId",
+        "delegateId",
+        "delegateType",
+        "action",
+        "scope",
+        "summary",
+        "attribution"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "delegatedAction"
+        },
+        "delegationId": {
+          "$ref": "#/$defs/id"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "delegateId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "delegateType": {
+          "$ref": "#/$defs/delegateType"
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attribution": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "delegateId",
+            "delegationId",
+            "action"
+          ]
+        }
+      }
+    },
+    "delegationRevocation": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "delegationId",
+        "revokedByParticipantId",
+        "reason"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "delegationRevocation"
+        },
+        "delegationId": {
+          "$ref": "#/$defs/id"
+        },
+        "revokedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "delegationExpiration": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "delegationId",
+        "expiredAt"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "delegationExpiration"
+        },
+        "delegationId": {
+          "$ref": "#/$defs/id"
+        },
+        "expiredAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "delegationViolation": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "delegationId",
+        "violationType",
+        "reason"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "delegationViolation"
+        },
+        "delegationId": {
+          "$ref": "#/$defs/id"
+        },
+        "actionId": {
+          "$ref": "#/$defs/id"
+        },
+        "violationType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "executionStatus": {
+      "enum": [
+        "active",
+        "completed",
+        "failed",
+        "rolled_back",
+        "violated"
+      ]
+    },
+    "executionAuthorizationRef": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "decision",
+            "delegation"
+          ]
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        }
+      }
+    },
+    "executionEvidence": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "executionRecord": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "actorId",
+        "authorizationRef",
+        "actionType",
+        "scope",
+        "constraints",
+        "status",
+        "attribution",
+        "authorityCreated",
+        "executionAsAuthorization",
+        "consensusCreated",
+        "executionAsConsensus",
+        "governanceApproval",
+        "amendmentApproval",
+        "completionByAssertionOnly",
+        "silentCompletion",
+        "silentFailure",
+        "silentRollback",
+        "intentOnly"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "executionRecord"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "actorId": {
+          "$ref": "#/$defs/id"
+        },
+        "authorizationRef": {
+          "$ref": "#/$defs/executionAuthorizationRef"
+        },
+        "delegationId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "decisionId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "actionType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "status": {
+          "$ref": "#/$defs/executionStatus"
+        },
+        "startedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "completedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "failedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "rolledBackAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/executionEvidence"
+          }
+        },
+        "summary": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "failureReason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "rollbackReason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "attribution": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "actorId",
+            "authorizationRef",
+            "actionType"
+          ]
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/executionViolation"
+          }
+        },
+        "authorityCreated": {
+          "const": false
+        },
+        "executionAsAuthorization": {
+          "const": false
+        },
+        "consensusCreated": {
+          "const": false
+        },
+        "executionAsConsensus": {
+          "const": false
+        },
+        "governanceApproval": {
+          "const": false
+        },
+        "amendmentApproval": {
+          "const": false
+        },
+        "completionByAssertionOnly": {
+          "const": false
+        },
+        "silentCompletion": {
+          "const": false
+        },
+        "silentFailure": {
+          "const": false
+        },
+        "silentRollback": {
+          "const": false
+        },
+        "intentOnly": {
+          "const": false
+        }
+      }
+    },
+    "executionViolation": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "executionId",
+        "threadId",
+        "violationType",
+        "reason",
+        "detectedByParticipantId",
+        "authorityCreated",
+        "executionAsAuthorization",
+        "consensusCreated",
+        "executionAsConsensus",
+        "governanceApproval",
+        "amendmentApproval"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "executionViolation"
+        },
+        "executionId": {
+          "$ref": "#/$defs/id"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "violationType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "detectedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "detectedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "authorityCreated": {
+          "const": false
+        },
+        "executionAsAuthorization": {
+          "const": false
+        },
+        "consensusCreated": {
+          "const": false
+        },
+        "executionAsConsensus": {
+          "const": false
+        },
+        "governanceApproval": {
+          "const": false
+        },
+        "amendmentApproval": {
+          "const": false
+        }
+      }
+    },
+    "outcomeStatus": {
+      "enum": [
+        "pending",
+        "observed",
+        "evaluated",
+        "disputed",
+        "violated"
+      ]
+    },
+    "outcomeEvaluationResult": {
+      "enum": [
+        "success",
+        "partial_success",
+        "failure",
+        "inconclusive"
+      ]
+    },
+    "outcomeEvidence": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "outcomeRecord": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "executionId",
+        "threadId",
+        "actorId",
+        "expectedEffect",
+        "evidence",
+        "status",
+        "attribution",
+        "completionAsSuccess",
+        "successByAssertion",
+        "outcomeAsConsensus",
+        "consensusCreated",
+        "governanceApproval",
+        "amendmentApproval",
+        "authorityCreated",
+        "retroactiveExpectedEffect",
+        "unmeasuredImpactAchieved",
+        "silentUnintendedConsequence"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "outcomeRecord"
+        },
+        "executionId": {
+          "$ref": "#/$defs/id"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "actorId": {
+          "$ref": "#/$defs/id"
+        },
+        "expectedEffect": {
+          "type": "string",
+          "minLength": 1
+        },
+        "observedEffect": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeEvidence"
+          }
+        },
+        "evaluationResult": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/outcomeEvaluationResult"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comparison": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "confidence": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "evaluatedByParticipantId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/outcomeStatus"
+        },
+        "createdAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "observedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evaluatedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "attribution": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "actorId",
+            "executionId"
+          ]
+        },
+        "disputes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeDispute"
+          }
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeViolation"
+          }
+        },
+        "completionAsSuccess": {
+          "const": false
+        },
+        "successByAssertion": {
+          "const": false
+        },
+        "outcomeAsConsensus": {
+          "const": false
+        },
+        "consensusCreated": {
+          "const": false
+        },
+        "governanceApproval": {
+          "const": false
+        },
+        "amendmentApproval": {
+          "const": false
+        },
+        "authorityCreated": {
+          "const": false
+        },
+        "retroactiveExpectedEffect": {
+          "const": false
+        },
+        "unmeasuredImpactAchieved": {
+          "const": false
+        },
+        "silentUnintendedConsequence": {
+          "const": false
+        }
+      }
+    },
+    "outcomeDispute": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "outcomeId",
+        "executionId",
+        "threadId",
+        "reason",
+        "disputedByParticipantId",
+        "completionAsSuccess",
+        "outcomeAsConsensus",
+        "consensusCreated",
+        "governanceApproval",
+        "amendmentApproval",
+        "authorityCreated"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "outcomeDispute"
+        },
+        "outcomeId": {
+          "$ref": "#/$defs/id"
+        },
+        "executionId": {
+          "$ref": "#/$defs/id"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "disputedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "disputedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "completionAsSuccess": {
+          "const": false
+        },
+        "outcomeAsConsensus": {
+          "const": false
+        },
+        "consensusCreated": {
+          "const": false
+        },
+        "governanceApproval": {
+          "const": false
+        },
+        "amendmentApproval": {
+          "const": false
+        },
+        "authorityCreated": {
+          "const": false
+        }
+      }
+    },
+    "outcomeViolation": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "outcomeId",
+        "executionId",
+        "threadId",
+        "violationType",
+        "reason",
+        "detectedByParticipantId",
+        "completionAsSuccess",
+        "successByAssertion",
+        "outcomeAsConsensus",
+        "consensusCreated",
+        "governanceApproval",
+        "amendmentApproval",
+        "authorityCreated",
+        "retroactiveExpectedEffect",
+        "unmeasuredImpactAchieved",
+        "silentUnintendedConsequence"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "outcomeViolation"
+        },
+        "outcomeId": {
+          "$ref": "#/$defs/id"
+        },
+        "executionId": {
+          "$ref": "#/$defs/id"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "violationType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "detectedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "detectedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "completionAsSuccess": {
+          "const": false
+        },
+        "successByAssertion": {
+          "const": false
+        },
+        "outcomeAsConsensus": {
+          "const": false
+        },
+        "consensusCreated": {
+          "const": false
+        },
+        "governanceApproval": {
+          "const": false
+        },
+        "amendmentApproval": {
+          "const": false
+        },
+        "authorityCreated": {
+          "const": false
+        },
+        "retroactiveExpectedEffect": {
+          "const": false
+        },
+        "unmeasuredImpactAchieved": {
+          "const": false
+        },
+        "silentUnintendedConsequence": {
+          "const": false
+        }
+      }
+    },
+    "integrityReport": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema",
+        "protocolVersion",
+        "hashVersion",
+        "strict",
+        "valid",
+        "eventCount",
+        "headHash",
+        "reasons"
+      ],
+      "properties": {
+        "schema": {
+          "const": "clista.integrity.v0"
+        },
+        "protocolVersion": {
+          "const": "clista.protocol.v0"
+        },
+        "hashVersion": {
+          "const": "clista.event_hash.v1"
+        },
+        "strict": {
+          "type": "boolean"
+        },
+        "valid": {
+          "type": "boolean"
+        },
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "headHash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "compatibilityProjection": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema",
+        "theorem",
+        "hardLaw",
+        "compatibilityProtocolVersion",
+        "localProtocolVersion",
+        "localCapabilitySet",
+        "supportedVerificationLayers",
+        "supportedAmendmentTypes",
+        "compatibilityValidationStatus"
+      ],
+      "properties": {
+        "schema": {
+          "const": "clista.compatibility.v0"
+        },
+        "theorem": {
+          "const": "protocol_compatibility = verify(capability_set, amendment_state, validation_requirements)"
+        },
+        "hardLaw": {
+          "const": "unsupported_state != valid_state"
+        },
+        "compatibilityProtocolVersion": {
+          "const": "0.24.0"
+        },
+        "localProtocolVersion": {
+          "const": "clista.protocol.v0"
+        },
+        "localCapabilitySet": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "contains": {
+            "const": "compatibility"
+          },
+          "allOf": [
+            {
+              "contains": {
+                "const": "interoperability"
+              }
+            },
+            {
+              "contains": {
+                "const": "federation"
+              }
+            },
+            {
+              "contains": {
+                "const": "negotiation"
+              }
+            },
+            {
+              "contains": {
+                "const": "delegation"
+              }
+            },
+            {
+              "contains": {
+                "const": "execution"
+              }
+            },
+            {
+              "contains": {
+                "const": "outcome"
+              }
+            },
+            {
+              "contains": {
+                "const": "outcome_learning"
+              }
+            },
+            {
+              "contains": {
+                "const": "review"
+              }
+            },
+            {
+              "contains": {
+                "const": "recovery"
+              }
+            }
+          ]
+        },
+        "supportedVerificationLayers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "contains": {
+            "const": "compatibility"
+          },
+          "allOf": [
+            {
+              "contains": {
+                "const": "interoperability"
+              }
+            },
+            {
+              "contains": {
+                "const": "federation"
+              }
+            },
+            {
+              "contains": {
+                "const": "negotiation"
+              }
+            },
+            {
+              "contains": {
+                "const": "delegation"
+              }
+            },
+            {
+              "contains": {
+                "const": "execution"
+              }
+            },
+            {
+              "contains": {
+                "const": "outcome"
+              }
+            },
+            {
+              "contains": {
+                "const": "outcome_learning"
+              }
+            },
+            {
+              "contains": {
+                "const": "review"
+              }
+            },
+            {
+              "contains": {
+                "const": "recovery"
+              }
+            }
+          ]
+        },
+        "supportedAmendmentTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "compatibilityValidationStatus": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "valid",
+            "unsupportedStateAccepted",
+            "bestEffortAcceptance",
+            "silentDowngrade",
+            "importedStateMutation",
+            "governanceApproval",
+            "amendmentApproval"
+          ],
+          "properties": {
+            "valid": {
+              "const": true
+            },
+            "unsupportedStateAccepted": {
+              "const": false
+            },
+            "bestEffortAcceptance": {
+              "const": false
+            },
+            "silentDowngrade": {
+              "const": false
+            },
+            "importedStateMutation": {
+              "const": false
+            },
+            "governanceApproval": {
+              "const": false
+            },
+            "amendmentApproval": {
+              "const": false
+            }
+          }
+        }
+      }
+    },
+    "interoperabilityProjection": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema",
+        "theorem",
+        "hardLaw",
+        "interoperabilityProtocolVersion",
+        "localProtocolVersion",
+        "supportedExchangeFormats",
+        "supportedSemantics",
+        "supportedEventTypes",
+        "objectSemantics",
+        "profiles",
+        "mappings",
+        "checks",
+        "degradations",
+        "failures",
+        "acceptances",
+        "byProfile",
+        "byMapping",
+        "interoperabilityValidationStatus"
+      ],
+      "properties": {
+        "schema": {
+          "const": "clista.interoperability.v0"
+        },
+        "theorem": {
+          "const": "protocol_interoperability = preserve(meaning, across_compatible_contexts)"
+        },
+        "hardLaw": {
+          "const": "translation != reinterpretation"
+        },
+        "interoperabilityProtocolVersion": {
+          "const": "0.24.0"
+        },
+        "localProtocolVersion": {
+          "const": "clista.protocol.v0"
+        },
+        "supportedExchangeFormats": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "contains": {
+            "const": "clista.continuity.packet.v0"
+          }
+        },
+        "supportedSemantics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "contains": {
+            "const": "authority_context"
+          },
+          "allOf": [
+            {
+              "contains": {
+                "const": "execution_status"
+              }
+            },
+            {
+              "contains": {
+                "const": "protocol_outcome_status"
+              }
+            },
+            {
+              "contains": {
+                "const": "protocol_outcome_learning_status"
+              }
+            },
+            {
+              "contains": {
+                "const": "protocol_review_status"
+              }
+            },
+            {
+              "contains": {
+                "const": "protocol_recovery_status"
+              }
+            }
+          ]
+        },
+        "supportedEventTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "contains": {
+            "const": "InteroperabilityProfileDeclared"
+          },
+          "allOf": [
+            {
+              "contains": {
+                "const": "ExecutionStarted"
+              }
+            },
+            {
+              "contains": {
+                "const": "OutcomeExpected"
+              }
+            },
+            {
+              "contains": {
+                "const": "LearningSignalDerived"
+              }
+            },
+            {
+              "contains": {
+                "const": "ReviewRequired"
+              }
+            },
+            {
+              "contains": {
+                "const": "RecoveryRequested"
+              }
+            },
+            {
+              "contains": {
+                "const": "RecoveryPlanCreated"
+              }
+            },
+            {
+              "contains": {
+                "const": "RecoveryQuarantined"
+              }
+            },
+            {
+              "contains": {
+                "const": "RecoveryApplied"
+              }
+            },
+            {
+              "contains": {
+                "const": "RecoveryVerified"
+              }
+            },
+            {
+              "contains": {
+                "const": "RecoveryViolationRecorded"
+              }
+            }
+          ]
+        },
+        "objectSemantics": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "required": [
+            "claim",
+            "assumption",
+            "evidence",
+            "decision",
+            "authority",
+            "attribution",
+            "provenance",
+            "learning_signal",
+            "adaptation_recommendation",
+            "amendment",
+            "continuity",
+            "compatibility",
+            "interoperability",
+            "federation",
+            "negotiation",
+            "delegation",
+            "execution",
+            "protocol_outcome",
+            "protocol_outcome_learning",
+            "protocol_review"
+          ]
+        },
+        "profiles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "mappings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "degradations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "failures": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "acceptances": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "byProfile": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "byMapping": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "interoperabilityValidationStatus": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "valid",
+            "semanticLossAccepted",
+            "semanticReinterpretation",
+            "silentSemanticDegradation",
+            "authorityFlattened",
+            "provenanceFlattened",
+            "learningSignalsAsScores",
+            "adaptationRecommendationsAsAmendments",
+            "continuityAsTranscriptSummary"
+          ],
+          "properties": {
+            "valid": {
+              "const": true
+            },
+            "semanticLossAccepted": {
+              "const": false
+            },
+            "semanticReinterpretation": {
+              "const": false
+            },
+            "silentSemanticDegradation": {
+              "const": false
+            },
+            "authorityFlattened": {
+              "const": false
+            },
+            "provenanceFlattened": {
+              "const": false
+            },
+            "learningSignalsAsScores": {
+              "const": false
+            },
+            "adaptationRecommendationsAsAmendments": {
+              "const": false
+            },
+            "continuityAsTranscriptSummary": {
+              "const": false
+            }
+          }
+        }
+      }
+    },
+    "federationProjection": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema",
+        "theorem",
+        "hardLaw",
+        "federationProtocolVersion",
+        "localProtocolVersion",
+        "statuses",
+        "contexts",
+        "peers",
+        "references",
+        "verifications",
+        "rejections",
+        "boundaries",
+        "byContext",
+        "byPeer",
+        "byReference",
+        "byVerification",
+        "byRejection",
+        "boundariesByReference",
+        "federationValidationStatus"
+      ],
+      "properties": {
+        "schema": {
+          "const": "clista.federation.v0"
+        },
+        "theorem": {
+          "const": "protocol_federation = align(independent_reasoning_states, shared_protocol_rules)"
+        },
+        "hardLaw": {
+          "const": "shared_state != shared_authority"
+        },
+        "federationProtocolVersion": {
+          "const": "0.18.0"
+        },
+        "localProtocolVersion": {
+          "const": "clista.protocol.v0"
+        },
+        "statuses": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "accepted",
+              "degraded",
+              "rejected",
+              "pending"
+            ]
+          }
+        },
+        "contexts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "peers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "verifications": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "rejections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "boundaries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "byContext": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "byPeer": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "byReference": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "byVerification": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "byRejection": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "boundariesByReference": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "federationValidationStatus": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "valid",
+            "sharedAuthority",
+            "remoteAuthorityImported",
+            "automaticAuthorityImport",
+            "localGovernanceMutation",
+            "remoteGovernanceMerged",
+            "automaticAmendmentImport",
+            "remoteAmendmentsImported",
+            "automaticConsensus",
+            "remoteStateMutation",
+            "networkConsensus"
+          ],
+          "properties": {
+            "valid": {
+              "const": true
+            },
+            "sharedAuthority": {
+              "const": false
+            },
+            "remoteAuthorityImported": {
+              "const": false
+            },
+            "automaticAuthorityImport": {
+              "const": false
+            },
+            "localGovernanceMutation": {
+              "const": false
+            },
+            "remoteGovernanceMerged": {
+              "const": false
+            },
+            "automaticAmendmentImport": {
+              "const": false
+            },
+            "remoteAmendmentsImported": {
+              "const": false
+            },
+            "automaticConsensus": {
+              "const": false
+            },
+            "remoteStateMutation": {
+              "const": false
+            },
+            "networkConsensus": {
+              "const": false
+            }
+          }
+        }
+      }
+    },
+    "negotiationProjection": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema",
+        "theorem",
+        "hardLaw",
+        "negotiationProtocolVersion",
+        "localProtocolVersion",
+        "statuses",
+        "requests",
+        "constraints",
+        "differences",
+        "terms",
+        "proposedTerms",
+        "acceptedTerms",
+        "rejectedTerms",
+        "degradedTerms",
+        "failures",
+        "byRequest",
+        "byConstraint",
+        "byDifference",
+        "byTerm",
+        "byFailure",
+        "differencesByNegotiation",
+        "termsByNegotiation",
+        "failuresByNegotiation",
+        "negotiationValidationStatus"
+      ],
+      "properties": {
+        "schema": {
+          "const": "clista.negotiation.v0"
+        },
+        "theorem": {
+          "const": "protocol_negotiation = agree(exchange_terms, across_independent_contexts)"
+        },
+        "hardLaw": {
+          "const": "agreement != governance merger"
+        },
+        "negotiationProtocolVersion": {
+          "const": "0.18.0"
+        },
+        "localProtocolVersion": {
+          "const": "clista.protocol.v0"
+        },
+        "statuses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/negotiationStatus"
+          }
+        },
+        "requests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/negotiationRequest"
+          }
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/negotiationConstraint"
+          }
+        },
+        "differences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/negotiationDifference"
+          }
+        },
+        "terms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/negotiationTerms"
+          }
+        },
+        "proposedTerms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/negotiationTerms"
+          }
+        },
+        "acceptedTerms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/negotiationTerms"
+          }
+        },
+        "rejectedTerms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/negotiationTerms"
+          }
+        },
+        "degradedTerms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/negotiationTerms"
+          }
+        },
+        "failures": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/negotiationFailure"
+          }
+        },
+        "byRequest": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/negotiationRequest"
+          }
+        },
+        "byConstraint": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/negotiationConstraint"
+          }
+        },
+        "byDifference": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/negotiationDifference"
+          }
+        },
+        "byTerm": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/negotiationTerms"
+          }
+        },
+        "byFailure": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/negotiationFailure"
+          }
+        },
+        "differencesByNegotiation": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/negotiationDifference"
+            }
+          }
+        },
+        "termsByNegotiation": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/negotiationTerms"
+            }
+          }
+        },
+        "failuresByNegotiation": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/negotiationFailure"
+            }
+          }
+        },
+        "negotiationValidationStatus": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "valid",
+            "authorityTransfer",
+            "remoteAuthorityImported",
+            "governanceMerge",
+            "automaticAmendmentAdoption",
+            "automaticConsensus",
+            "remoteStateMutation",
+            "silentDowngrade",
+            "negotiationAcceptanceAsAmendment"
+          ],
+          "properties": {
+            "valid": {
+              "const": true
+            },
+            "authorityTransfer": {
+              "const": false
+            },
+            "remoteAuthorityImported": {
+              "const": false
+            },
+            "governanceMerge": {
+              "const": false
+            },
+            "automaticAmendmentAdoption": {
+              "const": false
+            },
+            "automaticConsensus": {
+              "const": false
+            },
+            "remoteStateMutation": {
+              "const": false
+            },
+            "silentDowngrade": {
+              "const": false
+            },
+            "negotiationAcceptanceAsAmendment": {
+              "const": false
+            }
+          }
+        }
+      }
+    },
+    "delegationProjection": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema",
+        "theorem",
+        "hardLaw",
+        "delegationProtocolVersion",
+        "localProtocolVersion",
+        "statuses",
+        "grants",
+        "activeGrants",
+        "revokedGrants",
+        "expiredGrants",
+        "violatedGrants",
+        "actions",
+        "revocations",
+        "expirations",
+        "violations",
+        "byGrant",
+        "byAction",
+        "byRevocation",
+        "byExpiration",
+        "byViolation",
+        "actionsByDelegation",
+        "revocationsByDelegation",
+        "expirationsByDelegation",
+        "violationsByDelegation",
+        "delegationValidationStatus"
+      ],
+      "properties": {
+        "schema": {
+          "const": "clista.delegation.v0"
+        },
+        "theorem": {
+          "const": "protocol_delegation = authorize(scoped_action, accountable_actor)"
+        },
+        "hardLaw": {
+          "const": "delegation != authority surrender"
+        },
+        "delegationProtocolVersion": {
+          "const": "0.19.0"
+        },
+        "localProtocolVersion": {
+          "const": "clista.protocol.v0"
+        },
+        "statuses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/delegationStatus"
+          }
+        },
+        "grants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/delegationGrant"
+          }
+        },
+        "activeGrants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/delegationGrant"
+          }
+        },
+        "revokedGrants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/delegationGrant"
+          }
+        },
+        "expiredGrants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/delegationGrant"
+          }
+        },
+        "violatedGrants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/delegationGrant"
+          }
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/delegatedAction"
+          }
+        },
+        "revocations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/delegationRevocation"
+          }
+        },
+        "expirations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/delegationExpiration"
+          }
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/delegationViolation"
+          }
+        },
+        "byGrant": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/delegationGrant"
+          }
+        },
+        "byAction": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/delegatedAction"
+          }
+        },
+        "byRevocation": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/delegationRevocation"
+          }
+        },
+        "byExpiration": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/delegationExpiration"
+          }
+        },
+        "byViolation": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/delegationViolation"
+          }
+        },
+        "actionsByDelegation": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/delegatedAction"
+            }
+          }
+        },
+        "revocationsByDelegation": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/delegationRevocation"
+            }
+          }
+        },
+        "expirationsByDelegation": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/delegationExpiration"
+            }
+          }
+        },
+        "violationsByDelegation": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/delegationViolation"
+            }
+          }
+        },
+        "delegationValidationStatus": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "valid",
+            "authoritySurrender",
+            "authorityTransfer",
+            "unboundedAction",
+            "delegationWithoutAttribution",
+            "governanceMutation",
+            "automaticConsensus",
+            "delegatedConsensus"
+          ],
+          "properties": {
+            "valid": {
+              "const": true
+            },
+            "authoritySurrender": {
+              "const": false
+            },
+            "authorityTransfer": {
+              "const": false
+            },
+            "unboundedAction": {
+              "const": false
+            },
+            "delegationWithoutAttribution": {
+              "const": false
+            },
+            "governanceMutation": {
+              "const": false
+            },
+            "automaticConsensus": {
+              "const": false
+            },
+            "delegatedConsensus": {
+              "const": false
+            }
+          }
+        }
+      }
+    },
+    "executionProjection": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema",
+        "theorem",
+        "hardLaw",
+        "executionProtocolVersion",
+        "localProtocolVersion",
+        "statuses",
+        "records",
+        "active",
+        "completed",
+        "failed",
+        "rolled_back",
+        "violated",
+        "starts",
+        "completions",
+        "failures",
+        "rollbacks",
+        "violations",
+        "byExecution",
+        "byStart",
+        "byCompletion",
+        "byFailure",
+        "byRollback",
+        "byViolation",
+        "completionsByExecution",
+        "failuresByExecution",
+        "rollbacksByExecution",
+        "violationsByExecution",
+        "executionValidationStatus"
+      ],
+      "properties": {
+        "schema": {
+          "const": "clista.execution.v0"
+        },
+        "theorem": {
+          "const": "protocol_execution = perform(authorized_action, under_verified_constraints)"
+        },
+        "hardLaw": {
+          "const": "execution != intent"
+        },
+        "executionProtocolVersion": {
+          "const": "0.20.0"
+        },
+        "localProtocolVersion": {
+          "const": "clista.protocol.v0"
+        },
+        "statuses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/executionStatus"
+          }
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/executionRecord"
+          }
+        },
+        "active": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/executionRecord"
+          }
+        },
+        "completed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/executionRecord"
+          }
+        },
+        "failed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/executionRecord"
+          }
+        },
+        "rolled_back": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/executionRecord"
+          }
+        },
+        "violated": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/executionRecord"
+          }
+        },
+        "starts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/executionRecord"
+          }
+        },
+        "completions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/executionRecord"
+          }
+        },
+        "failures": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/executionRecord"
+          }
+        },
+        "rollbacks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/executionRecord"
+          }
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/executionViolation"
+          }
+        },
+        "byExecution": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/executionRecord"
+          }
+        },
+        "byStart": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/executionRecord"
+          }
+        },
+        "byCompletion": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/executionRecord"
+          }
+        },
+        "byFailure": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/executionRecord"
+          }
+        },
+        "byRollback": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/executionRecord"
+          }
+        },
+        "byViolation": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/executionViolation"
+          }
+        },
+        "completionsByExecution": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/executionRecord"
+            }
+          }
+        },
+        "failuresByExecution": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/executionRecord"
+            }
+          }
+        },
+        "rollbacksByExecution": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/executionRecord"
+            }
+          }
+        },
+        "violationsByExecution": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/executionViolation"
+            }
+          }
+        },
+        "executionValidationStatus": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "valid",
+            "authorityCreated",
+            "executionAsAuthorization",
+            "consensusCreated",
+            "executionAsConsensus",
+            "governanceApproval",
+            "amendmentApproval",
+            "completionByAssertionOnly",
+            "silentCompletion",
+            "silentFailure",
+            "silentRollback"
+          ],
+          "properties": {
+            "valid": {
+              "const": true
+            },
+            "authorityCreated": {
+              "const": false
+            },
+            "executionAsAuthorization": {
+              "const": false
+            },
+            "consensusCreated": {
+              "const": false
+            },
+            "executionAsConsensus": {
+              "const": false
+            },
+            "governanceApproval": {
+              "const": false
+            },
+            "amendmentApproval": {
+              "const": false
+            },
+            "completionByAssertionOnly": {
+              "const": false
+            },
+            "silentCompletion": {
+              "const": false
+            },
+            "silentFailure": {
+              "const": false
+            },
+            "silentRollback": {
+              "const": false
+            }
+          }
+        }
+      }
+    },
+    "outcomeProjection": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema",
+        "theorem",
+        "hardLaw",
+        "outcomeProtocolVersion",
+        "localProtocolVersion",
+        "statuses",
+        "evaluationResults",
+        "records",
+        "expected",
+        "pending",
+        "observed",
+        "evaluated",
+        "disputed",
+        "violated",
+        "observations",
+        "evaluations",
+        "disputes",
+        "violations",
+        "byOutcome",
+        "byExpected",
+        "byObservation",
+        "byEvaluation",
+        "byDispute",
+        "byViolation",
+        "observationsByOutcome",
+        "evaluationsByOutcome",
+        "disputesByOutcome",
+        "violationsByOutcome",
+        "outcomeValidationStatus"
+      ],
+      "properties": {
+        "schema": {
+          "const": "clista.outcome.v0"
+        },
+        "theorem": {
+          "const": "protocol_outcome = evaluate(execution_result, against_intended_effect)"
+        },
+        "hardLaw": {
+          "const": "completion != success"
+        },
+        "outcomeProtocolVersion": {
+          "const": "0.21.0"
+        },
+        "localProtocolVersion": {
+          "const": "clista.protocol.v0"
+        },
+        "statuses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeStatus"
+          }
+        },
+        "evaluationResults": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeEvaluationResult"
+          }
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeRecord"
+          }
+        },
+        "expected": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeRecord"
+          }
+        },
+        "pending": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeRecord"
+          }
+        },
+        "observed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeRecord"
+          }
+        },
+        "evaluated": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeRecord"
+          }
+        },
+        "disputed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeRecord"
+          }
+        },
+        "violated": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeRecord"
+          }
+        },
+        "observations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeRecord"
+          }
+        },
+        "evaluations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeRecord"
+          }
+        },
+        "disputes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeDispute"
+          }
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeViolation"
+          }
+        },
+        "byOutcome": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/outcomeRecord"
+          }
+        },
+        "byExpected": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/outcomeRecord"
+          }
+        },
+        "byObservation": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/outcomeRecord"
+          }
+        },
+        "byEvaluation": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/outcomeRecord"
+          }
+        },
+        "byDispute": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/outcomeDispute"
+          }
+        },
+        "byViolation": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/outcomeViolation"
+          }
+        },
+        "observationsByOutcome": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/outcomeRecord"
+            }
+          }
+        },
+        "evaluationsByOutcome": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/outcomeRecord"
+            }
+          }
+        },
+        "disputesByOutcome": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/outcomeDispute"
+            }
+          }
+        },
+        "violationsByOutcome": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/outcomeViolation"
+            }
+          }
+        },
+        "outcomeValidationStatus": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "valid",
+            "completionAsSuccess",
+            "successByAssertion",
+            "outcomeAsConsensus",
+            "consensusCreated",
+            "governanceApproval",
+            "amendmentApproval",
+            "authorityCreated",
+            "retroactiveExpectedEffect",
+            "unmeasuredImpactAchieved",
+            "silentUnintendedConsequence",
+            "governanceMutation",
+            "stateMutation"
+          ],
+          "properties": {
+            "valid": {
+              "const": true
+            },
+            "completionAsSuccess": {
+              "const": false
+            },
+            "successByAssertion": {
+              "const": false
+            },
+            "outcomeAsConsensus": {
+              "const": false
+            },
+            "consensusCreated": {
+              "const": false
+            },
+            "governanceApproval": {
+              "const": false
+            },
+            "amendmentApproval": {
+              "const": false
+            },
+            "authorityCreated": {
+              "const": false
+            },
+            "retroactiveExpectedEffect": {
+              "const": false
+            },
+            "unmeasuredImpactAchieved": {
+              "const": false
+            },
+            "silentUnintendedConsequence": {
+              "const": false
+            },
+            "governanceMutation": {
+              "const": false
+            },
+            "stateMutation": {
+              "const": false
+            }
+          }
+        }
+      }
+    },
+    "outcomeLearningConfidence": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "outcomeLearningSignal": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "outcomeId",
+        "executionId",
+        "threadId",
+        "evaluationResult",
+        "lesson",
+        "evidence",
+        "confidence",
+        "derivedByParticipantId",
+        "retroactiveJustification",
+        "priorRationaleRewritten",
+        "intendedEffectRewritten",
+        "governanceMutation",
+        "authorityMutation",
+        "learningFromUnevaluatedOutcome",
+        "universalTruthClaim",
+        "failureRecastAsSuccess",
+        "outcomeSuccessMutation",
+        "stateMutation"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "outcomeLearningSignal"
+        },
+        "signalType": {
+          "type": "string"
+        },
+        "outcomeId": {
+          "$ref": "#/$defs/id"
+        },
+        "executionId": {
+          "$ref": "#/$defs/id"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "evaluationResult": {
+          "$ref": "#/$defs/outcomeEvaluationResult"
+        },
+        "lesson": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confirmedAssumptionIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "failedAssumptionIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "recommendedConstraints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "recommendedAmendments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeEvidence"
+          }
+        },
+        "confidence": {
+          "$ref": "#/$defs/outcomeLearningConfidence"
+        },
+        "sourceOutcomeHash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "derivedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "derivedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "retroactiveJustification": {
+          "const": false
+        },
+        "priorRationaleRewritten": {
+          "const": false
+        },
+        "intendedEffectRewritten": {
+          "const": false
+        },
+        "governanceMutation": {
+          "const": false
+        },
+        "authorityMutation": {
+          "const": false
+        },
+        "learningFromUnevaluatedOutcome": {
+          "const": false
+        },
+        "universalTruthClaim": {
+          "const": false
+        },
+        "failureRecastAsSuccess": {
+          "const": false
+        },
+        "outcomeSuccessMutation": {
+          "const": false
+        },
+        "stateMutation": {
+          "const": false
+        }
+      }
+    },
+    "outcomeLesson": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "learningSignalId",
+        "outcomeId",
+        "executionId",
+        "threadId",
+        "lesson",
+        "evidence",
+        "recordedByParticipantId",
+        "retroactiveJustification",
+        "priorRationaleRewritten",
+        "intendedEffectRewritten",
+        "governanceMutation",
+        "authorityMutation",
+        "learningFromUnevaluatedOutcome",
+        "universalTruthClaim",
+        "failureRecastAsSuccess",
+        "outcomeSuccessMutation",
+        "stateMutation"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "outcomeLesson"
+        },
+        "learningSignalId": {
+          "$ref": "#/$defs/id"
+        },
+        "outcomeId": {
+          "$ref": "#/$defs/id"
+        },
+        "executionId": {
+          "$ref": "#/$defs/id"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "lesson": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeEvidence"
+          }
+        },
+        "recordedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "recordedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "retroactiveJustification": {
+          "const": false
+        },
+        "priorRationaleRewritten": {
+          "const": false
+        },
+        "intendedEffectRewritten": {
+          "const": false
+        },
+        "governanceMutation": {
+          "const": false
+        },
+        "authorityMutation": {
+          "const": false
+        },
+        "learningFromUnevaluatedOutcome": {
+          "const": false
+        },
+        "universalTruthClaim": {
+          "const": false
+        },
+        "failureRecastAsSuccess": {
+          "const": false
+        },
+        "outcomeSuccessMutation": {
+          "const": false
+        },
+        "stateMutation": {
+          "const": false
+        }
+      }
+    },
+    "outcomeLearningDispute": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "learningId",
+        "outcomeId",
+        "executionId",
+        "threadId",
+        "reason",
+        "disputedByParticipantId",
+        "retroactiveJustification",
+        "governanceMutation",
+        "authorityMutation",
+        "stateMutation"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "outcomeLearningDispute"
+        },
+        "learningId": {
+          "$ref": "#/$defs/id"
+        },
+        "outcomeId": {
+          "$ref": "#/$defs/id"
+        },
+        "executionId": {
+          "$ref": "#/$defs/id"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "disputedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "disputedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "retroactiveJustification": {
+          "const": false
+        },
+        "governanceMutation": {
+          "const": false
+        },
+        "authorityMutation": {
+          "const": false
+        },
+        "stateMutation": {
+          "const": false
+        }
+      }
+    },
+    "outcomeLearningViolation": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "learningId",
+        "outcomeId",
+        "executionId",
+        "threadId",
+        "violationType",
+        "reason",
+        "detectedByParticipantId",
+        "retroactiveJustification",
+        "priorRationaleRewritten",
+        "intendedEffectRewritten",
+        "governanceMutation",
+        "authorityMutation",
+        "learningFromUnevaluatedOutcome",
+        "universalTruthClaim",
+        "failureRecastAsSuccess",
+        "outcomeSuccessMutation",
+        "stateMutation"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "outcomeLearningViolation"
+        },
+        "learningId": {
+          "$ref": "#/$defs/id"
+        },
+        "outcomeId": {
+          "$ref": "#/$defs/id"
+        },
+        "executionId": {
+          "$ref": "#/$defs/id"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "violationType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "detectedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "detectedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "retroactiveJustification": {
+          "const": false
+        },
+        "priorRationaleRewritten": {
+          "const": false
+        },
+        "intendedEffectRewritten": {
+          "const": false
+        },
+        "governanceMutation": {
+          "const": false
+        },
+        "authorityMutation": {
+          "const": false
+        },
+        "learningFromUnevaluatedOutcome": {
+          "const": false
+        },
+        "universalTruthClaim": {
+          "const": false
+        },
+        "failureRecastAsSuccess": {
+          "const": false
+        },
+        "outcomeSuccessMutation": {
+          "const": false
+        },
+        "stateMutation": {
+          "const": false
+        }
+      }
+    },
+    "outcomeLearningProjection": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema",
+        "theorem",
+        "hardLaw",
+        "outcomeLearningProtocolVersion",
+        "localProtocolVersion",
+        "signals",
+        "lessons",
+        "disputes",
+        "violations",
+        "bySignal",
+        "byLesson",
+        "byDispute",
+        "byViolation",
+        "lessonsBySignal",
+        "disputesByLearning",
+        "violationsByLearning",
+        "signalsByOutcome",
+        "lessonsByOutcome",
+        "disputesByOutcome",
+        "violationsByOutcome",
+        "outcomeLearningValidationStatus"
+      ],
+      "properties": {
+        "schema": {
+          "const": "clista.outcome_learning.v0"
+        },
+        "theorem": {
+          "const": "protocol_outcome_learning = derive(adaptation_signal, from_evaluated_outcome)"
+        },
+        "hardLaw": {
+          "const": "learning != retroactive justification"
+        },
+        "outcomeLearningProtocolVersion": {
+          "const": "0.22.0"
+        },
+        "localProtocolVersion": {
+          "const": "clista.protocol.v0"
+        },
+        "signals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeLearningSignal"
+          }
+        },
+        "lessons": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeLesson"
+          }
+        },
+        "disputes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeLearningDispute"
+          }
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/outcomeLearningViolation"
+          }
+        },
+        "bySignal": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/outcomeLearningSignal"
+          }
+        },
+        "byLesson": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/outcomeLesson"
+          }
+        },
+        "byDispute": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/outcomeLearningDispute"
+          }
+        },
+        "byViolation": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/outcomeLearningViolation"
+          }
+        },
+        "lessonsBySignal": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "disputesByLearning": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "violationsByLearning": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "signalsByOutcome": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "lessonsByOutcome": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "disputesByOutcome": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "violationsByOutcome": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "outcomeLearningValidationStatus": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "valid",
+            "retroactiveJustification",
+            "priorRationaleRewritten",
+            "intendedEffectRewritten",
+            "governanceMutation",
+            "authorityMutation",
+            "learningFromUnevaluatedOutcome",
+            "universalTruthClaim",
+            "failureRecastAsSuccess",
+            "outcomeSuccessMutation",
+            "stateMutation"
+          ],
+          "properties": {
+            "valid": {
+              "const": true
+            },
+            "retroactiveJustification": {
+              "const": false
+            },
+            "priorRationaleRewritten": {
+              "const": false
+            },
+            "intendedEffectRewritten": {
+              "const": false
+            },
+            "governanceMutation": {
+              "const": false
+            },
+            "authorityMutation": {
+              "const": false
+            },
+            "learningFromUnevaluatedOutcome": {
+              "const": false
+            },
+            "universalTruthClaim": {
+              "const": false
+            },
+            "failureRecastAsSuccess": {
+              "const": false
+            },
+            "outcomeSuccessMutation": {
+              "const": false
+            },
+            "stateMutation": {
+              "const": false
+            }
+          }
+        }
+      }
+    },
+    "reviewStatus": {
+      "enum": [
+        "required",
+        "open",
+        "reviewed",
+        "disputed",
+        "violated"
+      ]
+    },
+    "protocolReview": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "subjectType",
+        "subjectId",
+        "subjectRef",
+        "triggerType",
+        "reason",
+        "required",
+        "status",
+        "reviewAsApproval",
+        "governanceMutation",
+        "authorityCreated",
+        "authorityMutation",
+        "consensusCreated",
+        "amendmentApproval",
+        "recoveryPerformed",
+        "rollbackPerformed",
+        "accountabilityScoreAssigned",
+        "blameAssigned",
+        "violationResolved",
+        "outcomeMutation",
+        "executionMutation",
+        "delegationMutation",
+        "learningMutation",
+        "stateMutation"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "protocolReview"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "subjectType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subjectId": {
+          "$ref": "#/$defs/id"
+        },
+        "subjectRef": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "type",
+            "id"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "minLength": 1
+            },
+            "id": {
+              "$ref": "#/$defs/id"
+            }
+          }
+        },
+        "subjectKey": {
+          "type": "string",
+          "minLength": 1
+        },
+        "triggerType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "triggerEventId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "status": {
+          "$ref": "#/$defs/reviewStatus"
+        },
+        "requiredReviewerRole": {
+          "type": "string"
+        },
+        "reviewerParticipantId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "requiredReviewId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "requiredByParticipantId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "openedByParticipantId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "requiredAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "openedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "completedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "completedByParticipantId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "completions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolReviewCompletion"
+          }
+        },
+        "disputes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolReviewDispute"
+          }
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolReviewViolation"
+          }
+        },
+        "reviewAsApproval": {
+          "const": false
+        },
+        "governanceMutation": {
+          "const": false
+        },
+        "authorityCreated": {
+          "const": false
+        },
+        "authorityMutation": {
+          "const": false
+        },
+        "consensusCreated": {
+          "const": false
+        },
+        "amendmentApproval": {
+          "const": false
+        },
+        "recoveryPerformed": {
+          "const": false
+        },
+        "rollbackPerformed": {
+          "const": false
+        },
+        "accountabilityScoreAssigned": {
+          "const": false
+        },
+        "blameAssigned": {
+          "const": false
+        },
+        "violationResolved": {
+          "const": false
+        },
+        "outcomeMutation": {
+          "const": false
+        },
+        "executionMutation": {
+          "const": false
+        },
+        "delegationMutation": {
+          "const": false
+        },
+        "learningMutation": {
+          "const": false
+        },
+        "stateMutation": {
+          "const": false
+        }
+      }
+    },
+    "protocolReviewCompletion": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "reviewId",
+        "threadId",
+        "completionStatus",
+        "summary",
+        "completedByParticipantId",
+        "reviewAsApproval",
+        "governanceMutation",
+        "authorityCreated",
+        "authorityMutation",
+        "consensusCreated",
+        "amendmentApproval",
+        "recoveryPerformed",
+        "rollbackPerformed",
+        "accountabilityScoreAssigned",
+        "blameAssigned",
+        "violationResolved",
+        "outcomeMutation",
+        "executionMutation",
+        "delegationMutation",
+        "learningMutation",
+        "stateMutation"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "protocolReviewCompletion"
+        },
+        "reviewId": {
+          "$ref": "#/$defs/id"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "completionStatus": {
+          "const": "reviewed"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "completedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "completedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reviewAsApproval": {
+          "const": false
+        },
+        "governanceMutation": {
+          "const": false
+        },
+        "authorityCreated": {
+          "const": false
+        },
+        "authorityMutation": {
+          "const": false
+        },
+        "consensusCreated": {
+          "const": false
+        },
+        "amendmentApproval": {
+          "const": false
+        },
+        "recoveryPerformed": {
+          "const": false
+        },
+        "rollbackPerformed": {
+          "const": false
+        },
+        "accountabilityScoreAssigned": {
+          "const": false
+        },
+        "blameAssigned": {
+          "const": false
+        },
+        "violationResolved": {
+          "const": false
+        },
+        "outcomeMutation": {
+          "const": false
+        },
+        "executionMutation": {
+          "const": false
+        },
+        "delegationMutation": {
+          "const": false
+        },
+        "learningMutation": {
+          "const": false
+        },
+        "stateMutation": {
+          "const": false
+        }
+      }
+    },
+    "protocolReviewDispute": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "reviewId",
+        "threadId",
+        "reason",
+        "disputedByParticipantId",
+        "reviewAsApproval",
+        "governanceMutation",
+        "authorityCreated",
+        "consensusCreated",
+        "amendmentApproval",
+        "stateMutation"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "protocolReviewDispute"
+        },
+        "reviewId": {
+          "$ref": "#/$defs/id"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "disputedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "disputedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reviewAsApproval": {
+          "const": false
+        },
+        "governanceMutation": {
+          "const": false
+        },
+        "authorityCreated": {
+          "const": false
+        },
+        "consensusCreated": {
+          "const": false
+        },
+        "amendmentApproval": {
+          "const": false
+        },
+        "stateMutation": {
+          "const": false
+        }
+      }
+    },
+    "protocolReviewViolation": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "reviewId",
+        "threadId",
+        "violationType",
+        "reason",
+        "detectedByParticipantId",
+        "reviewAsApproval",
+        "governanceMutation",
+        "authorityCreated",
+        "consensusCreated",
+        "amendmentApproval",
+        "stateMutation"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "protocolReviewViolation"
+        },
+        "reviewId": {
+          "$ref": "#/$defs/id"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "violationType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "detectedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "detectedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reviewAsApproval": {
+          "const": false
+        },
+        "governanceMutation": {
+          "const": false
+        },
+        "authorityCreated": {
+          "const": false
+        },
+        "consensusCreated": {
+          "const": false
+        },
+        "amendmentApproval": {
+          "const": false
+        },
+        "stateMutation": {
+          "const": false
+        }
+      }
+    },
+    "reviewProjection": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema",
+        "theorem",
+        "hardLaw",
+        "reviewProtocolVersion",
+        "localProtocolVersion",
+        "statuses",
+        "triggerTypes",
+        "records",
+        "required",
+        "open",
+        "completed",
+        "disputed",
+        "violated",
+        "completions",
+        "disputes",
+        "violations",
+        "byReview",
+        "bySubject",
+        "completionsByReview",
+        "disputesByReview",
+        "violationsByReview",
+        "reviewValidationStatus"
+      ],
+      "properties": {
+        "schema": {
+          "const": "clista.review.v0"
+        },
+        "theorem": {
+          "const": "protocol_review = route(state_change, through_required_review)"
+        },
+        "hardLaw": {
+          "const": "review != approval"
+        },
+        "reviewProtocolVersion": {
+          "const": "0.23.0"
+        },
+        "localProtocolVersion": {
+          "const": "clista.protocol.v0"
+        },
+        "statuses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/reviewStatus"
+          }
+        },
+        "triggerTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolReview"
+          }
+        },
+        "required": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolReview"
+          }
+        },
+        "open": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolReview"
+          }
+        },
+        "completed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolReview"
+          }
+        },
+        "disputed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolReview"
+          }
+        },
+        "violated": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolReview"
+          }
+        },
+        "completions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolReviewCompletion"
+          }
+        },
+        "disputes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolReviewDispute"
+          }
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolReviewViolation"
+          }
+        },
+        "byReview": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/protocolReview"
+          }
+        },
+        "bySubject": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/protocolReview"
+            }
+          }
+        },
+        "completionsByReview": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "disputesByReview": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "violationsByReview": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "reviewValidationStatus": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "valid",
+            "reviewAsApproval",
+            "governanceMutation",
+            "authorityCreated",
+            "consensusCreated",
+            "amendmentApproval",
+            "recoveryPerformed",
+            "rollbackPerformed",
+            "accountabilityScoreAssigned",
+            "blameAssigned",
+            "stateMutation"
+          ],
+          "properties": {
+            "valid": {
+              "const": true
+            },
+            "reviewAsApproval": {
+              "const": false
+            },
+            "governanceMutation": {
+              "const": false
+            },
+            "authorityCreated": {
+              "const": false
+            },
+            "consensusCreated": {
+              "const": false
+            },
+            "amendmentApproval": {
+              "const": false
+            },
+            "recoveryPerformed": {
+              "const": false
+            },
+            "rollbackPerformed": {
+              "const": false
+            },
+            "accountabilityScoreAssigned": {
+              "const": false
+            },
+            "blameAssigned": {
+              "const": false
+            },
+            "stateMutation": {
+              "const": false
+            }
+          }
+        }
+      }
+    },
+    "participant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "object",
+        "kind",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "participant"
+        },
+        "kind": {
+          "enum": [
+            "human",
+            "agent",
+            "tool",
+            "system"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "type": "string"
+        },
+        "declaredBy": {
+          "$ref": "#/$defs/id"
+        },
+        "declaredAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "identitySource": {
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "participantRole": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "participantId",
+        "role",
+        "scope"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "participantRole"
+        },
+        "participantId": {
+          "$ref": "#/$defs/id"
+        },
+        "role": {
+          "type": "string"
+        },
+        "scope": {
+          "enum": [
+            "global",
+            "thread"
+          ]
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        }
+      }
+    },
+    "participantAuthority": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "participantId",
+        "authority",
+        "scope"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "participantAuthority"
+        },
+        "participantId": {
+          "$ref": "#/$defs/id"
+        },
+        "authority": {
+          "enum": [
+            "decision_owner"
+          ]
+        },
+        "scope": {
+          "enum": [
+            "global",
+            "thread"
+          ]
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "active": {
+          "type": "boolean"
+        }
+      }
+    },
+    "participantAuthorityHistory": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "participantId",
+        "authority",
+        "scope",
+        "action"
+      ],
+      "properties": {
+        "participantId": {
+          "$ref": "#/$defs/id"
+        },
+        "authority": {
+          "enum": [
+            "decision_owner"
+          ]
+        },
+        "scope": {
+          "enum": [
+            "global",
+            "thread"
+          ]
+        },
+        "action": {
+          "enum": [
+            "granted",
+            "revoked"
+          ]
+        }
+      }
+    },
+    "identityProjection": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema",
+        "participants",
+        "roles",
+        "activeAuthorities",
+        "revokedAuthorities",
+        "authorityHistory",
+        "identityValidationStatus"
+      ],
+      "properties": {
+        "schema": {
+          "const": "clista.identity.v0"
+        },
+        "participants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/participant"
+          }
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/participantRole"
+          }
+        },
+        "activeAuthorities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/participantAuthority"
+          }
+        },
+        "revokedAuthorities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/participantAuthority"
+          }
+        },
+        "authorityHistory": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/participantAuthorityHistory"
+          }
+        },
+        "identityValidationStatus": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "contributionType": {
+      "enum": [
+        "evidence",
+        "assumption",
+        "claim",
+        "position",
+        "objection",
+        "objection_resolution",
+        "decision_request",
+        "governance",
+        "decision",
+        "minority_report",
+        "outcome",
+        "outcome_audit",
+        "decision_score",
+        "fork",
+        "merge",
+        "merge_conflict",
+        "merge_conflict_resolution",
+        "merge_completion"
+      ]
+    },
+    "contributionAttribution": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "contributionId",
+        "contributionType",
+        "sourceEventId",
+        "participantId"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "contributionAttribution"
+        },
+        "contributionId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contributionType": {
+          "$ref": "#/$defs/contributionType"
+        },
+        "sourceEventId": {
+          "$ref": "#/$defs/id"
+        },
+        "sourceEventType": {
+          "type": "string"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "participantId": {
+          "$ref": "#/$defs/id"
+        },
+        "role": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "roleContext": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "authorityContext": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "status": {
+          "enum": [
+            "active",
+            "corrected",
+            "disputed",
+            "revoked"
+          ]
+        }
+      }
+    },
+    "attributionCorrection": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "attributionId",
+        "reason"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "attributionCorrection"
+        },
+        "attributionId": {
+          "$ref": "#/$defs/id"
+        },
+        "correctedParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "correctedRole": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "attributionDispute": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "attributionId",
+        "reason"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "attributionDispute"
+        },
+        "attributionId": {
+          "$ref": "#/$defs/id"
+        },
+        "disputedBy": {
+          "$ref": "#/$defs/id"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "attributionRevocation": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "attributionId",
+        "reason"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "attributionRevocation"
+        },
+        "attributionId": {
+          "$ref": "#/$defs/id"
+        },
+        "revokedBy": {
+          "$ref": "#/$defs/id"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "attributionProjection": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema",
+        "attributions",
+        "byContribution",
+        "byParticipant",
+        "byEvent",
+        "corrections",
+        "disputes",
+        "revocations",
+        "attributionValidationStatus"
+      ],
+      "properties": {
+        "schema": {
+          "const": "clista.attribution.v0"
+        },
+        "attributions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/contributionAttribution"
+          }
+        },
+        "byContribution": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "byParticipant": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "byEvent": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "corrections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/attributionCorrection"
+          }
+        },
+        "disputes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/attributionDispute"
+          }
+        },
+        "revocations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/attributionRevocation"
+          }
+        },
+        "attributionValidationStatus": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "provenanceSourceType": {
+      "enum": [
+        "event",
+        "evidence",
+        "import",
+        "continuity_packet",
+        "fork",
+        "merge",
+        "projection",
+        "external_reference"
+      ]
+    },
+    "provenanceTransformation": {
+      "enum": [
+        "asserted",
+        "observed",
+        "imported",
+        "summarized",
+        "inferred",
+        "corrected",
+        "disputed",
+        "revoked",
+        "merged"
+      ]
+    },
+    "provenanceSourceRef": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "sourceType",
+        "transformation"
+      ],
+      "properties": {
+        "sourceType": {
+          "$ref": "#/$defs/provenanceSourceType"
+        },
+        "sourceId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sourceEventId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sourceEventType": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "objectType": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "objectId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "transformation": {
+          "$ref": "#/$defs/provenanceTransformation"
+        },
+        "sourceHash": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "expectedSourceHash": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "sourceIntegrityVerified": {
+          "type": "boolean"
+        },
+        "availableAtContributionTime": {
+          "type": "boolean"
+        }
+      }
+    },
+    "contributionProvenance": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "contributionId",
+        "contributionType",
+        "attributionId",
+        "threadId",
+        "participantId",
+        "sourceType",
+        "sourceId",
+        "introducedByEventId",
+        "transformation",
+        "sourceRefs",
+        "provenanceHash"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "contributionProvenance"
+        },
+        "contributionId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contributionType": {
+          "$ref": "#/$defs/contributionType"
+        },
+        "attributionId": {
+          "$ref": "#/$defs/id"
+        },
+        "attributionStatus": {
+          "enum": [
+            "active",
+            "corrected",
+            "disputed",
+            "revoked"
+          ]
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "participantId": {
+          "$ref": "#/$defs/id"
+        },
+        "authorityContext": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "sourceType": {
+          "$ref": "#/$defs/provenanceSourceType"
+        },
+        "sourceId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sourceEventId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "introducedByEventId": {
+          "$ref": "#/$defs/id"
+        },
+        "transformation": {
+          "$ref": "#/$defs/provenanceTransformation"
+        },
+        "transformations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/provenanceTransformation"
+          }
+        },
+        "sourceHash": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "sourceIntegrityVerified": {
+          "type": "boolean"
+        },
+        "sourceAvailableAtContributionTime": {
+          "type": "boolean"
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/provenanceSourceRef"
+          }
+        },
+        "originalSourceHashes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[a-f0-9]{64}$"
+          }
+        },
+        "auditTrail": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "provenanceHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      }
+    },
+    "provenanceProjection": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema",
+        "theorem",
+        "provenance",
+        "byContribution",
+        "bySource",
+        "byEvent",
+        "corrections",
+        "disputes",
+        "revocations",
+        "provenanceValidationStatus"
+      ],
+      "properties": {
+        "schema": {
+          "const": "clista.provenance.v0"
+        },
+        "theorem": {
+          "const": "trusted_contribution = verify(attribution + source_provenance)"
+        },
+        "provenance": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/contributionProvenance"
+          }
+        },
+        "byContribution": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "bySource": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "byEvent": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "corrections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/attributionCorrection"
+          }
+        },
+        "disputes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/attributionDispute"
+          }
+        },
+        "revocations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/attributionRevocation"
+          }
+        },
+        "provenanceValidationStatus": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "learningConfidence": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "learningSignal": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "signalType",
+        "pattern",
+        "relatedContributions",
+        "outcomeRefs",
+        "finding",
+        "confidence",
+        "actorScoring",
+        "sourceScoring",
+        "modelRanking",
+        "authorityMutation",
+        "learningHash"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "enum": [
+            "learningSignal",
+            "learningRecommendation"
+          ]
+        },
+        "signalType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pattern": {
+          "type": "string",
+          "minLength": 1
+        },
+        "threadId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "relatedContributions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "outcomeRefs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "provenanceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "finding": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "$ref": "#/$defs/learningConfidence"
+        },
+        "actorScoring": {
+          "const": false
+        },
+        "sourceScoring": {
+          "const": false
+        },
+        "modelRanking": {
+          "const": false
+        },
+        "authorityMutation": {
+          "const": false
+        },
+        "generatedFromEventIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "learningHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      }
+    },
+    "learningRecommendation": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/learningSignal"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "object": {
+              "const": "learningRecommendation"
+            },
+            "recommendationType": {
+              "type": "string"
+            },
+            "recommendation": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "learningPattern": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "pattern",
+        "signalCount",
+        "signalIds",
+        "confidence",
+        "actorScoring",
+        "sourceScoring",
+        "modelRanking"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "learningPattern"
+        },
+        "pattern": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signalCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "signalIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "confidence": {
+          "$ref": "#/$defs/learningConfidence"
+        },
+        "actorScoring": {
+          "const": false
+        },
+        "sourceScoring": {
+          "const": false
+        },
+        "modelRanking": {
+          "const": false
+        }
+      }
+    },
+    "learningProjection": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema",
+        "theorem",
+        "hardLaw",
+        "patterns",
+        "signals",
+        "outcomeCorrelations",
+        "assumptionReviews",
+        "objectionReviews",
+        "evidenceReviews",
+        "governanceReviews",
+        "revisitRecommendations",
+        "bySignal",
+        "byPattern",
+        "byOutcome",
+        "learningValidationStatus"
+      ],
+      "properties": {
+        "schema": {
+          "const": "clista.learning.v0"
+        },
+        "theorem": {
+          "const": "protocol_learning = update(reasoning_patterns, outcome_evidence)"
+        },
+        "hardLaw": {
+          "const": "learning != reputation"
+        },
+        "patterns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/learningPattern"
+          }
+        },
+        "signals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/learningSignal"
+          }
+        },
+        "outcomeCorrelations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/learningSignal"
+          }
+        },
+        "assumptionReviews": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/learningSignal"
+          }
+        },
+        "objectionReviews": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/learningSignal"
+          }
+        },
+        "evidenceReviews": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/learningSignal"
+          }
+        },
+        "governanceReviews": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/learningSignal"
+          }
+        },
+        "revisitRecommendations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/learningRecommendation"
+          }
+        },
+        "bySignal": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "byPattern": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "byOutcome": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "learningValidationStatus": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "adaptationRecommendation": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "recommendationType",
+        "pattern",
+        "learningSignalIds",
+        "learningPatterns",
+        "relatedContributions",
+        "finding",
+        "recommendation",
+        "confidence",
+        "authorityMutation",
+        "governanceMutation",
+        "ruleMutation",
+        "thresholdMutation",
+        "participantScoring",
+        "sourceScoring",
+        "modelRanking",
+        "adaptationHash"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "adaptationRecommendation"
+        },
+        "recommendationType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pattern": {
+          "type": "string",
+          "minLength": 1
+        },
+        "threadId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "learningSignalIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "learningPatterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "relatedContributions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "outcomeRefs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "provenanceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "finding": {
+          "type": "string",
+          "minLength": 1
+        },
+        "recommendation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "$ref": "#/$defs/learningConfidence"
+        },
+        "authorityMutation": {
+          "const": false
+        },
+        "governanceMutation": {
+          "const": false
+        },
+        "ruleMutation": {
+          "const": false
+        },
+        "thresholdMutation": {
+          "const": false
+        },
+        "participantScoring": {
+          "const": false
+        },
+        "sourceScoring": {
+          "const": false
+        },
+        "modelRanking": {
+          "const": false
+        },
+        "agentRanking": {
+          "const": false
+        },
+        "generatedFromEventIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "adaptationHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      }
+    },
+    "adaptationReview": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "pattern",
+        "learningSignalIds",
+        "finding",
+        "confidence",
+        "authorityMutation",
+        "governanceMutation",
+        "ruleMutation",
+        "thresholdMutation",
+        "participantScoring",
+        "sourceScoring",
+        "modelRanking",
+        "adaptationHash"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "adaptationReview"
+        },
+        "pattern": {
+          "type": "string",
+          "minLength": 1
+        },
+        "threadId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "learningSignalIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "finding": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "$ref": "#/$defs/learningConfidence"
+        },
+        "authorityMutation": {
+          "const": false
+        },
+        "governanceMutation": {
+          "const": false
+        },
+        "ruleMutation": {
+          "const": false
+        },
+        "thresholdMutation": {
+          "const": false
+        },
+        "participantScoring": {
+          "const": false
+        },
+        "sourceScoring": {
+          "const": false
+        },
+        "modelRanking": {
+          "const": false
+        },
+        "agentRanking": {
+          "const": false
+        },
+        "adaptationHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      }
+    },
+    "adaptationProjection": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema",
+        "theorem",
+        "hardLaw",
+        "recommendations",
+        "reviews",
+        "adaptationReviews",
+        "governanceReviewRecommendations",
+        "evidenceRequirementReviewRecommendations",
+        "revisitTriggerReviewRecommendations",
+        "decisionGateReviewRecommendations",
+        "provenanceRequirementReviewRecommendations",
+        "objectionResolutionReviewRecommendations",
+        "outcomeWindowReviewRecommendations",
+        "byRecommendation",
+        "byLearningSignal",
+        "byPattern",
+        "adaptationValidationStatus"
+      ],
+      "properties": {
+        "schema": {
+          "const": "clista.adaptation.v0"
+        },
+        "theorem": {
+          "const": "governance_adaptation = recommend(governance_review, learning_signals)"
+        },
+        "hardLaw": {
+          "const": "adaptation != governance mutation"
+        },
+        "recommendations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/adaptationRecommendation"
+          }
+        },
+        "reviews": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/adaptationReview"
+          }
+        },
+        "adaptationReviews": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/adaptationReview"
+          }
+        },
+        "governanceReviewRecommendations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/adaptationRecommendation"
+          }
+        },
+        "evidenceRequirementReviewRecommendations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/adaptationRecommendation"
+          }
+        },
+        "revisitTriggerReviewRecommendations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/adaptationRecommendation"
+          }
+        },
+        "decisionGateReviewRecommendations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/adaptationRecommendation"
+          }
+        },
+        "provenanceRequirementReviewRecommendations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/adaptationRecommendation"
+          }
+        },
+        "objectionResolutionReviewRecommendations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/adaptationRecommendation"
+          }
+        },
+        "outcomeWindowReviewRecommendations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/adaptationRecommendation"
+          }
+        },
+        "byRecommendation": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "byLearningSignal": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "byPattern": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "adaptationValidationStatus": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "protocolAmendment": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "title",
+        "amendmentType",
+        "target",
+        "rationale",
+        "proposedChange",
+        "effectScope",
+        "automaticAmendment",
+        "implicitMutation",
+        "retroactiveMutation",
+        "recommendationBecomesAmendment",
+        "amendmentHash"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "protocolAmendment"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "amendmentType": {
+          "enum": [
+            "protocol_rule",
+            "governance_requirement",
+            "evidence_threshold",
+            "revisit_trigger",
+            "decision_gate",
+            "schema",
+            "validation_policy",
+            "interpretive_guidance"
+          ]
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "proposedChange": {
+          "type": "string",
+          "minLength": 1
+        },
+        "effectScope": {
+          "enum": [
+            "future_only",
+            "interpretive_guidance"
+          ]
+        },
+        "threadId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "approved",
+            "rejected",
+            "superseded"
+          ]
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "adaptationRecommendationIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "learningSignalIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "sourceEventIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "automaticAmendment": {
+          "const": false
+        },
+        "implicitMutation": {
+          "const": false
+        },
+        "hiddenPolicyMutation": {
+          "const": false
+        },
+        "retroactiveMutation": {
+          "const": false
+        },
+        "rewritesPastEvents": {
+          "const": false
+        },
+        "recommendationBecomesAmendment": {
+          "const": false
+        },
+        "amendmentHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      }
+    },
+    "protocolAmendmentAction": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "amendmentId",
+        "rationale",
+        "automaticAmendment",
+        "implicitMutation",
+        "retroactiveMutation",
+        "recommendationBecomesAmendment",
+        "amendmentHash"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "enum": [
+            "protocolAmendmentReview",
+            "protocolAmendmentApproval",
+            "protocolAmendmentRejection",
+            "protocolAmendmentSupersession"
+          ]
+        },
+        "amendmentId": {
+          "$ref": "#/$defs/id"
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string"
+        },
+        "effectScope": {
+          "enum": [
+            "future_only",
+            "interpretive_guidance"
+          ]
+        },
+        "authority": {
+          "type": "string"
+        },
+        "supersededByAmendmentId": {
+          "$ref": "#/$defs/id"
+        },
+        "automaticAmendment": {
+          "const": false
+        },
+        "implicitMutation": {
+          "const": false
+        },
+        "hiddenPolicyMutation": {
+          "const": false
+        },
+        "retroactiveMutation": {
+          "const": false
+        },
+        "rewritesPastEvents": {
+          "const": false
+        },
+        "recommendationBecomesAmendment": {
+          "const": false
+        },
+        "amendmentHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      }
+    },
+    "amendmentProjection": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema",
+        "theorem",
+        "hardLaw",
+        "amendments",
+        "activeAmendments",
+        "pendingAmendments",
+        "rejectedAmendments",
+        "supersededAmendments",
+        "proposals",
+        "reviews",
+        "approvals",
+        "rejections",
+        "supersessions",
+        "byAmendment",
+        "historyByAmendment",
+        "byAdaptationRecommendation",
+        "byLearningSignal",
+        "amendmentValidationStatus"
+      ],
+      "properties": {
+        "schema": {
+          "const": "clista.amendments.v0"
+        },
+        "theorem": {
+          "const": "authorized_protocol_change = approve(amendment, governance_authority)"
+        },
+        "hardLaw": {
+          "const": "recommendation != amendment"
+        },
+        "amendments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolAmendment"
+          }
+        },
+        "activeAmendments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolAmendment"
+          }
+        },
+        "pendingAmendments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolAmendment"
+          }
+        },
+        "rejectedAmendments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolAmendment"
+          }
+        },
+        "supersededAmendments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolAmendment"
+          }
+        },
+        "proposals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolAmendment"
+          }
+        },
+        "reviews": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolAmendmentAction"
+          }
+        },
+        "approvals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolAmendmentAction"
+          }
+        },
+        "rejections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolAmendmentAction"
+          }
+        },
+        "supersessions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protocolAmendmentAction"
+          }
+        },
+        "byAmendment": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "historyByAmendment": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "byAdaptationRecommendation": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "byLearningSignal": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "amendmentValidationStatus": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "thread": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "object",
+        "title",
+        "question",
+        "status",
+        "participantIds",
+        "createdAt",
+        "updatedAt"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "thread"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "active",
+            "review",
+            "decided",
+            "archived"
+          ]
+        },
+        "participantIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "parentThreadId": {
+          "$ref": "#/$defs/id"
+        },
+        "fork": {
+          "$ref": "#/$defs/threadFork"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "threadFork": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "object",
+        "parentThreadId",
+        "forkThreadId",
+        "forkTitle",
+        "forkedBy",
+        "forkedAt",
+        "inheritedThroughEventId",
+        "forkReason"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "threadFork"
+        },
+        "parentThreadId": {
+          "$ref": "#/$defs/id"
+        },
+        "forkThreadId": {
+          "$ref": "#/$defs/id"
+        },
+        "forkTitle": {
+          "type": "string",
+          "minLength": 1
+        },
+        "forkedBy": {
+          "$ref": "#/$defs/id"
+        },
+        "forkedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "inheritedThroughEventId": {
+          "$ref": "#/$defs/id"
+        },
+        "forkReason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "changedAssumptionIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "changedClaimIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "source",
+        "finding",
+        "committedByParticipantId",
+        "committedAt",
+        "contentHash"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "evidence"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "finding": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "committedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "committedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "artifactIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "assumption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "text",
+        "status",
+        "declaredByParticipantId",
+        "declaredAt",
+        "contentHash"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "assumption"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "active",
+            "contested",
+            "resolved",
+            "superseded"
+          ]
+        },
+        "evidenceIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "declaredByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "declaredAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "text",
+        "status",
+        "createdByParticipantId",
+        "createdAt"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "claim"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "endorsed",
+            "contested",
+            "resolved"
+          ]
+        },
+        "evidenceIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "assumptionIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "contradictingEvidenceIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "createdByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "position": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "participantId",
+        "stance",
+        "takenAt"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "position"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "participantId": {
+          "$ref": "#/$defs/id"
+        },
+        "targetObjectId": {
+          "$ref": "#/$defs/id"
+        },
+        "targetObjectType": {
+          "enum": [
+            "claim",
+            "assumption",
+            "decisionRequest",
+            "thread"
+          ]
+        },
+        "stance": {
+          "enum": [
+            "support",
+            "oppose",
+            "conditional",
+            "neutral",
+            "abstain"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        },
+        "takenAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "objection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "participantId",
+        "targetObjectId",
+        "targetObjectType",
+        "text",
+        "status",
+        "raisedAt"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "objection"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "participantId": {
+          "$ref": "#/$defs/id"
+        },
+        "targetObjectId": {
+          "$ref": "#/$defs/id"
+        },
+        "targetObjectType": {
+          "enum": [
+            "evidence",
+            "assumption",
+            "claim",
+            "position",
+            "decisionRequest"
+          ]
+        },
+        "assumption": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "open",
+            "resolved",
+            "preserved",
+            "rejected"
+          ]
+        },
+        "resolution": {
+          "type": "string"
+        },
+        "blocking": {
+          "type": "boolean"
+        },
+        "raisedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "resolvedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "decisionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "proposal",
+        "status",
+        "openedByParticipantId",
+        "openedAt"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "decisionRequest"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "proposal": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "review",
+            "changes_requested",
+            "merged",
+            "rejected",
+            "superseded"
+          ]
+        },
+        "supportingEvidenceIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "supportingClaimIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "supportingAssumptionIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "objectionIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "openedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "openedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "decisionRequestId",
+        "reviewerParticipantId",
+        "status",
+        "reviewedAt"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "review"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "decisionRequestId": {
+          "$ref": "#/$defs/id"
+        },
+        "reviewerParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "status": {
+          "enum": [
+            "approve",
+            "approve_with_conditions",
+            "request_changes",
+            "reject",
+            "comment"
+          ]
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "comment": {
+          "type": "string"
+        },
+        "reviewedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "decisionRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "decisionRequestId",
+        "status",
+        "summary",
+        "decidedByParticipantId",
+        "decidedAt",
+        "contentHash"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "decisionRecord"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "decisionRequestId": {
+          "$ref": "#/$defs/id"
+        },
+        "status": {
+          "enum": [
+            "approved",
+            "rejected",
+            "superseded"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rationale": {
+          "type": "string"
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "supportingEvidenceIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "supportingClaimIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "supportingAssumptionIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "objectionIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "reviewIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "authorityTrail": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "participantId",
+              "source"
+            ],
+            "properties": {
+              "participantId": {
+                "$ref": "#/$defs/id"
+              },
+              "role": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "preservedObjectionIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "minorityReportIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "nextAction": {
+          "type": "string"
+        },
+        "nextReviewAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "decidedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "decidedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "minorityReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "decisionRecordId",
+        "participantId",
+        "text",
+        "filedAt",
+        "contentHash"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "minorityReport"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "decisionRecordId": {
+          "$ref": "#/$defs/id"
+        },
+        "participantId": {
+          "$ref": "#/$defs/id"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "objectionIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "filedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "mergeRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "mergeRequestId",
+        "object",
+        "threadId",
+        "sourceForkThreadId",
+        "targetThreadId",
+        "openedBy",
+        "openedAt",
+        "summary"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "mergeRequestId": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "mergeRequest"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "sourceForkThreadId": {
+          "$ref": "#/$defs/id"
+        },
+        "targetThreadId": {
+          "$ref": "#/$defs/id"
+        },
+        "openedBy": {
+          "$ref": "#/$defs/id"
+        },
+        "openedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "review",
+            "changes_requested",
+            "rejected",
+            "merged"
+          ]
+        },
+        "proposedAssumptionIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "proposedEvidenceIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "proposedClaimIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "proposedObjectionIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "proposedDecisionRecordIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "mergeReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "mergeRequestId",
+        "reviewerId",
+        "status",
+        "summary",
+        "reviewedAt"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "mergeReview"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "mergeRequestId": {
+          "$ref": "#/$defs/id"
+        },
+        "reviewerId": {
+          "$ref": "#/$defs/id"
+        },
+        "reviewerParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "status": {
+          "enum": [
+            "approve",
+            "request_changes",
+            "reject"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requiredChanges": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reviewedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "mergeConflict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "conflictId",
+        "object",
+        "threadId",
+        "mergeRequestId",
+        "conflictType",
+        "parentObjectId",
+        "forkObjectId",
+        "summary",
+        "declaredAt"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "conflictId": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "mergeConflict"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "mergeRequestId": {
+          "$ref": "#/$defs/id"
+        },
+        "conflictType": {
+          "enum": [
+            "assumption",
+            "claim",
+            "evidence",
+            "objection",
+            "decision",
+            "outcome"
+          ]
+        },
+        "parentObjectId": {
+          "$ref": "#/$defs/id"
+        },
+        "forkObjectId": {
+          "$ref": "#/$defs/id"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "open",
+            "resolved"
+          ]
+        },
+        "declaredBy": {
+          "$ref": "#/$defs/id"
+        },
+        "declaredAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "resolution": {
+          "$ref": "#/$defs/mergeConflictResolution"
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "mergeConflictResolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "mergeRequestId",
+        "conflictId",
+        "resolution",
+        "rationale",
+        "resolvedBy",
+        "resolvedAt"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "mergeConflictResolution"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "mergeRequestId": {
+          "$ref": "#/$defs/id"
+        },
+        "conflictId": {
+          "$ref": "#/$defs/id"
+        },
+        "resolution": {
+          "enum": [
+            "accept_parent",
+            "accept_fork",
+            "preserve_both",
+            "supersede",
+            "reject_fork"
+          ]
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "resolvedBy": {
+          "$ref": "#/$defs/id"
+        },
+        "resolvedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "mergeCompletion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "mergeRequestId",
+        "mergedBy",
+        "mergedAt",
+        "acceptedObjectIds",
+        "preservedObjectionIds",
+        "rejectedObjectIds",
+        "authorityTrail"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "mergeCompletion"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "mergeRequestId": {
+          "$ref": "#/$defs/id"
+        },
+        "mergedBy": {
+          "$ref": "#/$defs/id"
+        },
+        "mergedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "acceptedObjectIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "preservedObjectionIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "rejectedObjectIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "authorityTrail": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "participantId",
+              "source"
+            ],
+            "properties": {
+              "participantId": {
+                "$ref": "#/$defs/id"
+              },
+              "role": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "expectedOutcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "decisionRecordId",
+        "metric",
+        "operator",
+        "target",
+        "reviewDate"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "expectedOutcomeId": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "expectedOutcome"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "decisionRecordId": {
+          "$ref": "#/$defs/id"
+        },
+        "metric": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target": {
+          "type": [
+            "number",
+            "string",
+            "boolean"
+          ]
+        },
+        "reviewDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "assumptionIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "evidenceIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "description": {
+          "type": "string"
+        },
+        "declaredByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "declaredAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "outcomeAudit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "decisionRecordId",
+        "expectedOutcomeId",
+        "actual",
+        "result",
+        "summary",
+        "auditedBy",
+        "auditedAt"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "outcomeAuditId": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "outcomeAudit"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "decisionRecordId": {
+          "$ref": "#/$defs/id"
+        },
+        "expectedOutcomeId": {
+          "$ref": "#/$defs/id"
+        },
+        "actual": {
+          "type": [
+            "number",
+            "string",
+            "boolean"
+          ]
+        },
+        "result": {
+          "enum": [
+            "confirmed",
+            "partially_confirmed",
+            "failed",
+            "inconclusive"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "failedAssumptionIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "failedEvidenceIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "auditedBy": {
+          "$ref": "#/$defs/id"
+        },
+        "auditedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "auditedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "decisionScore": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "decisionRecordId",
+        "score",
+        "status",
+        "rationale",
+        "basedOnOutcomeAuditIds",
+        "scoredAt"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "decisionScore"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "decisionRecordId": {
+          "$ref": "#/$defs/id"
+        },
+        "score": {
+          "type": "number"
+        },
+        "status": {
+          "enum": [
+            "confirmed",
+            "partially_confirmed",
+            "failed",
+            "inconclusive"
+          ]
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "basedOnOutcomeAuditIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "scoredByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "scoredAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "alignmentSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "createdAt",
+        "evidenceAlignment",
+        "positionAlignment",
+        "riskAlignment",
+        "overallAlignment"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "alignmentSnapshot"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "evidenceAlignment": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "positionAlignment": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "riskAlignment": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "overallAlignment": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "event_type",
+        "thread_id",
+        "actor_id",
+        "timestamp",
+        "payload"
+      ],
+      "properties": {
+        "event_id": {
+          "$ref": "#/$defs/id"
+        },
+        "event_type": {
+          "enum": [
+            "ThreadCreated",
+            "ThreadForked",
+            "ParticipantAdded",
+            "ParticipantDeclared",
+            "ParticipantRoleAssigned",
+            "ParticipantAuthorityGranted",
+            "ParticipantAuthorityRevoked",
+            "ContributionAttributed",
+            "ContributionAttributionCorrected",
+            "ContributionAttributionDisputed",
+            "ContributionAttributionRevoked",
+            "LearningSignalRecorded",
+            "PatternObservationRecorded",
+            "OutcomeReviewRecorded",
+            "LearningRecommendationRecorded",
+            "AdaptationReviewRecorded",
+            "GovernanceReviewRecommended",
+            "EvidenceRequirementReviewRecommended",
+            "RevisitTriggerReviewRecommended",
+            "DecisionGateReviewRecommended",
+            "ProtocolAmendmentProposed",
+            "ProtocolAmendmentReviewed",
+            "ProtocolAmendmentApproved",
+            "ProtocolAmendmentRejected",
+            "ProtocolAmendmentSuperseded",
+            "CompatibilityCheckRecorded",
+            "CapabilitySetDeclared",
+            "CompatibilityFailureRecorded",
+            "CompatibilityDegradationRecorded",
+            "CompatibilityAcceptanceRecorded",
+            "InteroperabilityProfileDeclared",
+            "SemanticMappingRecorded",
+            "InteroperabilityCheckRecorded",
+            "SemanticDegradationRecorded",
+            "InteroperabilityFailureRecorded",
+            "InteroperabilityAcceptanceRecorded",
+            "FederationContextDeclared",
+            "FederationPeerRecorded",
+            "FederatedStateReferenceRecorded",
+            "FederatedPacketVerified",
+            "FederatedPacketRejected",
+            "FederationBoundaryRecorded",
+            "NegotiationRequested",
+            "NegotiationConstraintDeclared",
+            "NegotiationDifferenceRecorded",
+            "NegotiationTermsProposed",
+            "NegotiationTermsAccepted",
+            "NegotiationTermsRejected",
+            "NegotiationDegradationAccepted",
+            "NegotiationFailureRecorded",
+            "DelegationGranted",
+            "DelegatedActionRecorded",
+            "DelegationRevoked",
+            "DelegationExpired",
+            "DelegationViolationRecorded",
+            "ExecutionStarted",
+            "ExecutionCompleted",
+            "ExecutionFailed",
+            "ExecutionRolledBack",
+            "ExecutionViolationRecorded",
+            "OutcomeExpected",
+            "OutcomeObserved",
+            "OutcomeEvaluated",
+            "OutcomeDisputed",
+            "OutcomeViolationRecorded",
+            "LearningSignalDerived",
+            "LessonRecorded",
+            "LearningDisputed",
+            "LearningViolationRecorded",
+            "ReviewRequired",
+            "ReviewOpened",
+            "ReviewCompleted",
+            "ReviewDisputed",
+            "ReviewViolationRecorded",
+            "AssumptionDeclared",
+            "EvidenceCommitted",
+            "ClaimCreated",
+            "PositionTaken",
+            "ObjectionRaised",
+            "ObjectionResolved",
+            "AlignmentCalculated",
+            "DecisionRequestOpened",
+            "ReviewSubmitted",
+            "DecisionMerged",
+            "MinorityReportFiled",
+            "ExpectedOutcomeDeclared",
+            "OutcomeAudited",
+            "DecisionScored",
+            "MergeRequestOpened",
+            "MergeReviewSubmitted",
+            "MergeConflictDeclared",
+            "MergeConflictResolved",
+            "MergeCompleted",
+            "RecoveryRequested",
+            "RecoveryPlanCreated",
+            "RecoveryQuarantined",
+            "RecoveryApplied",
+            "RecoveryVerified",
+            "RecoveryViolationRecorded"
+          ]
+        },
+        "thread_id": {
+          "$ref": "#/$defs/id"
+        },
+        "actor_id": {
+          "$ref": "#/$defs/id"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "protocol_version": {
+          "const": "clista.protocol.v0"
+        },
+        "hash_version": {
+          "const": "clista.event_hash.v1"
+        },
+        "previous_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "content_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        }
+      }
+    },
+    "recoveryStatus": {
+      "enum": [
+        "requested",
+        "planned",
+        "quarantined",
+        "emergency_quarantined",
+        "applied",
+        "verified",
+        "violated"
+      ]
+    },
+    "recoveryCheckpoint": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "checkpointId",
+        "checkpointType",
+        "sourceThreadId",
+        "protocolVersion",
+        "projectionHash",
+        "stateHash",
+        "verificationLayerResults",
+        "verified"
+      ],
+      "properties": {
+        "checkpointId": {
+          "type": "string"
+        },
+        "checkpointType": {
+          "enum": [
+            "continuity_packet",
+            "protocol_export",
+            "federated_state_reference",
+            "projection_boundary",
+            "pre_recovery_projection_boundary"
+          ]
+        },
+        "sourceThreadId": {
+          "$ref": "#/$defs/id"
+        },
+        "protocolVersion": {
+          "type": "string"
+        },
+        "boundaryEventId": {
+          "type": "string"
+        },
+        "exportedAt": {
+          "type": "string"
+        },
+        "eventLogHash": {
+          "$ref": "#/$defs/hash"
+        },
+        "headHash": {
+          "$ref": "#/$defs/hash"
+        },
+        "projectionHash": {
+          "$ref": "#/$defs/hash"
+        },
+        "stateHash": {
+          "$ref": "#/$defs/hash"
+        },
+        "verificationLayerResults": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "artifactRef": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "verified": {
+          "const": true
+        },
+        "checkpointHash": {
+          "$ref": "#/$defs/hash"
+        }
+      }
+    },
+    "recoverySubjectRef": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "invalid_event",
+            "event_hash_mismatch",
+            "invalid_import",
+            "invalid_export",
+            "invalid_continuity_packet",
+            "degraded_continuity_packet",
+            "failed_projection",
+            "failed_validation_layer",
+            "bad_compatibility_packet",
+            "bad_interoperability_packet",
+            "bad_federation_packet",
+            "bad_negotiation_packet",
+            "bad_execution_rollback",
+            "bad_outcome_chain",
+            "bad_outcome_learning_chain",
+            "tamper_evidence",
+            "hash_chain_mismatch",
+            "external_artifact"
+          ]
+        },
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "recoveryRequest": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "threadId",
+        "subjectType",
+        "subjectId",
+        "checkpointRef",
+        "requestedByParticipantId",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "recoveryRequest"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "subjectType": {
+          "type": "string"
+        },
+        "subjectId": {
+          "type": "string"
+        },
+        "subjectRef": {
+          "$ref": "#/$defs/recoverySubjectRef"
+        },
+        "checkpointRef": {
+          "$ref": "#/$defs/recoveryCheckpoint"
+        },
+        "status": {
+          "const": "requested"
+        },
+        "requestedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "eventDeleted": {
+          "const": false
+        },
+        "eventReplaced": {
+          "const": false
+        },
+        "historyRewrite": {
+          "const": false
+        },
+        "historyRewritten": {
+          "const": false
+        },
+        "silentRepair": {
+          "const": false
+        },
+        "recoveryAsApproval": {
+          "const": false
+        },
+        "recoveryAsAmendment": {
+          "const": false
+        },
+        "recoveryAsConsensus": {
+          "const": false
+        },
+        "authorityCreated": {
+          "const": false
+        },
+        "governanceMutation": {
+          "const": false
+        },
+        "stateMutation": {
+          "const": false
+        }
+      }
+    },
+    "recoveryPlan": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "recoveryId",
+        "threadId",
+        "plan",
+        "reviewId",
+        "plannedByParticipantId"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "recoveryPlan"
+        },
+        "recoveryId": {
+          "$ref": "#/$defs/id"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "plan": {
+          "type": "string"
+        },
+        "reviewId": {
+          "$ref": "#/$defs/id"
+        },
+        "plannedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "eventDeleted": {
+          "const": false
+        },
+        "eventReplaced": {
+          "const": false
+        },
+        "historyRewrite": {
+          "const": false
+        },
+        "historyRewritten": {
+          "const": false
+        },
+        "silentRepair": {
+          "const": false
+        },
+        "recoveryAsApproval": {
+          "const": false
+        },
+        "recoveryAsAmendment": {
+          "const": false
+        },
+        "recoveryAsConsensus": {
+          "const": false
+        },
+        "authorityCreated": {
+          "const": false
+        },
+        "governanceMutation": {
+          "const": false
+        },
+        "stateMutation": {
+          "const": false
+        }
+      }
+    },
+    "recoveryQuarantine": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "recoveryId",
+        "planId",
+        "threadId",
+        "subjectType",
+        "subjectId",
+        "reviewId",
+        "visible",
+        "trusted",
+        "excludedFromTrustedProjection",
+        "quarantinedByParticipantId"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "recoveryQuarantine"
+        },
+        "recoveryId": {
+          "$ref": "#/$defs/id"
+        },
+        "planId": {
+          "$ref": "#/$defs/id"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "subjectType": {
+          "type": "string"
+        },
+        "subjectId": {
+          "type": "string"
+        },
+        "reviewId": {
+          "$ref": "#/$defs/id"
+        },
+        "emergency": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "quarantined",
+            "emergency_quarantined"
+          ]
+        },
+        "visible": {
+          "const": true
+        },
+        "trusted": {
+          "const": false
+        },
+        "excludedFromTrustedProjection": {
+          "const": true
+        },
+        "quarantinedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "eventDeleted": {
+          "const": false
+        },
+        "eventReplaced": {
+          "const": false
+        },
+        "historyRewrite": {
+          "const": false
+        },
+        "historyRewritten": {
+          "const": false
+        },
+        "silentRepair": {
+          "const": false
+        },
+        "recoveryAsApproval": {
+          "const": false
+        },
+        "recoveryAsAmendment": {
+          "const": false
+        },
+        "recoveryAsConsensus": {
+          "const": false
+        },
+        "authorityCreated": {
+          "const": false
+        },
+        "governanceMutation": {
+          "const": false
+        },
+        "stateMutation": {
+          "const": false
+        }
+      }
+    },
+    "recoveryApplication": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "recoveryId",
+        "planId",
+        "threadId",
+        "repairSummary",
+        "reviewId",
+        "appliedByParticipantId",
+        "repairApplied"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "recoveryApplication"
+        },
+        "recoveryId": {
+          "$ref": "#/$defs/id"
+        },
+        "planId": {
+          "$ref": "#/$defs/id"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "repairSummary": {
+          "type": "string"
+        },
+        "reviewId": {
+          "$ref": "#/$defs/id"
+        },
+        "appliedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "repairApplied": {
+          "const": true
+        },
+        "eventDeleted": {
+          "const": false
+        },
+        "eventReplaced": {
+          "const": false
+        },
+        "historyRewrite": {
+          "const": false
+        },
+        "historyRewritten": {
+          "const": false
+        },
+        "silentRepair": {
+          "const": false
+        },
+        "recoveryAsApproval": {
+          "const": false
+        },
+        "recoveryAsAmendment": {
+          "const": false
+        },
+        "recoveryAsConsensus": {
+          "const": false
+        },
+        "authorityCreated": {
+          "const": false
+        },
+        "governanceMutation": {
+          "const": false
+        },
+        "stateMutation": {
+          "const": false
+        }
+      }
+    },
+    "recoveryVerification": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "recoveryId",
+        "applicationId",
+        "threadId",
+        "reviewId",
+        "checkpointHash",
+        "recoveryLogHash",
+        "restoredProjectionHash",
+        "restoredStateHash",
+        "verifiedByParticipantId",
+        "verificationStatus",
+        "valid"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "recoveryVerification"
+        },
+        "recoveryId": {
+          "$ref": "#/$defs/id"
+        },
+        "applicationId": {
+          "$ref": "#/$defs/id"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "reviewId": {
+          "$ref": "#/$defs/id"
+        },
+        "originalHeadHash": {
+          "$ref": "#/$defs/hash"
+        },
+        "checkpointHash": {
+          "$ref": "#/$defs/hash"
+        },
+        "recoveryLogHash": {
+          "$ref": "#/$defs/hash"
+        },
+        "restoredProjectionHash": {
+          "$ref": "#/$defs/hash"
+        },
+        "restoredStateHash": {
+          "$ref": "#/$defs/hash"
+        },
+        "verifiedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "verificationStatus": {
+          "const": "verified"
+        },
+        "valid": {
+          "const": true
+        },
+        "eventDeleted": {
+          "const": false
+        },
+        "eventReplaced": {
+          "const": false
+        },
+        "historyRewrite": {
+          "const": false
+        },
+        "historyRewritten": {
+          "const": false
+        },
+        "silentRepair": {
+          "const": false
+        },
+        "recoveryAsApproval": {
+          "const": false
+        },
+        "recoveryAsAmendment": {
+          "const": false
+        },
+        "recoveryAsConsensus": {
+          "const": false
+        },
+        "authorityCreated": {
+          "const": false
+        },
+        "governanceMutation": {
+          "const": false
+        },
+        "stateMutation": {
+          "const": false
+        }
+      }
+    },
+    "recoveryViolation": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "object",
+        "recoveryId",
+        "threadId",
+        "violationType",
+        "reason",
+        "detectedByParticipantId"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "object": {
+          "const": "recoveryViolation"
+        },
+        "recoveryId": {
+          "$ref": "#/$defs/id"
+        },
+        "threadId": {
+          "$ref": "#/$defs/id"
+        },
+        "violationType": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "detectedByParticipantId": {
+          "$ref": "#/$defs/id"
+        },
+        "eventDeleted": {
+          "const": false
+        },
+        "eventReplaced": {
+          "const": false
+        },
+        "historyRewrite": {
+          "const": false
+        },
+        "historyRewritten": {
+          "const": false
+        },
+        "silentRepair": {
+          "const": false
+        },
+        "recoveryAsApproval": {
+          "const": false
+        },
+        "recoveryAsAmendment": {
+          "const": false
+        },
+        "recoveryAsConsensus": {
+          "const": false
+        },
+        "authorityCreated": {
+          "const": false
+        },
+        "governanceMutation": {
+          "const": false
+        },
+        "stateMutation": {
+          "const": false
+        }
+      }
+    },
+    "recoveryProjection": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema",
+        "theorem",
+        "hardLaw",
+        "recoveryProtocolVersion",
+        "localProtocolVersion",
+        "statuses",
+        "records",
+        "requested",
+        "planned",
+        "quarantined",
+        "applied",
+        "verified",
+        "violated",
+        "pendingReview",
+        "emergencyQuarantined",
+        "trusted_state_refs",
+        "quarantined_subjects",
+        "byRecovery",
+        "bySubject",
+        "plansByRecovery",
+        "quarantinesByRecovery",
+        "applicationsByRecovery",
+        "verificationsByRecovery",
+        "violationsByRecovery",
+        "recoveryValidationStatus"
+      ],
+      "properties": {
+        "schema": {
+          "const": "clista.recovery.v0"
+        },
+        "theorem": {
+          "const": "protocol_recovery = restore(valid_state, from_verified_checkpoint_and_repair_log)"
+        },
+        "hardLaw": {
+          "const": "recovery != history rewrite"
+        },
+        "recoveryProtocolVersion": {
+          "const": "0.24.0"
+        },
+        "localProtocolVersion": {
+          "const": "clista.protocol.v0"
+        },
+        "statuses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/recoveryStatus"
+          }
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/recoveryRequest"
+          }
+        },
+        "requested": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/recoveryRequest"
+          }
+        },
+        "planned": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/recoveryRequest"
+          }
+        },
+        "quarantined": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/recoveryRequest"
+          }
+        },
+        "applied": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/recoveryRequest"
+          }
+        },
+        "verified": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/recoveryRequest"
+          }
+        },
+        "violated": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/recoveryRequest"
+          }
+        },
+        "pendingReview": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/recoveryRequest"
+          }
+        },
+        "emergencyQuarantined": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/recoveryQuarantine"
+          }
+        },
+        "trusted_state_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "quarantined_subjects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "requests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/recoveryRequest"
+          }
+        },
+        "plans": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/recoveryPlan"
+          }
+        },
+        "quarantines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/recoveryQuarantine"
+          }
+        },
+        "applications": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/recoveryApplication"
+          }
+        },
+        "verifications": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/recoveryVerification"
+          }
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/recoveryViolation"
+          }
+        },
+        "byRecovery": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "bySubject": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "plansByRecovery": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "quarantinesByRecovery": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "applicationsByRecovery": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "verificationsByRecovery": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "violationsByRecovery": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "recoveryValidationStatus": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "valid",
+            "historyRewrite",
+            "eventDeletion",
+            "eventReplacement",
+            "silentRepair",
+            "recoveryAsApproval",
+            "recoveryAsAmendment",
+            "recoveryAsConsensus",
+            "authorityCreated",
+            "governanceMutation",
+            "unverifiedCheckpoint",
+            "restoredStateHashMismatch"
+          ],
+          "properties": {
+            "valid": {
+              "const": true
+            },
+            "historyRewrite": {
+              "const": false
+            },
+            "eventDeletion": {
+              "const": false
+            },
+            "eventReplacement": {
+              "const": false
+            },
+            "silentRepair": {
+              "const": false
+            },
+            "recoveryAsApproval": {
+              "const": false
+            },
+            "recoveryAsAmendment": {
+              "const": false
+            },
+            "recoveryAsConsensus": {
+              "const": false
+            },
+            "authorityCreated": {
+              "const": false
+            },
+            "governanceMutation": {
+              "const": false
+            },
+            "unverifiedCheckpoint": {
+              "const": false
+            },
+            "restoredStateHashMismatch": {
+              "const": false
+            }
+          }
+        }
+      }
+    }
+  }
+}

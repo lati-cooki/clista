@@ -1,0 +1,13 @@
+node_modules/
+package-lock.json
+.DS_Store
+*.ndjson.tmp
+.clista/release-manifest.json
+.clista/config.json
+.clista/*.bak.*
+.clista/*.polluted.*
+__pycache__/
+*.pyc
+
+# Local lati agent docs (not part of the protocol)
+docs/lati-*.md

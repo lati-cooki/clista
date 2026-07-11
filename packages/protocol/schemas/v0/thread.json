@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://clista.ai/schemas/v0/thread.json",
+  "title": "Thread",
+  "description": "The container for reasoning. Field names here match the actual ThreadCreated runtime payload (src/cli.js threadCreate, src/validator.js validateThreadCreated), not the older snake_case shape (problem_statement/visibility/evidence_ids/claim_ids/...) this file previously described -- the thread object itself does not carry lists of its evidence, claims, positions, objections, or decisions; those are derived by projecting the event log, not stored on the thread. See the schemas/v0-vs-runtime sync item before treating any sibling file in this directory as ground truth.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "object": { "type": "string", "const": "thread" },
+    "title": { "type": "string" },
+    "question": { "type": "string" },
+    "status": { "type": "string" },
+    "participantIds": { "type": "array", "items": { "type": "string" } },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "required": [
+    "id", "object", "title", "question", "participantIds", "createdAt", "updatedAt"
+  ],
+  "additionalProperties": false
+}

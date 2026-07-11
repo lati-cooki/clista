@@ -1,0 +1,47 @@
+{
+  "version": "clista.examples.manifest.v0",
+  "description": "Registry of ClisTa-Protocol example decision logs published to the cockpit (app.clista.ai). The cockpit's sync-examples track vendors every published entry, re-verifies it with the engine (replay + cross-thread provenance), and renders it. Adding an example to the cockpit is adding an entry here — not writing cockpit code. test/examples-manifest.test.js guarantees every entry is coherent and integrity-clean before it can ship.",
+  "examples": [
+    {
+      "id": "pharma-phase-gate-multithreaded",
+      "title": "Pharma Phase II/III Go/No-Go — Multi-Arm (Octopus)",
+      "summary": "A parent go/no-go that imports four arm-level decisions as CrossThreadEvidence. Three dissents survive the parent approval: two objections propagate from the arms (safety stopping rules, subgroup discipline) with the biostatistician minority report traceable two threads deep by hash, and a third originates at the go/no-go itself — the independent DSMB chair objecting that a single ~500-patient pivotal is an inadequate labeling safety database for a known hepatic signal (a dissent on whether to advance, not just how).",
+      "domain": "pharma",
+      "kind": "multi-thread",
+      "entryThreadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2",
+      "threads": [
+        { "role": "parent", "threadId": "thd_phase2_to_phase3_go_nogo_ltn4481_r2", "file": "examples/pharma-phase-gate-multithreaded/parent-go-nogo.ndjson" },
+        { "role": "arm", "threadId": "thd_arm_pkpd_modeling_ltn4481_r2", "file": "examples/pharma-phase-gate-multithreaded/arm-pkpd-modeling.ndjson" },
+        { "role": "arm", "threadId": "thd_arm_safety_assessment_ltn4481_r2", "file": "examples/pharma-phase-gate-multithreaded/arm-safety-assessment.ndjson" },
+        { "role": "arm", "threadId": "thd_arm_subgroup_review_ltn4481_r2", "file": "examples/pharma-phase-gate-multithreaded/arm-subgroup-review.ndjson" },
+        { "role": "arm", "threadId": "thd_arm_regulatory_strategy_ltn4481_r2", "file": "examples/pharma-phase-gate-multithreaded/arm-regulatory-strategy.ndjson" }
+      ],
+      "verifyCrossThread": true,
+      "published": true
+    },
+    {
+      "id": "ongoing-monitoring-concept-drift",
+      "title": "Ongoing Monitoring Effective Challenge — Concept Drift (SR 11-7)",
+      "summary": "A model risk challenger shows that consumer credit model M-471 posted four PSI-green quarters while matured vintages defaulted 35% above predicted PD — concept drift that input-distribution monitoring structurally cannot see. The sealed log records the challenge (what watches P(y|X)?), the line's remediation, the challenger's disposition, and a decision that preserves the residual label-lag exposure as a surviving objection.",
+      "domain": "model-risk",
+      "kind": "single-thread",
+      "entryThreadId": "thd_ongoing_monitoring_concept_drift_m471",
+      "threads": [
+        { "role": "single", "threadId": "thd_ongoing_monitoring_concept_drift_m471", "file": "examples/ongoing-monitoring-concept-drift/challenge.ndjson" }
+      ],
+      "published": true
+    },
+    {
+      "id": "clista-csv-cli-build",
+      "title": "CSV CLI Build Consensus — Octopus Execution + ClisTa Governance",
+      "summary": "A dogfood build log: a CSV reporting CLI built under Octopus multi-arm execution with ClisTa consensus governing it. Delegations scope each arm's authority, execution signals land as committed evidence, an assumption is declared rather than buried, and the owner's approval records exactly what the arms were authorized to do. The same log is notarized as ThreadHub thread clista-csv-cli-build-v4, whose record hashes the protocol's own test suite resolves.",
+      "domain": "engineering",
+      "kind": "single-thread",
+      "entryThreadId": "thd_csv_cli_build_consensus_mqa0yqno_95493e23",
+      "threads": [
+        { "role": "single", "threadId": "thd_csv_cli_build_consensus_mqa0yqno_95493e23", "file": "examples/clista-csv-cli-build.ndjson" }
+      ],
+      "published": true
+    }
+  ]
+}
