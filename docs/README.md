@@ -69,11 +69,11 @@ flowchart LR
 
 | Page | Answers |
 |---|---|
-| [architecture.md](docs/architecture.md) | The systems and every data flow between them |
-| [identities.md](docs/identities.md) | Who can write where, as whom, with which key — the full credential inventory |
-| [operations.md](docs/operations.md) | Runbook: services, deploys, tests, the archive command |
-| [decisions.md](docs/decisions.md) | The governing decisions and where their permanent records live |
-| [history.md](docs/history.md) | Timeline: milestones, incidents, retirements |
+| [architecture.md](architecture.md) | The systems and every data flow between them |
+| [identities.md](identities.md) | Who can write where, as whom, with which key — the full credential inventory |
+| [operations.md](operations.md) | Runbook: services, deploys, tests, the archive command |
+| [decisions.md](decisions.md) | The governing decisions and where their permanent records live |
+| [history.md](history.md) | Timeline: milestones, incidents, retirements |
 
 ## Standing invariants (the rules everything above obeys)
 
