@@ -6,23 +6,19 @@ The integration map for the ClisTa ecosystem — every repo, service, agent,
 identity, and data flow, in one place. **Private.** This is the answer to
 "what talks to what, as whom, with which key."
 
-> **Supremacy clause** *(canonical-source decision, `canonical-source-designation`
-> / `thd_c1a2a74df65b`, 2026-07-08)*. This atlas is **derivative**: authoritative
-> for navigation, never for facts. In any conflict, the artifact repo —
-> [clista-protocol](https://github.com/lati-club/ClisTa-Protocol),
-> [ThreadHub](https://github.com/lati-club/ThreadHub),
-> [clista-ai-app](https://github.com/lati-club/clista-ai-app) — governs and the
-> atlas yields. Protocol facts have one canonical home:
-> **[lati-club/ClisTa-Protocol](https://github.com/lati-club/ClisTa-Protocol)**,
-> which is also the single external entry point to the ecosystem docs; the
-> atlas is linked from it, never presented in parallel.
+> **Authority** *(monorepo consolidation decision,
+> `monorepo-consolidation-for-the-mrm-pivot` / `thd_3e028f67bae0` seq 2,
+> 2026-07-10 — superseding the 07-08 canonical-source designation)*. These
+> docs now live INSIDE the single authoritative repo (lati-cooki/clista);
+> code and docs travel in the same commits. In any conflict, code and tests
+> govern; this map yields. The old supremacy clause, per-page provenance
+> pins, and CI pin validation lapsed with the multi-repo structure — pins
+> still present on older pages are historical artifacts.
 
-> Maintenance rule: any session that changes an integration (new writer, new
-> identity, new flow, a retirement) updates the atlas in the same PR/commit
-> as the change. A stale map is worse than no map. **Scope:** the same-commit
-> rule binds *within this atlas repo* only; cross-repo freshness is tracked by
-> each page's **Provenance** pin (repo@commit it was written against) and the
-> CI staleness report (`scripts/validate-pins.mjs`) — disclosed, not promised.
+> Maintenance rule (unchanged in spirit): any change to an integration (new
+> writer, new identity, new flow, a retirement) updates these docs **in the
+> same commit** — now trivially enforceable since everything is one repo. A
+> stale map is worse than no map.
 
 ## The one-paragraph version
 

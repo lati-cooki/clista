@@ -1,11 +1,58 @@
-# Transfer prompt — resume the ClisTa canonical-source seal
+# Transfer prompt — the ClisTa monorepo / MRM pivot
 
-> **Provenance:** clista-protocol@7dceb917b9a18f282cd1cad6ed4a10e3725b5678 · ThreadHub@41a1efe98f165ef27f84e835f703e94fff0f9828 · clista-ai-app@93d10232ec65b0039a89938dbc5fa5a9d2f7efaf
+Paste this into a fresh session. This repo — **lati-cooki/clista**, local
+`~/clista` — is the single authoritative home for the whole system (see the
+root `README.md`). Read root `README.md` + this `docs/` directory FIRST; this
+file is the "where we left off" delta on top of them. Sections below the top
+delta describe the pre-monorepo era (those repos merged here with history;
+provenance pins in older pages are historical artifacts of that era).
 
-Paste this into a fresh session. Read `README.md` + `docs/` in this repo
-(lati-club/clista-atlas, local `~/clista-atlas`) FIRST — it is the integration
-map (systems, flows, identities/keys, runbook, decisions, history). This file
-is only the "where we left off" delta on top of it.
+## Update 2026-07-10 (night) — MONOREPO PIVOT; new goal: MRM product
+
+Owner decision: the multi-repo structure was limiting progress; the goal is
+a true production app.clista.ai as an **MRM (model risk management) product**
+— SR 11-7 effective challenge recorded as decisions with preserved dissent.
+
+- **Ledgered first**: ThreadHub thread `monorepo-consolidation-for-the-mrm-pivot`
+  (`thd_3e028f67bae0`): DR seq 1, owner decision seq 2
+  `sha256:c750d2a69ca59019afd6fc8249a58cd1706b6b1a23be7e2ce63ddd595e73e34d`,
+  implementation evidence seq 3 (+ correction seq 4). The
+  `canonical-source-designation` seal is SUPERSEDED (pointer at its seq 13);
+  its rules 1–5 (supremacy clause, provenance pins, CI pin validation,
+  single entry point) lapse. The four security invariants are carried
+  forward verbatim (root README) — they are product features, not process.
+- **Monorepo assembled** @ `fa3a27fa`: subtree merges preserving all 438
+  commits — `packages/protocol` (was clista-protocol@7dceb917),
+  `packages/threadhub` (ThreadHub@41a1efe9), `app` (clista-ai-app@93d10232),
+  `docs` (clista-atlas@6def6772, flattened). All suites green in place:
+  protocol 355, threadhub 34, app 25 node + 43 workerd (`npm test` at root).
+- **Public github.com/lati-club/clista-protocol: left as-is** (owner
+  decision) — no more pushes; a historical public snapshot.
+
+### Cutover checklist (remaining, in order)
+
+1. **CI is OFF in the monorepo right now** — the merged workflows live at
+   `app/.github/workflows/` and `packages/*/.github/`, which GitHub ignores.
+   Author root `.github/workflows/` (tests per package + deploy with
+   `working-directory: app`), and set the deploy secrets on lati-cooki/clista
+   (Cloudflare API token etc. — secrets are not copyable, re-enter them).
+2. Prove staging deploy from the monorepo, then flip production deploy here
+   and freeze lati-club/clista-ai-app (pointer README; keep as archive).
+   Until then: **production still deploys from lati-club/clista-ai-app** —
+   land app changes there too, or hold deploys.
+3. De-vendor: replace `app/worker/engine/` vendored code with direct imports
+   from `packages/protocol` (workspace), retire `vendor-engine.mjs` /
+   `vendor-examples.mjs` / hash baselines; examples import from the package.
+4. Repoint the ThreadHub launchd service checkout from `~/ThreadHub` to
+   `~/clista/packages/threadhub` when quiet. The DB at
+   `~/ThreadHub/data/hub.db` is the state that matters — do NOT move it
+   casually.
+5. Freeze the old private repos with pointer READMEs after cutover
+   (clista-atlas frozen now; ThreadHub + clista-ai-app after steps 2/4).
+6. MRM roadmap seeds: model-inventory objects in the protocol grammar;
+   SR 11-7 effective-challenge thread templates in the cockpit; the
+   concept-drift example as onboarding; notary-as-a-service for customer
+   attestation addresses.
 
 ## Update 2026-07-10 — LTN-4481 example re-issued as _r2; hide feature live
 
