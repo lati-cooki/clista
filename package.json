@@ -1,0 +1,12 @@
+{
+  "name": "clista",
+  "private": true,
+  "version": "0.1.0",
+  "description": "ClisTa monorepo: protocol + notary + app.clista.ai cockpit, toward the MRM product",
+  "scripts": {
+    "test:protocol": "npm --prefix packages/protocol test",
+    "test:threadhub": "npm --prefix packages/threadhub test",
+    "test:app": "npm --prefix app run test:all",
+    "test": "npm run test:protocol && npm run test:threadhub && npm run test:app"
+  }
+}
