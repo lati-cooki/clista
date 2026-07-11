@@ -1,6 +1,6 @@
 # Architecture — systems and data flows
 
-> **Provenance:** clista-protocol@d76bd5664b46b4eb435160190d0e96ce1f94add4 · ThreadHub@41a1efe98f165ef27f84e835f703e94fff0f9828 · clista-ai-app@8c0570866882f7b4a0f56a7a3857657b15998904
+> **Provenance:** clista-protocol@7dceb917b9a18f282cd1cad6ed4a10e3725b5678 · ThreadHub@41a1efe98f165ef27f84e835f703e94fff0f9828 · clista-ai-app@93d10232ec65b0039a89938dbc5fa5a9d2f7efaf
 
 ## The systems
 
@@ -22,7 +22,11 @@
   + `events.js` are hand-adapted Worker ports guarded by hash baseline;
   `src/validator/` vendors wholesale; `cli.js` & friends are excluded.
 - `scripts/vendor-examples.mjs`: published example logs mirror into the
-  cockpit's example registry.
+  cockpit's example registry. Seeding is **seed-once per thread id** (DO
+  ledgers are append-only): shipping a revised example means re-issuing its
+  thread ids at the source (e.g. `*_ltn4481` → `*_ltn4481_r2`), regenerating,
+  re-vendoring and seeding fresh; superseded cards get hidden
+  (`POST /api/threads/:id/hide`, index-projection metadata only).
 
 ### Protocol → ThreadHub (content, manual)
 - `threadhub ingest --events <log>.ndjson` ingests protocol-validated logs.

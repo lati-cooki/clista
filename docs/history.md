@@ -1,6 +1,6 @@
 # History — how this system got here
 
-> **Provenance:** clista-protocol@d76bd5664b46b4eb435160190d0e96ce1f94add4 · ThreadHub@41a1efe98f165ef27f84e835f703e94fff0f9828 · clista-ai-app@8c0570866882f7b4a0f56a7a3857657b15998904
+> **Provenance:** clista-protocol@7dceb917b9a18f282cd1cad6ed4a10e3725b5678 · ThreadHub@41a1efe98f165ef27f84e835f703e94fff0f9828 · clista-ai-app@93d10232ec65b0039a89938dbc5fa5a9d2f7efaf
 
 Condensed timeline; details live in the linked repos/docs.
 
@@ -57,6 +57,21 @@ Condensed timeline; details live in the linked repos/docs.
   TheLatiMac.local. Meanwhile `agent-loop-autonomy` converged: hermes-raft
   (records #10–11) confirmed a clean scheduler and closed on supervised-only;
   formal decision record pending.
+- **07-09** `agent-loop-autonomy` CLOSED (owner seq 21, supervised-only) and
+  `canonical-source-designation` seal disclosure discharged (protocol
+  `d76bd566` pushed public). LTN-4481 example science review landed
+  (protocol #76–#80: clinical/statistical fixes + modeling *whether* to
+  advance — the DSMB-chair dissent); `clista-csv-cli-build` published to the
+  cockpit example registry (protocol `0812746` → app `ad7f74a`).
+- **07-10 EXAMPLE RE-ISSUE + HIDE**: the #77/#79 revisions had never reached
+  the cockpit's live threads — seeded example threads are append-only DOs,
+  seed-once per thread id. Resolution: revise the thread ids at the source
+  (`*_ltn4481` → `*_ltn4481_r2`, protocol `7dceb917`), regenerate, re-vendor
+  (app `e46d460`), seed the five `_r2` threads (parent 41 events, chain
+  valid). The superseded originals were then hidden via the new
+  index-projection hide/unhide (app `93d10232`): a `hidden` flag on the
+  IndexDO card only — logs untouched, threads still resolvable by id,
+  `GET /api/threads?hidden=1` audits.
 
 ## Lessons that became invariants
 

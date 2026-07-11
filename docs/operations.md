@@ -1,6 +1,6 @@
 # Operations runbook
 
-> **Provenance:** clista-protocol@d76bd5664b46b4eb435160190d0e96ce1f94add4 · ThreadHub@41a1efe98f165ef27f84e835f703e94fff0f9828 · clista-ai-app@8c0570866882f7b4a0f56a7a3857657b15998904
+> **Provenance:** clista-protocol@7dceb917b9a18f282cd1cad6ed4a10e3725b5678 · ThreadHub@41a1efe98f165ef27f84e835f703e94fff0f9828 · clista-ai-app@93d10232ec65b0039a89938dbc5fa5a9d2f7efaf
 
 ## Services
 
@@ -27,6 +27,10 @@ node ~/ThreadHub/adapters/octopus-cli.js send --hub http://127.0.0.1:7777 \
   --slug <thread> --author <id> --key <pem> --payload '<clista-event-json>'
 
 # Wake the hermes-raft agent: post "wake @hermes-raft" in Raft #all (supervised sessions only)
+
+# Hide/unhide a cockpit thread card (index projection only; log untouched,
+# thread stays resolvable by id). Audit view: GET /api/threads?hidden=1
+#   POST https://app.clista.ai/api/threads/<id>/hide   (or /unhide; authed)
 ```
 
 ## Test suites (all must stay green)
@@ -34,7 +38,7 @@ node ~/ThreadHub/adapters/octopus-cli.js send --hub http://127.0.0.1:7777 \
 | Repo | Command | Size |
 |---|---|---|
 | clista-protocol | `npm test` | ~350 tests (incl. ThreadHub cross-citation test — needs the local hub up, else skips) |
-| clista-ai-app | `npm run test:all` | 25 node + 41 workerd |
+| clista-ai-app | `npm run test:all` | 25 node + 43 workerd |
 | ThreadHub | `npm test` | 34 (incl. the 7-scenario agent-loop harness: concurrency, SIGKILL durability, stale-chain/replay, clock skew) |
 | ThreadHub remote smoke | `THREADHUB_URL=<url> node --test test/agent-loop/loop.test.js` | non-destructive scenarios only. **Never point at the real local hub** — smoke residue is permanent in an append-only store |
 | Octopus | `cd ~/octopus/tests && PYTHONPATH=.:.. python3 -m unittest` | writer glue 9 tests |
@@ -57,3 +61,8 @@ node ~/ThreadHub/adapters/octopus-cli.js send --hub http://127.0.0.1:7777 \
 - Hermes updates can rewrite `jobs.json` — pause state does NOT survive them.
   Any future scheduled writer needs a kill switch OUTSIDE jobs.json (the
   CLISTA_STOP file pattern, archived in `~/.hermes/cron/clistahermes.done/`).
+- `POST /api/examples/:id/seed` is **seed-once per thread id** — an already
+  seeded thread reports `ok:false` (409 overall) and revisions never reach it
+  in place. Ship a revised example by bumping the thread ids in the protocol
+  generator + manifest, regenerate, `sync:examples`, deploy, seed; hide the
+  superseded cards (done 2026-07-10 for LTN-4481 → `*_r2`).

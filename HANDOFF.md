@@ -1,11 +1,28 @@
 # Transfer prompt — resume the ClisTa canonical-source seal
 
-> **Provenance:** clista-protocol@d76bd5664b46b4eb435160190d0e96ce1f94add4 · ThreadHub@41a1efe98f165ef27f84e835f703e94fff0f9828
+> **Provenance:** clista-protocol@7dceb917b9a18f282cd1cad6ed4a10e3725b5678 · ThreadHub@41a1efe98f165ef27f84e835f703e94fff0f9828 · clista-ai-app@93d10232ec65b0039a89938dbc5fa5a9d2f7efaf
 
 Paste this into a fresh session. Read `README.md` + `docs/` in this repo
 (lati-club/clista-atlas, local `~/clista-atlas`) FIRST — it is the integration
 map (systems, flows, identities/keys, runbook, decisions, history). This file
 is only the "where we left off" delta on top of it.
+
+## Update 2026-07-10 — LTN-4481 example re-issued as _r2; hide feature live
+
+Cockpit example maintenance arc, complete, nothing open (details:
+`docs/history.md` 07-10, `docs/operations.md` gotchas):
+
+- The #77/#79 LTN-4481 log revisions could not reach the live seeded threads
+  (seed-once per thread id; DO ledgers append-only). Re-issued the five
+  thread ids as `*_ltn4481_r2` at the source (protocol `7dceb917`),
+  re-vendored (app `e46d460`), seeded — parent 41 events incl. the
+  DSMB-chair whether-to-advance dissent, chain validates clean.
+- New app feature `93d10232`: `POST /api/threads/:id/{hide,unhide}` flips a
+  `hidden` flag on the IndexDO card (projection metadata only; log untouched,
+  thread resolvable by id; `GET /api/threads?hidden=1` audits). The five
+  superseded originals are hidden. Ledger shows 16 threads, all current.
+- app.clista.ai health-checked end to end (edge, Access, CI, console,
+  chain-validated/replay-deterministic): green.
 
 ## Update 2026-07-08 (late evening) — re-home DONE, agents replaced
 
