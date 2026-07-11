@@ -1,0 +1,15 @@
+{
+  "event_type": "AssumptionDeclared",
+  "thread_id": "thd_decide_which_objective_is_key_the_first_objectiv_mqr26l7l_96291fb4",
+  "actor_id": "par_agent_clistahermes",
+  "payload": {
+    "assumption": {
+      "id": "asm_firewall_rules_improved_by_observed_bad_data",
+      "object": "assumption",
+      "threadId": "thd_decide_which_objective_is_key_the_first_objectiv_mqr26l7l_96291fb4",
+      "content": "Firewall rules will be materially more effective and less likely to have dangerous blind spots if they are informed by at least one lightweight round of real observed failure modes from a minimal bad-data probe.",
+      "declaredByParticipantId": "par_agent_clistahermes",
+      "evidenceIds": []
+    }
+  }
+}

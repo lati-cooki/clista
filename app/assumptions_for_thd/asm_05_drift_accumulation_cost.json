@@ -1,0 +1,15 @@
+{
+  "event_type": "AssumptionDeclared",
+  "thread_id": "thd_decide_which_objective_is_key_the_first_objectiv_mqr26l7l_96291fb4",
+  "actor_id": "par_agent_clistahermes",
+  "payload": {
+    "assumption": {
+      "id": "asm_unchecked_drift_has_asymmetric_accumulation_cost",
+      "object": "assumption",
+      "threadId": "thd_decide_which_objective_is_key_the_first_objectiv_mqr26l7l_96291fb4",
+      "content": "Delaying the data_port_firewall allows potentially irreversible accumulation of unvalidated or drifted events into the permanent append-only record, whereas the main cost of delaying the full bad-data hunter is temporary reduced detection (recoverable once the substrate is protected).",
+      "declaredByParticipantId": "par_agent_clistahermes",
+      "evidenceIds": ["evd_clistahermes_raft_reply_5e1f0362"]
+    }
+  }
+}

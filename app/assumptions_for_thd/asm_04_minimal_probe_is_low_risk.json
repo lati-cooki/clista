@@ -1,0 +1,15 @@
+{
+  "event_type": "AssumptionDeclared",
+  "thread_id": "thd_decide_which_objective_is_key_the_first_objectiv_mqr26l7l_96291fb4",
+  "actor_id": "par_agent_clistahermes",
+  "payload": {
+    "assumption": {
+      "id": "asm_minimal_bad_data_probe_can_be_isolated",
+      "object": "assumption",
+      "threadId": "thd_decide_which_objective_is_key_the_first_objectiv_mqr26l7l_96291fb4",
+      "content": "A thin, minimal bad-data probe or data feed can be stood up in a contained or read-oriented way (synthetic data, gated port, or non-authoritative observer) without risking contamination of the canonical append-only event log.",
+      "declaredByParticipantId": "par_agent_clistahermes",
+      "evidenceIds": []
+    }
+  }
+}

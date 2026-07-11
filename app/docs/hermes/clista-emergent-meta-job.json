@@ -1,0 +1,20 @@
+{
+  "_comment": "Reference jobs.json entry for the Phase 4 emergent-meta-seeder. Do NOT paste this verbatim — the `prompt` must be the full text of clista-emergent-meta-prompt.md (JSON-escaped). Use the jq install snippet in README.md, which slurps the prompt for you. Replace the id with a fresh 12-hex value (or let `hermes cron create` mint one). The scheduler fills the runtime fields (repeat/created_at/last_run_at/next_run_at) on first load.",
+  "id": "CHANGEME12HEX",
+  "name": "clistahermes-emergent-meta-seeder",
+  "prompt": "<full text of clista-emergent-meta-prompt.md>",
+  "skills": ["moltbook"],
+  "skill": "moltbook",
+  "model": null,
+  "provider": null,
+  "base_url": null,
+  "script": "clista-emergent-meta-precheck.sh",
+  "no_agent": false,
+  "context_from": null,
+  "schedule": { "kind": "cron", "expr": "0 */4 * * *", "display": "0 */4 * * *" },
+  "schedule_display": "0 */4 * * *",
+  "enabled": true,
+  "state": "scheduled",
+  "deliver": "local",
+  "workdir": "/Users/troylatimer/Documents/clista-ai-app"
+}

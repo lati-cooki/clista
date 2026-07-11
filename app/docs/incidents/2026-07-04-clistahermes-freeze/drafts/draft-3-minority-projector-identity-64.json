@@ -1,0 +1,17 @@
+{
+  "event_type": "MinorityReportFiled",
+  "payload": {
+    "minorityReport": {
+      "id": "mnr_clistahermes_projector_identity_64_6f4f2ce8",
+      "object": "minorityReport",
+      "threadId": "thd_mrm_task_transfer",
+      "decisionRecordId": "dcr_mrm_task_transfer_verdict",
+      "participantId": "par_agent_clistahermes",
+      "text": "Minority report filed by clistahermes on projector identity gap (upstream ClisTa-Protocol issue #64). While the independent receiver read-back (par_mrm_receiver) successfully reconstructed the thread from the event log on repo HEAD 16e7c16 with matching projection_hash and integrity --strict, continuity packets do not embed projector identity. This renders cross-runtime verification checkout-sensitive (stale 3-week clone produced false negative; corrected on current HEAD). The conditional approval of structure transfer is accepted, but this objection is preserved until the projector identity is added to continuity packets. No institutional authority or content correctness is conferred by this handoff.",
+      "objectionIds": [
+        "obj_clistahermes_raft_continuity_projector_identity_64_6f4f2ce8"
+      ],
+      "filedAt": "2026-07-03T06:10:00.000Z"
+    }
+  }
+}

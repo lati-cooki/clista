@@ -1,0 +1,50 @@
+{
+  "event_type": "DecisionMerged",
+  "payload": {
+    "decisionRecord": {
+      "id": "dcr_mrm_task_transfer_verdict",
+      "object": "decisionRecord",
+      "threadId": "thd_mrm_task_transfer",
+      "decisionRequestId": "drq_mrm_task_transfer_verdict",
+      "status": "approved",
+      "summary": "ClisTa can conditionally transfer a scoped MRM task: an independent receiver reconstructed this thread from the log alone and accepted the bounded scope as structure transfer, so conditional transferability is verified; verified-success beyond structure remains withheld.",
+      "rationale": "Five reproducible sealed dry-run logs, continuity export/verify, bounded delegation, and the prompt-pack transfer-state contract establish the mechanism; the receiver read-back (integrity --strict + continuity projection_hash match on repo HEAD 16e7c16, formal conditional acceptance) discharged the blocking objection that no handoff had been observed. The decision stays conditional because two harvested objections survive it: continuity packets carry no projector identity (upstream ClisTa-Protocol issue #64, demonstrated stale-checkout false negative) and cross-engine interpretation drift on the receiver-compatibility assumption is unverified.",
+      "conditions": [
+        "Acceptance covers reproducible structure only — not correctness, endorsement, or audit of the transferred recommendation (trusted:false / unaudited)",
+        "The handoff confers no institutional model-risk authority; endorsement and deployment trust must be granted separately by the institution",
+        "Pin the projector identity / repo ref for continuity verification until upstream issue #64 lands — cross-runtime verification is checkout-sensitive",
+        "Cross-engine invariance remains an open verification task: promote beyond conditional only after a receiver on a different inference engine reproduces a matching objection set from the same packet"
+      ],
+      "supportingClaimIds": [
+        "clm_mrm_task_transfer_conditionally_supported",
+        "clm_transfer_does_not_confer_authority"
+      ],
+      "supportingEvidenceIds": [
+        "evd_mrm_dryrun_reproducible",
+        "evd_mrm_authority_boundary",
+        "evd_continuity_verified_transfer",
+        "evd_delegation_scoped_not_authority",
+        "evd_mrm_transfer_state_contract",
+        "evd_clistahermes_raft_mrm_receiver_readback_6f4f2ce8"
+      ],
+      "supportingAssumptionIds": ["asm_receiver_compatible_and_authorized"],
+      "objectionIds": [
+        "obj_receiver_handoff_not_yet_observed",
+        "obj_clistahermes_raft_continuity_projector_identity_64_6f4f2ce8",
+        "obj_clistahermes_moltbook_vina_interpretation_drift_1bf948ba"
+      ],
+      "preservedObjectionIds": [
+        "obj_clistahermes_raft_continuity_projector_identity_64_6f4f2ce8",
+        "obj_clistahermes_moltbook_vina_interpretation_drift_1bf948ba"
+      ],
+      "reviewIds": ["rev_8c1b3285"],
+      "minorityReportIds": [
+        "mnr_clistahermes_projector_identity_64_6f4f2ce8",
+        "mnr_clistahermes_vina_interpretation_drift_1bf948ba"
+      ],
+      "nextAction": "Run the cross-engine invariance check (second receiver, different inference engine, same packet) and track upstream #64 for projector identity in continuity packets; a new decision is required to promote beyond conditional.",
+      "decidedByParticipantId": "par_mrm_owner",
+      "decidedAt": "2026-07-03T00:00:00.000Z"
+    }
+  }
+}

@@ -1,0 +1,5 @@
+# Copy to .dev.vars for local development (gitignored).
+# Enables the dev identity fallback (X-Clista-Email header) so the app is
+# drivable without Cloudflare Access. NEVER enable in production.
+DEV_IDENTITY=true
+DEV_EMAIL=you@example.com

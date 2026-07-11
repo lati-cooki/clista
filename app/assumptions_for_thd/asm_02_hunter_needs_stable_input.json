@@ -1,0 +1,15 @@
+{
+  "event_type": "AssumptionDeclared",
+  "thread_id": "thd_decide_which_objective_is_key_the_first_objectiv_mqr26l7l_96291fb4",
+  "actor_id": "par_agent_clistahermes",
+  "payload": {
+    "assumption": {
+      "id": "asm_bad_data_hunter_requires_stable_validated_stream",
+      "object": "assumption",
+      "threadId": "thd_decide_which_objective_is_key_the_first_objectiv_mqr26l7l_96291fb4",
+      "content": "A bad-data hunting agent and its test environment will generate higher-signal, lower-noise results when the input stream already has core integrity protections (schema enforcement, provenance, deduplication) in place at the data port.",
+      "declaredByParticipantId": "par_agent_clistahermes",
+      "evidenceIds": ["evd_clistahermes_raft_reply_5e1f0362"]
+    }
+  }
+}

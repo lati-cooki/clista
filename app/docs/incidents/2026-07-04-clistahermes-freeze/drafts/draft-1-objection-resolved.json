@@ -1,0 +1,7 @@
+{
+  "event_type": "ObjectionResolved",
+  "payload": {
+    "objectionId": "obj_receiver_handoff_not_yet_observed",
+    "resolution": "Resolved by independent receiver read-back: par_mrm_receiver (@MacLati, delegate under dlg_mrm_receiver_review) reconstructed this thread from the event log alone — integrity verify --strict valid with recomputed head-hash match, continuity verify valid on repo HEAD 16e7c16 with projection_hash match — and formally accepted the bounded task scope as structure transfer only (trusted:false / unaudited, no authority conferred). See evd_clistahermes_raft_mrm_receiver_readback_6f4f2ce8 and pos_clistahermes_raft_mrm_receiver_conditional_accept_6f4f2ce8. The read-back this objection demanded has now been observed."
+  }
+}

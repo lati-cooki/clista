@@ -1,0 +1,93 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "clista-ai-app",
+  "main": "worker/index.js",
+  "compatibility_date": "2025-09-15",
+  // Serve the Worker at app.clista.ai. custom_domain:true makes `wrangler deploy`
+  // create the DNS record + cert automatically (the clista.ai zone is already in
+  // the account; the *.clista.ai wildcard cert covers it). Safe to deploy without
+  // a route first — comment this out for a *.workers.dev-only smoke deploy.
+  "routes": [{ "pattern": "app.clista.ai", "custom_domain": true }],
+  // Engine ported to js-sha256 + Web Crypto; no Node builtins, so no nodejs_compat.
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  },
+  "durable_objects": {
+    "bindings": [
+      { "name": "THREAD", "class_name": "ThreadDO" },
+      { "name": "INDEX", "class_name": "IndexDO" }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["ThreadDO"]
+    },
+    {
+      "tag": "v2",
+      "new_sqlite_classes": ["IndexDO"]
+    }
+  ],
+  "observability": { "enabled": true },
+  // OPTIONAL re-review email alerts (issue #21). The worker flags the current
+  // decision owner in-app on every re-review flip; it ALSO emails them iff a
+  // send_email binding named EMAIL exists AND the owner declared an email at
+  // participation. To enable: onboard the domain once
+  // (`npx wrangler email sending enable clista.ai`), then uncomment:
+  //   "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["notify@clista.ai"] }],
+  // Optionally set the sender via vars.EMAIL_FROM (default notify@clista.ai).
+  // Absent binding → alerting is silently skipped; nothing else changes.
+  // Phase 4 identity. Production reads identity from Cloudflare Access: set these
+  // to your Access team domain (the "<team>" in <team>.cloudflareaccess.com) and
+  // the Access application's AUD tag. Local dev uses DEV_IDENTITY in .dev.vars
+  // instead (see .dev.vars.example) — never enable DEV_IDENTITY in production.
+  "vars": {
+    "ACCESS_TEAM_DOMAIN": "laticooki",
+    "ACCESS_AUD": "60455fe3334e5242cb0fe8787064ee31e26e209fed6fe2de2f97c52da5b1cb93",
+    // Optional friendly names for agent service tokens (Cloudflare puts the
+    // Client ID in the JWT, not the dashboard name). Format: "<clientId>:<name>".
+    "AGENT_NAMES": "398a39a665f1d0faeee372da7b67e360:clistahermes",
+    // Public intake (POST /api/intake): the comma-separated origin allow-list for
+    // CORS — the gate.clista.ai submission form posts cross-origin to the app.
+    // The Turnstile SECRET is NOT here (it's a secret): set it with
+    //   echo <secret> | npx wrangler secret put TURNSTILE_SECRET
+    // When TURNSTILE_SECRET is unset (local dev / tests), verification is skipped
+    // so the route is drivable without a token; production always sets it.
+    "INTAKE_ALLOWED_ORIGIN": "https://gate.clista.ai"
+  },
+  // Staging — a separate Worker (clista-ai-app-staging) at staging.clista.ai so
+  // changes can be seen and exercised before a production deploy. Being its own
+  // Worker gives it its OWN Durable Objects: seed/append/break threads freely,
+  // production event logs are untouched. Bindings and vars don't inherit across
+  // environments, so everything is redeclared. Deployed by deploy-staging.yml
+  // on pull requests; production (top-level config) still deploys from main.
+  "env": {
+    "staging": {
+      "name": "clista-ai-app-staging",
+      "routes": [{ "pattern": "staging.clista.ai", "custom_domain": true }],
+      "assets": {
+        "directory": "./dist",
+        "binding": "ASSETS",
+        "not_found_handling": "single-page-application"
+      },
+      "durable_objects": {
+        "bindings": [
+          { "name": "THREAD", "class_name": "ThreadDO" },
+          { "name": "INDEX", "class_name": "IndexDO" }
+        ]
+      },
+      "observability": { "enabled": true },
+      "vars": {
+        "ACCESS_TEAM_DOMAIN": "laticooki",
+        // AUD of the *staging* Access application (staging.clista.ai). If this is
+        // ever emptied, deploy-staging.yml refuses to deploy — staging never goes
+        // up without Access in front of it (docs/DEPLOY.md §7).
+        "ACCESS_AUD": "f58afc8602c9f4328273b8620e99e434a9e65e6016b014086c49a7793f02cd3a",
+        "AGENT_NAMES": "398a39a665f1d0faeee372da7b67e360:clistahermes",
+        "INTAKE_ALLOWED_ORIGIN": "https://gate.clista.ai"
+      }
+    }
+  }
+}

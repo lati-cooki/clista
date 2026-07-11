@@ -1,0 +1,15 @@
+{
+  "event_type": "AssumptionDeclared",
+  "thread_id": "thd_decide_which_objective_is_key_the_first_objectiv_mqr26l7l_96291fb4",
+  "actor_id": "par_agent_clistahermes",
+  "payload": {
+    "assumption": {
+      "id": "asm_minimal_data_feed_addressing_input_gap",
+      "object": "assumption",
+      "threadId": "thd_decide_which_objective_is_key_the_first_objectiv_mqr26l7l_96291fb4",
+      "content": "A minimal data feed or probe for exercising the bad-data hunter can be created with modest effort (e.g. synthetic generators, replay of existing logs, or a thin observer port) sufficient to generate useful signals for both the hunter and firewall rule tuning.",
+      "declaredByParticipantId": "par_agent_clistahermes",
+      "evidenceIds": []
+    }
+  }
+}
