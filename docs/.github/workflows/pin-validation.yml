@@ -1,0 +1,23 @@
+# Rule 5 of the canonical-source decision (canonical-source-designation /
+# thd_c1a2a74df65b): provenance pins are machine-checked. Missing/invalid
+# pins block merge; staleness is disclosed in the job log, never hidden.
+name: pin-validation
+on:
+  push:
+  pull_request:
+jobs:
+  validate-pins:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Validate provenance pins
+        env:
+          # Optional PAT with read access to the private lati-club repos so
+          # commit existence + staleness can be verified for them in CI.
+          # Without it, public repos are still verified via the anonymous
+          # API and private ones are disclosed as UNVERIFIABLE.
+          PIN_VALIDATION_TOKEN: ${{ secrets.PIN_VALIDATION_TOKEN }}
+        run: node scripts/validate-pins.mjs
