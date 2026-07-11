@@ -7,6 +7,41 @@ file is the "where we left off" delta on top of them. Sections below the top
 delta describe the pre-monorepo era (those repos merged here with history;
 provenance pins in older pages are historical artifacts of that era).
 
+## Update 2026-07-11 (early) — cutover in progress, PAUSED on two bad secrets
+
+Where the deploy cutover stopped (session ended here; everything below the
+next heading still describes the pivot itself):
+
+- **Root CI is LIVE and green** on lati-cooki/clista: `tests.yml` (6 jobs:
+  change filter, protocol JS/Python/replay, threadhub, app node+worker),
+  `deploy-staging.yml` (PR paths + dispatch, same fail-closed Access gate),
+  `deploy-app.yml` — **deliberately workflow_dispatch-ONLY** until the
+  pipeline is proven; do NOT add the push trigger before one clean staging
+  run + one explicit production run.
+- **Monorepo code deploys fine**: staging.clista.ai was deployed from
+  `~/clista/app` with LOCAL wrangler auth (version `97075eda`) to isolate
+  the CI failure. The app code is not the problem.
+- **BLOCKER — both repo secrets hold wrong values** (proven by the
+  temporary `cf-diag.yml` workflow, run 29137786249):
+  `CLOUDFLARE_ACCOUNT_ID` is 33 chars (must be exactly the 32-char
+  `1c0cdbfbea6c50934ddcec8546507314`); `CLOUDFLARE_API_TOKEN` is 64 chars
+  and the verify endpoint says "Invalid API Token" (~40-char token secret
+  needed — the 64-hex value is likely the token ID, not the secret; Roll
+  the token or mint a new one from the "Edit Cloudflare Workers" template
+  with Account Resources → Include → troylati).
+- **Resume sequence**: fix both secrets → dispatch `cf-diag.yml` (15s
+  pass/fail, prints no values) → dispatch `deploy-staging.yml` → dispatch
+  `deploy-app.yml` (first monorepo production deploy; verify app.clista.ai)
+  → restore the push trigger in `deploy-app.yml` (paths under `app/`, see
+  the old repo's workflow) → freeze lati-club/clista-ai-app (pointer
+  README, disable its workflows; its uncommitted incident-doc edits were
+  already carried into the monorepo) → repoint the ThreadHub launchd
+  checkout when quiet → DELETE `cf-diag.yml`.
+- Meanwhile **production app.clista.ai is healthy and untouched**, still
+  serving the old repo's last deploy (`93d1023` content) — identical to
+  monorepo `app/`. If an urgent app change is needed before cutover, land
+  it in BOTH lati-club/clista-ai-app (deploys) and the monorepo (authority).
+
 ## Update 2026-07-10 (night) — MONOREPO PIVOT; new goal: MRM product
 
 Owner decision: the multi-repo structure was limiting progress; the goal is
