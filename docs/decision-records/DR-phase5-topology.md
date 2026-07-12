@@ -2,12 +2,14 @@
 
 > **Provenance:** clista@a1cea18545756ed876c25aca7cc67c8e7c8e6b96 · prompt-studio@8788709c120fd87db4d9093d59cd94251cb5ff2e
 
-**Status:** APPROVED — owner challenge pass 2026-07-12, four objections
-resolved by pre-seal amendment (see Amendments); sealing through the studio
-seal flow in progress; on seal this section records the slug/hash and flips
-to ADOPTED. Originally an agent-authored draft without a separate challenge
-pass — disclosed, per the 2026-07-10 monorepo precedent; the owner checkpoint
-was named as the challenge gate for this record, and that gate has now run.
+**Status:** ADOPTED — sealed 2026-07-12
+(`sha256:a406d40ae108df11160bbee04c9e927432761c90245da74bf7ae9e2c9060706a`)
+on ThreadHub thread `dr-phase5-topology` (`thd_725f1cef76ac`), after the
+owner challenge pass of 2026-07-12 resolved four objections by pre-seal
+amendment (see Amendments and the Seal section). Originally an agent-authored
+draft without a separate challenge pass — disclosed, per the 2026-07-10
+monorepo precedent; the owner checkpoint was named as the challenge gate for
+this record, and that gate ran and amended the draft before sealing.
 **Decision owner:** troy_builds
 **Date raised:** 2026-07-12
 **Applies to:** `lati-cooki/clista` (packages/protocol, packages/threadhub,
@@ -358,6 +360,26 @@ path disclosed.**
 
 ## Seal
 
-Pending — owner approval received 2026-07-12 (Wave 0 checkpoint); sealing
-through the studio seal flow in progress; the seal record's slug/hash will
-be recorded here by amendment.
+Sealed 2026-07-12 through the studio seal flow: ThreadHub thread
+`dr-phase5-topology` (`thd_725f1cef76ac`), 12 records, chain `valid: true`,
+head
+`sha256:a406d40ae108df11160bbee04c9e927432761c90245da74bf7ae9e2c9060706a`.
+The sealed evidence pins this document at commit `fbf4c62`
+(`content_hash=sha256:a664fecbd86015969cdab88c87b8e15411f2e6a8478d22f868727256e76e137e`)
+— the adoption-candidate text; this post-seal commit amends only the Status
+and Seal sections to record the seal, per the append-only rule.
+
+The seal thread witnesses the owner challenge pass: the four objections
+(`obj_mapping-completeness` — including its FCP terminal-outcome second
+component, `obj_canonicality-boundary`, `obj_custody-disclosure-reach`,
+`obj_recall-double-emission`) are filed as `ObjectionRaised` events with
+their resolutions folded into the objection text — the Phase 4 form this
+DR's own mapping table discloses, used knowingly: `ObjectionResolved` gains
+an emitting path in Slice 6. First objections filed against Phase 5; the
+gate ran on its own gatekeeper.
+
+Custody disclosure (rule 5.3, applied to this seal): all 12 records were
+written under the legacy single custodial studio author (`id_f71531f1d383`,
+"Prompt Studio") — the pre-Slice-2 regime this DR phases out. The semantic
+actors (owner, objectors) are carried in event payloads, not as distinct
+transport writers; per-writer attribution begins with Slice 2.
