@@ -174,6 +174,7 @@ const {
   validateCommand,
   verifyCrossThreadCommand
 } = require("./cli/integrity");
+const { reportVerify } = require("./cli/report");
 const {
   auditShow,
   stateShow
@@ -360,6 +361,8 @@ function main(argv = process.argv.slice(2), cwd = process.cwd()) {
         return integrityVerify(options, cwd);
       case "integrity verify-suffix":
         return integrityVerifySuffix(options, cwd);
+      case "report verify":
+        return reportVerify(options, cwd);
       case "continuity export":
         return continuityExport(options, cwd);
       case "continuity verify":
@@ -889,6 +892,7 @@ function usage() {
   clista verify-cross-thread --parent <path> --arm <path> [--arm <path>...]
   clista integrity verify [--events <path>] [--strict]
   clista integrity verify-suffix --anchor <headHash> [--events <suffix path>]
+  clista report verify [--events <path>] [--json true]   # T2 ventriloquism diff: unwitnessed claims (empty list = pass)
   clista continuity export [--events <path>] [--thread <threadId>] [--out <path>]
   clista continuity verify [--packet <path>]
   clista continuity import <path> [--replace true]
