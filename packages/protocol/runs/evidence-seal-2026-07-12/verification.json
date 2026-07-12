@@ -1,0 +1,25 @@
+{
+  "threadId": "thd_mutual_reliance_evidence_mrh43nx1_dcfbe526",
+  "sealEventId": "evt_sealedreport_mrh43nx9_e0422440",
+  "sealHash": "sha256:93dd6c1d3ea92519325d3bde55ec9cf273013eed857f7a7b9a51ad76f488c460",
+  "integrity": {
+    "schema": "clista.integrity.v0",
+    "protocolVersion": "clista.protocol.v0",
+    "hashVersion": "clista.event_hash.v1",
+    "strict": false,
+    "valid": true,
+    "eventCount": 14,
+    "headHash": "sha256:93dd6c1d3ea92519325d3bde55ec9cf273013eed857f7a7b9a51ad76f488c460",
+    "reasons": []
+  },
+  "validation": {
+    "valid": true,
+    "errors": []
+  },
+  "report": {
+    "valid": true,
+    "reportCount": 1,
+    "errors": []
+  },
+  "rejections": []
+}

@@ -7,6 +7,32 @@ file is the "where we left off" delta on top of them. Sections below the top
 delta describe the pre-monorepo era (those repos merged here with history;
 provenance pins in older pages are historical artifacts of that era).
 
+## Update 2026-07-12 (later) — Mutual Reliance workstream: all 8 slices DONE
+
+The v2 direction (`docs/new/clista-new-direction-transfer-prompt.md`,
+owner-approved) executed end to end in one session:
+
+- **Three DRs adopted** (docs/decision-records/, atlas updated same-commit):
+  claim-citation report events (`SealedReport`), silent-action prohibition,
+  precedent-as-citation (`PrecedentReference`, implementation deferred).
+- **Implemented (TDD)**: `SealedReport` first-class event type (registry +
+  validator + projector); `src/report.js` `verifyReport` — three mechanical
+  checks (chain / existence / coverage); CLI `clista report verify`
+  (T2 ventriloquism diff, prose output). Suite 355 → 379 green.
+- **T1/T2 executed live** (FINDINGS-T1-T2.md): T1 agent variant PASS attempt
+  one (prediction confirmed); T2 agent prediction MISSED — forced citation
+  structure was satisfied immediately by a live model; miss recorded plainly.
+  Artifacts under `packages/protocol/runs/`.
+- **Evidence chain SEALED** as ClisTa thread
+  `thd_mutual_reliance_evidence_mrh43nx1_dcfbe526` (14 events, seal
+  `sha256:93dd6c1d3ea92519325d3bde55ec9cf273013eed857f7a7b9a51ad76f488c460`),
+  artifact `packages/protocol/runs/evidence-seal-2026-07-12/` — chain,
+  validation, and report all verify via `clista report verify`.
+- Open follow-ups from the workstream: implement `PrecedentReference`
+  (Slice 3 DR); a gate-rejection event type (Slice 2 known nonconformance);
+  unforced-prose diffing belongs to probe-style T3/T4 in the swarm repo.
+  App de-vendor (cutover item 3) will carry the new event type to the app.
+
 ## Update 2026-07-12 — CUTOVER DONE: production deploys from the monorepo
 
 The 07-11 blocker below is RESOLVED and the deploy cutover is complete:
