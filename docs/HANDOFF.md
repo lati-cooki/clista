@@ -70,9 +70,18 @@ The 07-11 blocker below is RESOLVED and the deploy cutover is complete:
   integration is disconnected in the dash so a push doesn't recreate it.
   GH Actions (not Workers Builds) is the chosen deploy path — it keeps the
   staging gate and explicit production dispatch.
-- **Remaining** (from the checklist below): freeze lati-club/clista-ai-app
-  (pointer README + disable workflows); repoint the ThreadHub launchd
-  checkout when quiet; de-vendor `app/worker/engine/` (checklist item 3).
+- **ThreadHub repoint + freeze DONE 2026-07-12 (later)**: the launchd service
+  `com.lati.threadhub` now runs `~/clista/packages/threadhub/bin/cli.js`
+  (WorkingDirectory likewise); the DB stays at `~/ThreadHub/data/hub.db` by
+  explicit `--db` (deliberate — moving it is a future migration). Verified:
+  178 records / 11 threads, `verify --all` clean from the monorepo checkout.
+  lati-club/ThreadHub frozen with a pointer README (`c13b308`). Gotcha
+  survived: PR #8 (publish-to-app bridge) had landed on the old remote AFTER
+  the subtree cut — carried into the monorepo at `fbc1365` (suite 45/45)
+  before the freeze.
+- **Remaining** (from the checklist below): disable the frozen
+  lati-club/clista-ai-app repo's 7 workflows (classifier-blocked; owner
+  one-liner in session notes).
 - `docs/new/` holds the Mutual Reliance / new-direction transfer prompt — a
   separate protocol workstream, not started, uncommitted until owner says so.
 
