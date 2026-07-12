@@ -1,14 +1,22 @@
 name: Deploy app.clista.ai
 
-# Build the SPA and deploy the Worker (+ Durable Objects) to app.clista.ai.
+# Build the SPA and deploy the Worker (+ Durable Objects) to app.clista.ai on
+# every push to main that touches the app, or manually from the Actions tab.
 # Monorepo port of clista-ai-app's deploy-app.yml (cutover 2026-07-10, per
-# the monorepo-consolidation-for-the-mrm-pivot decision).
-#
-# DISPATCH-ONLY during cutover: every production deploy is an explicit,
-# operator-triggered action until the monorepo pipeline is proven (staging
-# deploy + one manual production deploy verified). Then restore the push
-# trigger (same paths as the old repo, under app/) and freeze the old repo.
+# the monorepo-consolidation-for-the-mrm-pivot decision). Pipeline proven
+# 2026-07-12: staging run 29173984183, production run 29174143736.
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/src/**'
+      - 'app/worker/**'
+      - 'app/index.html'
+      - 'app/vite.config.js'
+      - 'app/wrangler.jsonc'
+      - 'app/package.json'
+      - 'app/package-lock.json'
+      - '.github/workflows/deploy-app.yml'
   workflow_dispatch:
 
 concurrency:

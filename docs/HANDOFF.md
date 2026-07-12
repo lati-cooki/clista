@@ -7,7 +7,35 @@ file is the "where we left off" delta on top of them. Sections below the top
 delta describe the pre-monorepo era (those repos merged here with history;
 provenance pins in older pages are historical artifacts of that era).
 
-## Update 2026-07-11 (early) — cutover in progress, PAUSED on two bad secrets
+## Update 2026-07-12 — CUTOVER DONE: production deploys from the monorepo
+
+The 07-11 blocker below is RESOLVED and the deploy cutover is complete:
+
+- **Secrets fixed**: `CLOUDFLARE_ACCOUNT_ID` re-set to the 32-char id; a new
+  API token "clista monorepo deploy (GH Actions)" was minted from the Edit
+  Cloudflare Workers template (Account Resources → Include → troylati only).
+  NOTE for future diagnostics: current Cloudflare user tokens are
+  `cfut_`-prefixed and **53 chars** — the old "~40 chars" expectation is
+  stale. `cf-diag.yml` passed all checks (run 29173970883) and was DELETED.
+- **Pipeline proven**: staging deploy from CI green (run 29173984183,
+  staging.clista.ai healthy) → first monorepo production deploy green
+  (run 29174143736, worker version `2217f99d`, app.clista.ai healthy behind
+  Access). Push trigger restored in `deploy-app.yml` (old repo's paths,
+  prefixed `app/`).
+- **Stray worker incident (same evening)**: a Cloudflare Workers Builds git
+  integration experiment auto-deployed a worker named `clista` serving the
+  raw (unbuilt) app source publicly at clista.troylati.workers.dev. Deleted
+  via `wrangler delete --name clista`; verify the Workers Builds git
+  integration is disconnected in the dash so a push doesn't recreate it.
+  GH Actions (not Workers Builds) is the chosen deploy path — it keeps the
+  staging gate and explicit production dispatch.
+- **Remaining** (from the checklist below): freeze lati-club/clista-ai-app
+  (pointer README + disable workflows); repoint the ThreadHub launchd
+  checkout when quiet; de-vendor `app/worker/engine/` (checklist item 3).
+- `docs/new/` holds the Mutual Reliance / new-direction transfer prompt — a
+  separate protocol workstream, not started, uncommitted until owner says so.
+
+## Update 2026-07-11 (early) — cutover in progress, PAUSED on two bad secrets [RESOLVED — see above]
 
 Where the deploy cutover stopped (session ended here; everything below the
 next heading still describes the pivot itself):
