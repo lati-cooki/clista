@@ -86,6 +86,10 @@
   output-shaping action — recall/reuse, arbitration, gate rejections,
   external ingestion — emits a typed event at action time. Absent records
   outrank corrupted ones in severity; reconstruction never satisfies.
+- **Precedent as citation, never ventriloquism** (Mutual Reliance,
+  DR-2026-07-12): reused conclusions travel as `PrecedentReference`
+  citations (holding + context hashes + regrounding mode); prior rationale
+  is unrepresentable in the shape. Ambiguous context match → fresh compute.
 - **Reports follow the protocol too** (Mutual Reliance, DR-2026-07-12):
   prose derived from a thread ships as a `SealedReport` event — ordered
   claims, each citing earlier same-thread event hashes — so the report layer
