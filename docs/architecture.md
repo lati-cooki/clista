@@ -82,3 +82,8 @@
   auto `ReviewTriggered` → current-owner notify, clista-ai-app #19/#21).
 - ThreadHub has **no seal/terminal state** — "complete" is a convention
   (marker record + verify assertion), enforced by tests, not the store.
+- **Reports follow the protocol too** (Mutual Reliance, DR-2026-07-12):
+  prose derived from a thread ships as a `SealedReport` event — ordered
+  claims, each citing earlier same-thread event hashes — so the report layer
+  verifies with the same three mechanical checks as the log layer. Reports
+  are renderings, never evidence; they do not re-enter the decision graph.
