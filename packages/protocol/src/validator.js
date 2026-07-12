@@ -136,6 +136,7 @@ const {
   validateObjectionRaised,
   validateObjectionResolved,
   validatePositionTaken,
+  validatePrecedentReference,
   validateSealedReport,
   validateThreadCreated,
   validateThreadForked
@@ -482,6 +483,9 @@ function validateEvents(events) {
         break;
       case "SealedReport":
         validateSealedReport(event, state);
+        break;
+      case "PrecedentReference":
+        validatePrecedentReference(event, state);
         break;
       case "AlignmentCalculated":
         validateAlignmentCalculated(event, state);

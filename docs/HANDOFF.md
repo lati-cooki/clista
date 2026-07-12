@@ -28,10 +28,13 @@ owner-approved) executed end to end in one session:
   `sha256:93dd6c1d3ea92519325d3bde55ec9cf273013eed857f7a7b9a51ad76f488c460`),
   artifact `packages/protocol/runs/evidence-seal-2026-07-12/` — chain,
   validation, and report all verify via `clista report verify`.
-- Open follow-ups from the workstream: implement `PrecedentReference`
-  (Slice 3 DR); a gate-rejection event type (Slice 2 known nonconformance);
-  unforced-prose diffing belongs to probe-style T3/T4 in the swarm repo.
-  App de-vendor (cutover item 3) will carry the new event type to the app.
+- `PrecedentReference` IMPLEMENTED 2026-07-12 (follow-up slice against the
+  Slice 3 DR): first-class event type, validator rejects rationale fields
+  outright, age derived never stored. Suite 379 → 397 green.
+- Open follow-ups from the workstream: a gate-rejection event type (Slice 2
+  known nonconformance); unforced-prose diffing belongs to probe-style T3/T4
+  in the swarm repo. App de-vendor (cutover item 3) will carry the new event
+  types (`SealedReport`, `PrecedentReference`) to the app.
 
 ## Update 2026-07-12 — CUTOVER DONE: production deploys from the monorepo
 

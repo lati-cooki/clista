@@ -3,9 +3,13 @@
 **Status:** ADOPTED by owner direction — Mutual Reliance transfer prompt
 (committed `c56b406`, drafted 2026-07-11), Slice 3. Agent-authored draft
 without a separate challenge pass — disclosed, per the 2026-07-10 monorepo
-precedent. Evidence chain seals in Slice 8. Event-shape implementation is
-deliberately NOT in Slice 4 (which implements only the Slice 1 vocabulary);
-it lands in a later implementation slice against this DR.
+precedent. Evidence chain sealed in Slice 8. Event-shape implementation was
+deliberately NOT in Slice 4 (which implemented only the Slice 1 vocabulary);
+**implemented 2026-07-12** as a follow-up slice against this DR:
+`PrecedentReference` is a first-class event type (registry + validator +
+projector), the validator rejects any `rationale`/`sourceRationale` field
+outright (rule 2 made mechanical), and precedent age is enforced
+non-negative, never stored (rule 1). Tests: `test/precedent-reference.test.js`.
 **Decision owner:** troy_builds
 **Date raised:** 2026-07-12
 **Applies to:** `packages/protocol` grammar; any ClisTa-governed system

@@ -1,4 +1,5 @@
 const { primaryObject } = require("../event-types");
+const { HASH_PATTERN } = require("../integrity");
 const { unique } = require("../utils");
 const {
   addError,
@@ -156,6 +157,63 @@ function validateCrossThreadEvidence(event, state) {
       derivation: cte.derivation,
     },
   });
+}
+
+// PrecedentReference (DR-2026-07-12 precedent-as-citation): a witnessed reuse
+// of a prior conclusion. The HOLDING travels as a tagged citation — source
+// thread/event hash, live + source context hashes, precedent date, regrounding
+// mode. The rationale does NOT travel: the shape has no rationale field, and a
+// payload that smuggles one in is rejected outright — rationale transplant is
+// unrepresentable, not discouraged. Like SealedReport, this does NOT register
+// into state.evidence: a reused conclusion that also serves as evidence
+// crosses via CrossThreadEvidence; neither event substitutes for the other.
+function validatePrecedentReference(event, state) {
+  const ref = event.payload.precedentReference;
+  if (!ref?.id) {
+    addError(state, event, "PrecedentReference payload missing precedentReference.id");
+    return;
+  }
+  validateThreadObject(event, ref, state, "precedentReference");
+  if ("rationale" in ref || "sourceRationale" in ref) {
+    addError(state, event, "PrecedentReference must not carry a rationale — cite the holding, re-ground against the live context");
+  }
+  for (const field of ["sourceThreadId", "holding", "precedentDate", "reusedAt"]) {
+    if (!ref[field]) {
+      addError(state, event, `PrecedentReference missing ${field}`);
+    }
+  }
+  if (!ref.sourceEventHash) {
+    addError(state, event, "PrecedentReference missing sourceEventHash");
+  } else if (!HASH_PATTERN.test(ref.sourceEventHash)) {
+    addError(state, event, `PrecedentReference sourceEventHash is not a sha256 hash: ${ref.sourceEventHash}`);
+  }
+  if (!ref.contextHash) {
+    addError(state, event, "PrecedentReference missing contextHash");
+  } else if (!HASH_PATTERN.test(ref.contextHash)) {
+    addError(state, event, `PrecedentReference contextHash is not a sha256 hash: ${ref.contextHash}`);
+  }
+  if (ref.sourceContextHash && !HASH_PATTERN.test(ref.sourceContextHash)) {
+    addError(state, event, `PrecedentReference sourceContextHash is not a sha256 hash: ${ref.sourceContextHash}`);
+  }
+  if (!ref.regrounding) {
+    addError(state, event, "PrecedentReference missing regrounding");
+  } else if (!["fresh", "templated_precedent"].includes(ref.regrounding)) {
+    addError(state, event, `PrecedentReference unsupported regrounding ${ref.regrounding}`);
+  }
+  if (!ref.reusedByParticipantId) {
+    addError(state, event, "PrecedentReference missing reusedByParticipantId");
+  } else if (!state.participants.has(ref.reusedByParticipantId)) {
+    addError(state, event, `precedentReference reused by unknown participant ${ref.reusedByParticipantId}`);
+  }
+  // Precedent age is reusedAt − precedentDate, derivable mechanically; it is
+  // never stored. The one thing to enforce is that it is non-negative.
+  if (ref.precedentDate && ref.reusedAt) {
+    const precedentDate = Date.parse(ref.precedentDate);
+    const reusedAt = Date.parse(ref.reusedAt);
+    if (!Number.isNaN(precedentDate) && !Number.isNaN(reusedAt) && reusedAt < precedentDate) {
+      addError(state, event, `PrecedentReference reusedAt precedes precedentDate (${ref.reusedAt} < ${ref.precedentDate})`);
+    }
+  }
 }
 
 // SealedReport (DR-2026-07-12 claim-citation events): an ordered claim list,
@@ -413,6 +471,7 @@ module.exports = {
   validateObjectionRaised,
   validateObjectionResolved,
   validatePositionTaken,
+  validatePrecedentReference,
   validateSealedReport,
   validateThreadCreated,
   validateThreadForked

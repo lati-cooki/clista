@@ -96,6 +96,7 @@ const EVENT_TYPES = Object.freeze([
   "ParticipantRoleAssigned",
   "PatternObservationRecorded",
   "PositionTaken",
+  "PrecedentReference",
   "ProtocolAmendmentApproved",
   "ProtocolAmendmentProposed",
   "ProtocolAmendmentRejected",
@@ -219,7 +220,8 @@ const PRIMARY_OBJECT_KEYS = Object.freeze([
   "negotiationDifference",
   "negotiationTerms",
   "negotiationFailure",
-  "sealedReport"
+  "sealedReport",
+  "precedentReference"
 ]);
 
 // The event primary domain object, or null. Faithful to the prior `||` chains
