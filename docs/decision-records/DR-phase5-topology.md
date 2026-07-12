@@ -137,12 +137,18 @@ each emitter maps into it exactly once, here.
 | studio `ClaimCreated` | `ClaimCreated` | — |
 | studio `ObjectionRaised` | `ObjectionRaised` | — |
 | studio `ObjectionResolved` | `ObjectionResolved` | The Slice 6 objection lifecycle emits raise → resolve; the Wave 5 gate checks the terminal record carries both. *(Added by pre-seal amendment, 2026-07-12 — resolves `obj_mapping-completeness`.)* |
+| studio FCP close: promoted | `ClaimCreated` | Terminal outcome of a promotion: decision text "`<pid> <ver> promoted to production. FCP: {…}`" with the window facts (opened_at/closes_at/resolved_at, state, window_hours, waive facts, objection_count, evidence_attached) as a trailing JSON object in the claim text — NO new event type, per the studio's owner decision 2026-07-12 (`promotion_seal.py` module docstring). *(This row and the five below added by pre-seal amendment, 2026-07-12 — resolves `obj_mapping-completeness`, second component: without them, rule 3.2 would orphan Phase 4's own promotion records at seal.)* |
+| studio FCP close: aborted | `ClaimCreated` | Same shape, "`NOT promoted (promotion aborted)`" decision text with the same trailing FCP meta. |
+| studio FCP close: waived | `ClaimCreated` | Same shape with `fcp_waived: true` + `waive_reason` in the FCP meta — a waive is a property of the close, not a type; the Slice 5 waive-ratio metric reads exactly this field. |
+| studio deprecation | `ClaimCreated` | Demotion decision text supersedes the promotion thread by slug ("`Supersedes promotion record thread '<slug>'`"), or discloses that no prior promotion record was found (`promotion_seal.py` `build_demotion_payload`). |
+| studio eval stamp | `EvidenceCommitted` | Pinned eval evidence: source `eval:<file>`, `content_hash`, model/tokens/run_at, plus the honesty-boundary sentence (the chain proves what was recorded and when — not that the prompt is good); grade + graded_by ride here from Slice 2 on. |
+| studio objection resolution (Phase 4 form) | `ObjectionRaised` (resolution inline in the text) | Phase 4 emitted no `ObjectionResolved`: the resolution rode inside the ObjectionRaised text as "`[resolution: <resolution> — <body>]`" (`promotion_seal.py` `_objection_texts`). Disclosed here so pre-Phase-5 records stay covered by rule 3.2; the `ObjectionResolved` identity row above is the target form from Slice 6 on. |
 | harness `SealedReport` | `SealedReport` | Native (DR-2026-07-12-claim-citation-events). |
 | harness `PrecedentReference` | `PrecedentReference` | Native (DR-2026-07-12-precedent-as-citation). |
 | harness `GateRejectionRecorded` | `GateRejectionRecorded` | Native (silent-action DR rule 2, closed 2026-07-12). |
 | swarm `firestore:CRYSTALLIZATION` | `ClaimCreated` + `CrossThreadEvidence` | Original compute archived as precedent: the conclusion as a claim, its cross-thread reach as evidence import. Mapping only; build in Phase 6. |
 | swarm `firestore:RECALL` | `PrecedentReference` | Citation of prior compute — the archived witness of a reuse. Mapping only; build in Phase 6. |
-| swarm `stream:RECALL` | `PrecedentReference` | The gateway's Mantle stream event (emitted on a hit, never `CONSENSUS`) is the at-action-time witness of the same reuse the `firestore:RECALL` document archives — one recall act, two swarm-side traces, exactly one `PrecedentReference` emission (rule 3.5). Mapping only; build in Phase 6. |
+| swarm `stream:RECALL` | `PrecedentReference` | The gateway's Mantle stream event (emitted on a hit, never `CONSENSUS`) is the at-action-time witness of the same reuse the `firestore:RECALL` document archives — one recall act, two swarm-side traces, exactly one `PrecedentReference` emission (rule 3.5). Mapping only; build in Phase 6. *(Note tightened by pre-seal amendment, 2026-07-12 — resolves `obj_recall-double-emission`.)* |
 | swarm arbitration | labeled arbitrated: `ClaimCreated` carrying the arbitrated outcome + `PositionTaken` per arm + `MinorityReportFiled` for preserved dissent | Arbitrated resolutions are labeled arbitrated with dissent preserved, never laundered as confidence 1.0 (silent-action DR rule 2). The outcome itself travels as a `ClaimCreated` labeled arbitrated. Today's Arbitrator does the opposite (`gateway.py:477`); its own DR is still owed — this row records the mapping, not a fix. Build in Phase 6. *(Outcome carrier added by pre-seal amendment, 2026-07-12 — resolves `obj_mapping-completeness`.)* |
 
 Every protocol-side name above appears verbatim in
@@ -259,8 +265,9 @@ path disclosed.**
      minted and linked to the custodial one; every prior custodial record
      stands un-rewritten, with the linkage disclosed on the record. No
      re-authoring, no retroactive re-signing — history keeps the custody it
-     was written under. *The specifics of this path are part of what the
-     owner approves at the Wave 0 checkpoint.*
+     was written under. *The specifics of this path were approved at the
+     Wave 0 checkpoint (owner challenge pass, 2026-07-12; no objection was
+     raised against this rule).*
 
 5.5. **No key material in any repo or doc.** Ever.
 
@@ -327,7 +334,15 @@ path disclosed.**
     no carrier for the arbitrated outcome itself. Resolved: `ObjectionResolved`
     row added; the arbitration row now carries the outcome as a
     `ClaimCreated` labeled arbitrated, alongside `PositionTaken` per arm
-    and `MinorityReportFiled` for dissent.
+    and `MinorityReportFiled` for dissent. **Second component:** the table
+    also omitted the studio's FCP terminal-outcome vocabulary, which would
+    have let rule 3.2 orphan Phase 4's own promotion records the moment the
+    seal closed. Resolved: six rows added mapping the FCP closes (promoted /
+    aborted / waived), deprecation, eval stamps, and the Phase 4 inline
+    objection-resolution form — all riding the validated decision-as-claim
+    sequence with no new event types, per the studio's owner decision
+    2026-07-12 (`promotion_seal.py`), the Phase 4 inline form disclosed so
+    pre-Phase-5 records stay covered.
   - `obj_canonicality-boundary` — rule 2.1's "accumulated/anchored"
     conflated two distinct acts. Resolved: canonicality transfers on
     accumulation into the hub; anchoring is an external timestamp on an
@@ -343,5 +358,6 @@ path disclosed.**
 
 ## Seal
 
-Pending — seals through the studio seal flow after owner approval (Wave 0
-checkpoint); the seal record's slug/hash will be recorded here by amendment.
+Pending — owner approval received 2026-07-12 (Wave 0 checkpoint); sealing
+through the studio seal flow in progress; the seal record's slug/hash will
+be recorded here by amendment.
