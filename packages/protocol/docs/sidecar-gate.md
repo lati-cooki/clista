@@ -7,7 +7,15 @@ model risk management, financial underwriting, anything that wants
 `authorizationRef.type: "decision"` on its `ExecutionStarted` record — waiting
 until after the fact is too late. `src/gate.js` is a pre-append check for
 exactly that case: `decision propose` either appends a `DecisionRequestOpened`
-that's already known-valid, or appends nothing and tells you why.
+that's already known-valid, or refuses — and **witnesses the refusal** with a
+`GateRejectionRecorded` event (DR-2026-07-12-silent-action-prohibition: a
+gate that refuses an append has shaped the output, so the refusal itself is
+a typed event at action time). The rejected candidate is committed to by
+content hash, never embedded. One residual boundary, on record: if the
+witness event itself cannot validate (empty log, undeclared writer, or a log
+the engine has already declared invalid), the gate appends nothing and
+reports `rejectionWitnessed: false` — it never corrupts the log in order to
+witness a refusal.
 
 ## What the gate actually checks
 
@@ -25,7 +33,8 @@ reused as-is. The gate builds the candidate `DecisionRequestOpened` event,
 chains it onto the real log in memory with `prepareEventForAppend`, and runs
 the same `validateEvents` the `validate` command runs. If any cited id
 doesn't resolve, `validateEvents` says so, in its own words, and the gate
-appends nothing. There is no separate existence-checking logic in `gate.js`
+refuses the candidate (appending only the rejection witness). There is no
+separate existence-checking logic in `gate.js`
 to drift from the engine's — there's only the engine's, called early.
 
 ## Using it
@@ -54,20 +63,22 @@ npm run clista -- decision propose --thread $THREAD --proposal "Ship it again" \
   --evidence evd_totally_made_up_ffffffff --assumptions $ASM
 # => { "valid": false, "errors": [
 #      { "event_type": "DecisionRequestOpened",
-#        "reason": "evidence reference does not exist: evd_totally_made_up_ffffffff" } ] }
-# log length unchanged — nothing was appended
+#        "reason": "evidence reference does not exist: evd_totally_made_up_ffffffff" } ],
+#      "rejectionEvent": { "event_type": "GateRejectionRecorded", ... }, "rejectionWitnessed": true }
+# the rejected proposal was NOT appended; its refusal was (one witness event)
 
 npm run clista -- decision propose --thread $THREAD --proposal "Ship it with nothing"
 # => { "valid": false, "errors": [
 #      { "reason": "propose_decision requires at least one supportingEvidenceIds pointer" },
-#      { "reason": "propose_decision requires at least one supportingAssumptionIds pointer" } ] }
-# log length unchanged — nothing was appended
+#      { "reason": "propose_decision requires at least one supportingAssumptionIds pointer" } ],
+#      "rejectionEvent": { "event_type": "GateRejectionRecorded", ... }, "rejectionWitnessed": true }
+# structural refusals carry no candidateContentHash — no candidate was ever prepared
 ```
 
-All three cases above were run against a real thread as part of verifying
-this feature; `clista validate` on the resulting log reports
-`{ "valid": true, "errors": [] }` after all of it, including the two
-rejected attempts.
+All three cases are exercised in `test/gate.test.js` and
+`test/gate-rejection.test.js`; `clista validate` on the resulting log reports
+`{ "valid": true, "errors": [] }` after all of it — the two rejected attempts
+are present in the log only as their `GateRejectionRecorded` witnesses.
 
 The gate also checks the *existing* log's validity before it checks the
 draft's. If a thread already has an invalid event in it — written by one of

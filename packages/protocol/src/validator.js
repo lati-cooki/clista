@@ -133,6 +133,7 @@ const {
   validateClaimCreated,
   validateCrossThreadEvidence,
   validateEvidenceCommitted,
+  validateGateRejectionRecorded,
   validateObjectionRaised,
   validateObjectionResolved,
   validatePositionTaken,
@@ -486,6 +487,9 @@ function validateEvents(events) {
         break;
       case "PrecedentReference":
         validatePrecedentReference(event, state);
+        break;
+      case "GateRejectionRecorded":
+        validateGateRejectionRecorded(event, state);
         break;
       case "AlignmentCalculated":
         validateAlignmentCalculated(event, state);

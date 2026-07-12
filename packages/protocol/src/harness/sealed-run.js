@@ -16,13 +16,16 @@
 const { createEvent, readEvents, appendEvent, newId } = require("../events");
 const { validateEvents } = require("../validator");
 const { verifyEventIntegrity, prepareEventForAppend } = require("../integrity");
+const { witnessRejection } = require("../gate");
 
 // The sidecar-gate pattern generalized to any event type: build the candidate,
 // chain it onto the real log IN MEMORY, run the same validateEvents the
-// validate command runs, and append only a known-valid event. On rejection,
-// nothing is appended. (Per DR-2026-07-12-silent-action-prohibition, a silent
-// rejection is a known protocol gap; this harness surfaces rejections in its
-// return value and run record rather than swallowing them.)
+// validate command runs, and append only a known-valid event. On rejection the
+// candidate is not appended; instead the refusal is witnessed by a
+// GateRejectionRecorded event (DR-2026-07-12-silent-action-prohibition) —
+// unless the witness itself cannot validate (empty log, undeclared writer),
+// in which case nothing appends and rejectionEvent is null: the gate never
+// corrupts the log in order to witness a refusal.
 function appendThroughGate({ type, threadId, actorId, payload }, cwd) {
   const existing = readEvents(cwd);
   const draft = createEvent({ type, threadId, actorId, payload });
@@ -31,7 +34,19 @@ function appendThroughGate({ type, threadId, actorId, payload }, cwd) {
   const result = validateEvents(existing.concat([prepared]));
   if (!result.valid) {
     const ownErrors = result.errors.filter((e) => e.event_id === prepared.event_id);
-    return { valid: false, errors: ownErrors.length ? ownErrors : result.errors, event: null };
+    const errors = ownErrors.length ? ownErrors : result.errors;
+    const rejectionEvent = witnessRejection(
+      {
+        threadId,
+        actorId,
+        gate: "append_through_gate",
+        candidateEventType: type,
+        candidateContentHash: prepared.content_hash,
+        errors
+      },
+      cwd
+    );
+    return { valid: false, errors, event: null, rejectionEvent };
   }
   appendEvent(draft, cwd);
   return { valid: true, errors: [], event: draft };

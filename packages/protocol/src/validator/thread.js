@@ -1,4 +1,4 @@
-const { primaryObject } = require("../event-types");
+const { isKnownEventType, primaryObject } = require("../event-types");
 const { HASH_PATTERN } = require("../integrity");
 const { unique } = require("../utils");
 const {
@@ -157,6 +157,48 @@ function validateCrossThreadEvidence(event, state) {
       derivation: cte.derivation,
     },
   });
+}
+
+// GateRejectionRecorded (DR-2026-07-12 silent-action-prohibition): a gate that
+// refuses an append has shaped the output — the record that isn't there — so
+// the refusal is witnessed at action time. The rejected candidate is committed
+// to by content hash, never embedded: the log carries THAT a specific append
+// was refused and WHY, without hosting an invalid payload. Does not register
+// into any other state map.
+function validateGateRejectionRecorded(event, state) {
+  const rejection = event.payload.gateRejection;
+  if (!rejection?.id) {
+    addError(state, event, "GateRejectionRecorded payload missing gateRejection.id");
+    return;
+  }
+  validateThreadObject(event, rejection, state, "gateRejection");
+  for (const field of ["gate", "rejectedAt"]) {
+    if (!rejection[field]) {
+      addError(state, event, `GateRejectionRecorded missing ${field}`);
+    }
+  }
+  if (!rejection.candidateEventType) {
+    addError(state, event, "GateRejectionRecorded missing candidateEventType");
+  } else if (!isKnownEventType(rejection.candidateEventType)) {
+    addError(state, event, `GateRejectionRecorded unknown candidateEventType ${rejection.candidateEventType}`);
+  }
+  if (rejection.candidateContentHash && !HASH_PATTERN.test(rejection.candidateContentHash)) {
+    addError(state, event, `GateRejectionRecorded candidateContentHash is not a sha256 hash: ${rejection.candidateContentHash}`);
+  }
+  if (!Array.isArray(rejection.reasons) || rejection.reasons.length === 0) {
+    addError(state, event, "GateRejectionRecorded reasons must be a non-empty array");
+  } else {
+    rejection.reasons.forEach((entry, index) => {
+      if (!entry || typeof entry.reason !== "string" || entry.reason.length === 0) {
+        addError(state, event, `GateRejectionRecorded reason ${index + 1} missing text`);
+      }
+    });
+  }
+  if (!rejection.rejectedByParticipantId) {
+    addError(state, event, "GateRejectionRecorded missing rejectedByParticipantId");
+  } else if (!state.participants.has(rejection.rejectedByParticipantId)) {
+    addError(state, event, `gateRejection recorded by unknown participant ${rejection.rejectedByParticipantId}`);
+  }
 }
 
 // PrecedentReference (DR-2026-07-12 precedent-as-citation): a witnessed reuse
@@ -468,6 +510,7 @@ module.exports = {
   validateClaimCreated,
   validateCrossThreadEvidence,
   validateEvidenceCommitted,
+  validateGateRejectionRecorded,
   validateObjectionRaised,
   validateObjectionResolved,
   validatePositionTaken,

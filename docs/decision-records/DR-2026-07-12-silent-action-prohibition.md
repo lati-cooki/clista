@@ -44,11 +44,17 @@ MUST produce a typed event at action time.** Binding rules:
      unanimous or confidence 1.0.
    - **Gate rejections** — a gate that refuses an append has shaped the
      output (the record that *isn't* there). The ClisTa sidecar gate itself
-     is currently in this class: a rejected `decision propose` appends
-     nothing (docs/sidecar-gate.md — "appends nothing and tells you why").
-     That behavior predates this DR and is now a known gap, on record here;
-     closing it (a rejection event type) is future protocol work, not part
-     of the Slice 4 implementation.
+     was in this class at adoption time: a rejected `decision propose`
+     appended nothing. **CLOSED 2026-07-12** by `GateRejectionRecorded`:
+     both gates (`decision propose` and the harness `appendThroughGate`)
+     now witness every refusal with a typed event carrying the gate name,
+     the candidate's event type, the candidate's content hash (existential
+     rejections; structural refusals never prepare a candidate), the
+     engine's own reasons, and the refused writer. Residual boundary, on
+     record: a rejection whose witness cannot itself validate (empty log,
+     undeclared writer, already-broken log) appends nothing and is reported
+     `rejectionWitnessed: false` — the gate never corrupts the log in order
+     to witness a refusal.
    - **External evidence ingestion** — evidence entering from outside the
      governed boundary (API results, file reads, human paste-ins).
 3. **Reuse and fresh computation are distinct event types.** A consumer of
@@ -85,9 +91,11 @@ the product's failure mode.
 
 - Ledgers get longer; projection/query tooling must stay useful at higher
   event volume.
-- The sidecar gate's current reject-silently behavior is now a *known
-  nonconformance* inside the protocol's own repo, on record above. Honest
-  state: disclosed and scheduled, not hidden.
+- The sidecar gate's reject-silently behavior was a *known nonconformance*
+  at adoption, disclosed above rather than hidden; it was closed 2026-07-12
+  (see rule 2). The disclosed residual is narrower: refusals whose witness
+  cannot itself validate remain unwitnessed in-log and are surfaced only in
+  the gate's return value.
 - "Action time" pins event emission to the acting process; systems that
   cannot write at action time (network partition, crashed sidecar) must
   fail the action rather than act unwitnessed — fail-closed is implied and

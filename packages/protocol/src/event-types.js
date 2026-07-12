@@ -53,6 +53,7 @@ const EVENT_TYPES = Object.freeze([
   "FederationBoundaryRecorded",
   "FederationContextDeclared",
   "FederationPeerRecorded",
+  "GateRejectionRecorded",
   "GovernanceReviewRecommended",
   "InteroperabilityAcceptanceRecorded",
   "InteroperabilityCheckRecorded",
@@ -221,7 +222,8 @@ const PRIMARY_OBJECT_KEYS = Object.freeze([
   "negotiationTerms",
   "negotiationFailure",
   "sealedReport",
-  "precedentReference"
+  "precedentReference",
+  "gateRejection"
 ]);
 
 // The event primary domain object, or null. Faithful to the prior `||` chains

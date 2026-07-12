@@ -115,6 +115,7 @@ function emptyProjection() {
     alignmentSnapshots: {},
     sealedReports: {},
     precedentReferences: {},
+    gateRejections: {},
     identity: {
       schema: "clista.identity.v0",
       participants: [],
@@ -850,6 +851,10 @@ function projectEvents(events) {
         upsert(projection.precedentReferences, payload.precedentReference);
         touchThread(projection, payload.precedentReference?.threadId, eventTimestamp(event));
         break;
+      case "GateRejectionRecorded":
+        upsert(projection.gateRejections, payload.gateRejection);
+        touchThread(projection, payload.gateRejection?.threadId, eventTimestamp(event));
+        break;
       case "DecisionRequestOpened":
         upsert(projection.decisionRequests, payload.decisionRequest);
         setThreadStatus(projection, payload.decisionRequest?.threadId, "review", eventTimestamp(event));
@@ -1300,6 +1305,7 @@ function exportProtocol(projection) {
     alignmentSnapshots: Object.values(projection.alignmentSnapshots),
     sealedReports: Object.values(projection.sealedReports),
     precedentReferences: Object.values(projection.precedentReferences),
+    gateRejections: Object.values(projection.gateRejections),
     identity: projection.identity,
     participantRoles: projection.identity.roles,
     activeAuthorities: projection.identity.activeAuthorities,

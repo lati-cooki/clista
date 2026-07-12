@@ -65,7 +65,7 @@ test("decision propose: golden path appends a validated DecisionRequestOpened", 
   assert.equal(validated.valid, true);
 });
 
-test("decision propose: structural gate rejects empty evidence and assumption slots without appending", () => {
+test("decision propose: structural gate rejects empty evidence and assumption slots, appending only the rejection witness", () => {
   const { cwd, threadId } = bootstrapThread();
   const before = logLength(cwd);
 
@@ -75,7 +75,12 @@ test("decision propose: structural gate rejects empty evidence and assumption sl
   assert.equal(result.errors.length, 2);
   assert.ok(result.errors.some((e) => e.reason.includes("supportingEvidenceIds")));
   assert.ok(result.errors.some((e) => e.reason.includes("supportingAssumptionIds")));
-  assert.equal(logLength(cwd), before, "a structurally incomplete proposal must not be appended");
+  // DR-2026-07-12-silent-action-prohibition: the refusal itself is witnessed;
+  // the rejected proposal is not appended.
+  assert.equal(result.rejectionWitnessed, true);
+  assert.equal(result.rejectionEvent.event_type, "GateRejectionRecorded");
+  assert.equal(logLength(cwd), before + 1, "exactly one GateRejectionRecorded witness must be appended");
+  assert.equal(run(cwd, ["validate"]).valid, true);
 });
 
 test("decision propose: existential check rejects a hallucinated pointer using the engine's own validateEvents", () => {
@@ -93,7 +98,12 @@ test("decision propose: existential check rejects a hallucinated pointer using t
   assert.equal(result.valid, false);
   assert.equal(result.errors.length, 1);
   assert.match(result.errors[0].reason, /evidence reference does not exist: evd_totally_made_up_ffffffff/);
-  assert.equal(logLength(cwd), before, "a hallucinated pointer must not be appended");
+  // The hallucinated proposal is not appended; its refusal is (with the
+  // rejected candidate committed to by content hash).
+  assert.equal(result.rejectionWitnessed, true);
+  assert.match(result.rejectionEvent.payload.gateRejection.candidateContentHash, /^sha256:[a-f0-9]{64}$/);
+  assert.equal(logLength(cwd), before + 1, "exactly one GateRejectionRecorded witness must be appended");
+  assert.equal(run(cwd, ["validate"]).valid, true);
 });
 
 test("decision propose: pre-existing log corruption is reported distinctly from a valid new proposal", () => {

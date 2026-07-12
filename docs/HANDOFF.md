@@ -31,10 +31,16 @@ owner-approved) executed end to end in one session:
 - `PrecedentReference` IMPLEMENTED 2026-07-12 (follow-up slice against the
   Slice 3 DR): first-class event type, validator rejects rationale fields
   outright, age derived never stored. Suite 379 → 397 green.
-- Open follow-ups from the workstream: a gate-rejection event type (Slice 2
-  known nonconformance); unforced-prose diffing belongs to probe-style T3/T4
-  in the swarm repo. App de-vendor (cutover item 3) will carry the new event
-  types (`SealedReport`, `PrecedentReference`) to the app.
+- Gate-rejection event type IMPLEMENTED 2026-07-12: `GateRejectionRecorded`
+  closes the Slice 2 known nonconformance — `decision propose` and the
+  harness gate witness every refusal (candidate by content hash, engine
+  reasons, refused writer); unwitnessable refusals (empty log, undeclared
+  writer, broken log) append nothing and are disclosed as
+  `rejectionWitnessed: false`. Suite 397 → 413 green.
+- Open follow-ups from the workstream: unforced-prose diffing belongs to
+  probe-style T3/T4 in the swarm repo. App de-vendor (cutover item 3) will
+  carry the new event types (`SealedReport`, `PrecedentReference`,
+  `GateRejectionRecorded`) to the app.
 
 ## Update 2026-07-12 — CUTOVER DONE: production deploys from the monorepo
 
