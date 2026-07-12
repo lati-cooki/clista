@@ -158,6 +158,55 @@ function validateCrossThreadEvidence(event, state) {
   });
 }
 
+// SealedReport (DR-2026-07-12 claim-citation events): an ordered claim list,
+// every claim citing content_hashes of EARLIER events in the SAME thread.
+// The report does NOT register into state.evidence — reports are renderings,
+// never evidence; they must not re-enter the decision graph.
+function validateSealedReport(event, state) {
+  const report = event.payload.sealedReport;
+  if (!report?.id) {
+    addError(state, event, "SealedReport payload missing sealedReport.id");
+    return;
+  }
+  validateThreadObject(event, report, state, "sealedReport");
+  if (!report.renderingRuleVersion || typeof report.renderingRuleVersion !== "string") {
+    addError(state, event, "SealedReport missing renderingRuleVersion");
+  }
+  if (!report.renderedByParticipantId) {
+    addError(state, event, "SealedReport missing renderedByParticipantId");
+  } else if (!state.participants.has(report.renderedByParticipantId)) {
+    addError(state, event, `sealedReport rendered by unknown participant ${report.renderedByParticipantId}`);
+  }
+  if (!Array.isArray(report.claims) || report.claims.length === 0) {
+    addError(state, event, "SealedReport claims must be a non-empty array");
+    return;
+  }
+  // Hashes citable by this report: every already-processed event in the same
+  // thread (state.events holds strictly earlier events at this point, so
+  // forward and self citation are unrepresentable here by construction).
+  const earlierHashes = new Set();
+  for (const earlier of state.events) {
+    if (earlier?.thread_id === event.thread_id && earlier.content_hash) {
+      earlierHashes.add(earlier.content_hash);
+    }
+  }
+  report.claims.forEach((claim, index) => {
+    if (!claim || typeof claim.text !== "string" || claim.text.length === 0) {
+      addError(state, event, `SealedReport claim ${index + 1} missing text`);
+      return;
+    }
+    if (!Array.isArray(claim.citedEventHashes) || claim.citedEventHashes.length === 0) {
+      addError(state, event, `SealedReport claim ${index + 1} has no citations`);
+      return;
+    }
+    for (const hash of claim.citedEventHashes) {
+      if (!earlierHashes.has(hash)) {
+        addError(state, event, `SealedReport claim ${index + 1} cited event hash does not exist in thread: ${hash}`);
+      }
+    }
+  });
+}
+
 function validateEvidenceCommitted(event, state) {
   const evidence = event.payload.evidence;
   if (!evidence?.id) {
@@ -364,6 +413,7 @@ module.exports = {
   validateObjectionRaised,
   validateObjectionResolved,
   validatePositionTaken,
+  validateSealedReport,
   validateThreadCreated,
   validateThreadForked
 };

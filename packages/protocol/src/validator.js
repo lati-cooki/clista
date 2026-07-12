@@ -136,6 +136,7 @@ const {
   validateObjectionRaised,
   validateObjectionResolved,
   validatePositionTaken,
+  validateSealedReport,
   validateThreadCreated,
   validateThreadForked
 } = require("./validator/thread");
@@ -478,6 +479,9 @@ function validateEvents(events) {
         break;
       case "CrossThreadEvidence":
         validateCrossThreadEvidence(event, state);
+        break;
+      case "SealedReport":
+        validateSealedReport(event, state);
         break;
       case "AlignmentCalculated":
         validateAlignmentCalculated(event, state);

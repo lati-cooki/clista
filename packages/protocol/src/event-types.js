@@ -116,6 +116,7 @@ const EVENT_TYPES = Object.freeze([
   "ReviewTriggered",
   "ReviewViolationRecorded",
   "RevisitTriggerReviewRecommended",
+  "SealedReport",
   "SemanticDegradationRecorded",
   "SemanticMappingRecorded",
   "ThreadCreated",
@@ -217,7 +218,8 @@ const PRIMARY_OBJECT_KEYS = Object.freeze([
   "negotiationConstraint",
   "negotiationDifference",
   "negotiationTerms",
-  "negotiationFailure"
+  "negotiationFailure",
+  "sealedReport"
 ]);
 
 // The event primary domain object, or null. Faithful to the prior `||` chains

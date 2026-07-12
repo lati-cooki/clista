@@ -113,6 +113,7 @@ function emptyProjection() {
     outcomeAudits: {},
     decisionScores: {},
     alignmentSnapshots: {},
+    sealedReports: {},
     identity: {
       schema: "clista.identity.v0",
       participants: [],
@@ -840,6 +841,10 @@ function projectEvents(events) {
       case "AlignmentCalculated":
         upsert(projection.alignmentSnapshots, payload.alignmentSnapshot);
         break;
+      case "SealedReport":
+        upsert(projection.sealedReports, payload.sealedReport);
+        touchThread(projection, payload.sealedReport?.threadId, eventTimestamp(event));
+        break;
       case "DecisionRequestOpened":
         upsert(projection.decisionRequests, payload.decisionRequest);
         setThreadStatus(projection, payload.decisionRequest?.threadId, "review", eventTimestamp(event));
@@ -1288,6 +1293,7 @@ function exportProtocol(projection) {
     outcomeAudits: Object.values(projection.outcomeAudits),
     decisionScores: Object.values(projection.decisionScores),
     alignmentSnapshots: Object.values(projection.alignmentSnapshots),
+    sealedReports: Object.values(projection.sealedReports),
     identity: projection.identity,
     participantRoles: projection.identity.roles,
     activeAuthorities: projection.identity.activeAuthorities,
