@@ -8,7 +8,11 @@
   // the account; the *.clista.ai wildcard cert covers it). Safe to deploy without
   // a route first — comment this out for a *.workers.dev-only smoke deploy.
   "routes": [{ "pattern": "app.clista.ai", "custom_domain": true }],
-  // Engine ported to js-sha256 + Web Crypto; no Node builtins, so no nodejs_compat.
+  // De-vendor (2026-07-12): the engine is imported directly from the in-repo
+  // packages/protocol, whose integrity.js hashes via node:crypto.createHash
+  // (synchronous, byte-identical to the retired js-sha256 port) and whose
+  // events.js imports node:fs (bundled; only pure builders are ever called).
+  "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",

@@ -37,10 +37,16 @@ owner-approved) executed end to end in one session:
   reasons, refused writer); unwitnessable refusals (empty log, undeclared
   writer, broken log) append nothing and are disclosed as
   `rejectionWitnessed: false`. Suite 397 → 413 green.
+- App de-vendor (cutover item 3) DONE 2026-07-12: `app/worker/engine/` is a
+  single index.js importing `packages/protocol/src/` directly (worker now
+  runs `nodejs_compat`; js-sha256/Web-Crypto ports, hash baselines, and both
+  vendor scripts deleted — ~16k vendored lines gone). Examples regenerate
+  from the package manifest via `scripts/generate-examples.mjs` (pre-hooks;
+  `worker/examples/` gitignored). The three new event types reach the app
+  automatically. App suite 25 node + 43 workerd green; wrangler dry-run
+  bundle carries the new types and no js-sha256.
 - Open follow-ups from the workstream: unforced-prose diffing belongs to
-  probe-style T3/T4 in the swarm repo. App de-vendor (cutover item 3) will
-  carry the new event types (`SealedReport`, `PrecedentReference`,
-  `GateRejectionRecorded`) to the app.
+  probe-style T3/T4 in the swarm repo.
 
 ## Update 2026-07-12 — CUTOVER DONE: production deploys from the monorepo
 

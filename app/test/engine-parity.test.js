@@ -1,7 +1,9 @@
-// Phase 1 trust anchor: prove the ported engine (js-sha256 + Workers shims)
-// projects the scenario-demo log byte-for-byte identically to the ClisTa CLI,
-// and that its hash chain re-validates. Mirrors the engine's own
-// test/scenario-demo.test.js field-for-field, but runs against worker/engine.
+// Trust anchor: prove the engine the app ships (imported directly from
+// packages/protocol since the 2026-07-12 de-vendor; formerly a js-sha256
+// vendored port) projects the scenario-demo log byte-for-byte identically to
+// the ClisTa CLI, and that its hash chain re-validates. Mirrors the engine's
+// own test/scenario-demo.test.js field-for-field, but runs against
+// worker/engine's public surface — exactly what the ThreadDO consumes.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -19,7 +21,7 @@ const events = readFileSync(join(here, 'fixtures', 'scenario-demo.ndjson'), 'utf
   .map((line) => JSON.parse(line));
 const expected = JSON.parse(readFileSync(join(here, 'fixtures', 'scenario-demo.expected-state.json'), 'utf8'));
 
-test('appended log hash-chains and re-validates (js-sha256 byte-identical to node:crypto)', () => {
+test('appended log hash-chains and re-validates (fixture hashes replay byte-identically)', () => {
   // The DO chains raw events on append (content_hash + previous_hash). Verifying
   // the chained log is the real integrity guarantee; on the unhashed source log
   // there is nothing to check.

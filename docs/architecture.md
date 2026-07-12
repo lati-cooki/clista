@@ -16,17 +16,21 @@
 
 ## Data flows (every arrow that exists)
 
-### Protocol → App (code, PR-gated)
-- `scripts/vendor-engine.mjs`: the engine is **vendored**, not depended on —
-  upstream reaches production only via reviewed PR + redeploy. `integrity.js`
-  + `events.js` are hand-adapted Worker ports guarded by hash baseline;
-  `src/validator/` vendors wholesale; `cli.js` & friends are excluded.
-- `scripts/vendor-examples.mjs`: published example logs mirror into the
-  cockpit's example registry. Seeding is **seed-once per thread id** (DO
-  ledgers are append-only): shipping a revised example means re-issuing its
-  thread ids at the source (e.g. `*_ltn4481` → `*_ltn4481_r2`), regenerating,
-  re-vendoring and seeding fresh; superseded cards get hidden
-  (`POST /api/threads/:id/hide`, index-projection metadata only).
+### Protocol → App (code, same-commit since the 2026-07-12 de-vendor)
+- The engine is **imported directly**: `app/worker/engine/index.js` is a thin
+  surface over `packages/protocol/src/` (worker runs `nodejs_compat`, so the
+  engine's `node:crypto` hashing works in workerd unchanged; the retired
+  js-sha256/Web-Crypto ports, hash baselines, and `vendor-engine.mjs` are
+  gone). A protocol change reaches the app in the same monorepo commit; the
+  review gate is the PR itself plus the engine-parity test.
+- Examples: `app/scripts/generate-examples.mjs` regenerates the cockpit's
+  registry (`worker/examples/`, gitignored) from
+  `packages/protocol/examples/manifest.json` before every test/build/dev run,
+  re-verifying each example with the same engine. Seeding is still
+  **seed-once per thread id** (DO ledgers are append-only): shipping a
+  revised example means re-issuing its thread ids at the source
+  (e.g. `*_ltn4481` → `*_ltn4481_r2`) and seeding fresh; superseded cards get
+  hidden (`POST /api/threads/:id/hide`, index-projection metadata only).
 
 ### Protocol → ThreadHub (content, manual)
 - `threadhub ingest --events <log>.ndjson` ingests protocol-validated logs.
@@ -75,7 +79,8 @@
 
 ## Key design boundaries
 
-- ThreadHub does **not** import the protocol engine; the app does (vendored).
+- ThreadHub does **not** import the protocol engine; the app does (direct
+  workspace import since 2026-07-12 — formerly vendored).
 - The app and ThreadHub share **no** API surface; logs move between them as
   exported/ingested ClisTa events.
 - The re-review loop lives **in the app's ledger** (post-decision objection →

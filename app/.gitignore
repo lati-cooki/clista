@@ -1,5 +1,7 @@
 node_modules/
 dist/
+# Build artifact: generated from packages/protocol by scripts/generate-examples.mjs
+worker/examples/
 .dev.vars
 .wrangler/
 .env

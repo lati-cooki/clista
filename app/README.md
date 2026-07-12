@@ -43,11 +43,12 @@ the Durable Object**, not fixtures:
 The projection→view-model mapping lives in `src/adapt.js`; data loading in
 `src/useThread.js`; the API client in `src/api.js`.
 
-**Back-end** — the real ClisTa engine, ported. The pure modules from
-[`lati-club/ClisTa-Protocol`](https://github.com/lati-club/ClisTa-Protocol) are
-vendored verbatim into `worker/engine/`; only the hashing (`node:crypto` →
-synchronous `js-sha256`, byte-identical) and the storage shell (`.clista/events.ndjson`
-→ **Durable Object SQLite**) were adapted. **One Durable Object per thread** holds
+**Back-end** — the real ClisTa engine, imported directly. Since the 2026-07-12
+de-vendor, `worker/engine/index.js` is a thin surface over the in-repo
+`packages/protocol/src/` modules — the same files the protocol's own test
+suite runs against (the worker runs with `nodejs_compat`, so the engine's
+`node:crypto` hashing works in `workerd` unchanged; the storage shell is
+still **Durable Object SQLite**, not `.clista/`). **One Durable Object per thread** holds
 that thread's append-only, hash-chained event log; projection + validation run in the
 DO. Appends are **validate-before-trust, fail-closed** (rejections return `event_id` +
 reasons, HTTP 422).
@@ -71,9 +72,11 @@ application, and the workflow is gated fail-closed: with
 come up without Access in front of it. One shared environment, latest PR push
 wins. Setup + notes: [`docs/DEPLOY.md`](docs/DEPLOY.md) §7.
 
-The vendored engine and example threads re-sync from ClisTa-Protocol releases:
-a release tag there dispatches `sync-engine.yml` / `sync-examples.yml`, which
-open PRs on drift (the engine one is the human-reviewed trust-anchor gate).
+Engine and examples both come from the in-repo `packages/protocol` — the
+engine by direct import, the example registry generated into
+`worker/examples/` (gitignored) by `scripts/generate-examples.mjs` before
+every test/build/dev run. There is no re-sync pipeline anymore; a protocol
+change and the app change that consumes it land in one monorepo commit.
 
 ## Run it
 
@@ -106,10 +109,11 @@ curl localhost:8787/api/threads/thd_scenario_demo/validate
 - `worker/thread-do.js` — `ThreadDO`: SQLite event store, validate-before-trust append, projection
 - `worker/index-do.js` — `IndexDO`: thread_id → card ledger for the index
 - `worker/identity.js` — Cloudflare Access JWT verification + gated dev fallback → `actor_id`
-- `worker/engine/` — vendored ClisTa engine (pure modules; `integrity.js` + `events.js` adapted)
+- `worker/engine/index.js` — the engine surface, imported directly from `../../packages/protocol/src/`
+- `worker/examples/` — generated example registry (gitignored; `scripts/generate-examples.mjs`)
 - `test/engine-parity.test.js` — scenario-demo parity + integrity proof
-- `wrangler.jsonc` — DO binding, SQLite migration, static-asset (SPA) serving; `env.staging` = the staging Worker
-- `.github/workflows/` — `deploy-app.yml` (main → production), `deploy-staging.yml` (PRs → staging), `sync-engine.yml` / `sync-examples.yml` (upstream release → PR on drift)
+- `wrangler.jsonc` — DO binding, SQLite migration, static-asset (SPA) serving, `nodejs_compat`; `env.staging` = the staging Worker
+- deploy workflows live at the monorepo root: `.github/workflows/deploy-app.yml` (main → production), `deploy-staging.yml` (PRs → staging)
 
 ## API
 
