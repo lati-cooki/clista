@@ -1,0 +1,37 @@
+{
+  "variant": "t1-claude-code-orchestrator",
+  "description": "Single-prompt sealed run (T1) executed by a Claude Code orchestrator driving two live subagents (MAKER, CHECKER) through a standalone Python sidecar gate. Each writer appended its own events via the gate at reasoning time; the orchestrator appended only registration, the claim-cited report, and the seal.",
+  "question": "Fintech fraud model auto-declines applications scoring above 850; marketing wants 900 for a four-day holiday promotion. Raise, hold, or another action?",
+  "thread": "t1-fraud-threshold-holiday-promo",
+  "genesisHash": "5edfdee7e6cf68f94bf817c8171b59998aac0752220a503a587134ee64a0fe52",
+  "sealHash": "660953ee1ac2dc5c0be34d54cbb591be28e7c85943bbe268d82ca18c73b276d2",
+  "reportHash": "2510a23b7710e761ae3ad526cb5c5ac7e1fb1d88b93bb6f51e3f6e288df0c9b5",
+  "pass": true,
+  "chainValid": true,
+  "coverage": { "claims": 12, "unwitnessed": 0 },
+  "eventCount": 28,
+  "gateRejections": 0,
+  "checkerAlteredOutcome": true,
+  "checkerAlteringEvents": [
+    "c22e5c69efaf6ef7f2125596196c020ba1258b761c5a31b2c1f86d0293ec8e12",
+    "0010046e260d768d7ac530f2b9c6bfd861a52eebe90be9924489fd445e22ebb5",
+    "570d8ecf5fd8d1ca3615427840a5da43b595361c832db976baa2fdde41af1542",
+    "eb67241087f91eb630936ee8ddfc71f4d712b98bb406235fe3c491f269ad6caf",
+    "f087863b005665634d60a7374beb42da48e19cc293e9e3c3acc5bb27fc659205",
+    "cc70416fc49792026844bd0dfe7d7e664002e26fa80db0b226d6b8c9c1f8da0e"
+  ],
+  "outcome": {
+    "status": "converged_with_recorded_reservations",
+    "recommendation": "Data-gated conditional raise: pre-register the gate estimator as a witnessed event; reconstruct last year's 850-900 band bad rate as an upper confidence bound with label coverage disclosed and resolve the 22% FP definition; if the upper bound is below ~9% (11.44% break-even minus drift/adaptation margin), raise to 900 for the window with a hard daily loss-budget cap and leading-indicator kill-switch; otherwise, or if the data cannot be produced, hold at 850 with a clean decline; expedited revalidation and band instrumentation in all branches.",
+    "makerOriginalWithdrawn": true,
+    "checkerReservations": [
+      "R1: gate estimator must be pre-registered as a witnessed event before the data pull (9f59a65e)",
+      "R2: 22% FP-rate definition is load-bearing for the gate value (f087863b item 2, 94c86d81)"
+    ]
+  },
+  "verify": "cd <this dir> && python3 gate.py verify && python3 gate.py coverage",
+  "knownGaps": [
+    "writers are gate-registered strings, not signing keys (no per-writer ed25519); transport-writer identity not cryptographically bound",
+    "seal head not anchored externally (no ThreadHub notarization); chain proves tamper-evidence, not third-party non-repudiation"
+  ]
+}
