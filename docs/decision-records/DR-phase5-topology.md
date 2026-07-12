@@ -2,11 +2,12 @@
 
 > **Provenance:** clista@a1cea18545756ed876c25aca7cc67c8e7c8e6b96 · prompt-studio@8788709c120fd87db4d9093d59cd94251cb5ff2e
 
-**Status:** PROPOSED — drafted 2026-07-12, awaiting owner approval (Phase 5
-Wave 0 checkpoint); on approval, sealed through the studio seal flow and this
-section amended. Agent-authored draft without a separate challenge pass —
-disclosed, per the 2026-07-10 monorepo precedent; the owner checkpoint is the
-challenge gate for this record.
+**Status:** APPROVED — owner challenge pass 2026-07-12, four objections
+resolved by pre-seal amendment (see Amendments); sealing through the studio
+seal flow in progress; on seal this section records the slug/hash and flips
+to ADOPTED. Originally an agent-authored draft without a separate challenge
+pass — disclosed, per the 2026-07-10 monorepo precedent; the owner checkpoint
+was named as the challenge gate for this record, and that gate has now run.
 **Decision owner:** troy_builds
 **Date raised:** 2026-07-12
 **Applies to:** `lati-cooki/clista` (packages/protocol, packages/threadhub,
@@ -92,9 +93,12 @@ write back; reconcile on conflict.
 ### Binding rules
 
 2.1. **Canonical artifacts:** hub records; and a protocol run's
-     `thread.jsonl` for that run *until its head is accumulated/anchored*,
-     after which the hub record governs and the run directory is its
-     retained projection.
+     `thread.jsonl` for that run *until its records are accumulated into the
+     hub*, after which the hub record governs and the run directory is its
+     retained projection. Anchoring (Decision 4) is a distinct act: an
+     external timestamp on an already-canonical artifact, and it never
+     changes canonicality. *(Amended by pre-seal amendment, 2026-07-12 —
+     resolves `obj_canonicality-boundary`.)*
 
 2.2. **Projections:** studio DB rows, `INDEX.json`, Firestore documents, and
      rendered `.md` reports. Every projection carries declared provenance to
@@ -132,13 +136,14 @@ each emitter maps into it exactly once, here.
 | studio `EvidenceCommitted` | `EvidenceCommitted` | — |
 | studio `ClaimCreated` | `ClaimCreated` | — |
 | studio `ObjectionRaised` | `ObjectionRaised` | — |
+| studio `ObjectionResolved` | `ObjectionResolved` | The Slice 6 objection lifecycle emits raise → resolve; the Wave 5 gate checks the terminal record carries both. *(Added by pre-seal amendment, 2026-07-12 — resolves `obj_mapping-completeness`.)* |
 | harness `SealedReport` | `SealedReport` | Native (DR-2026-07-12-claim-citation-events). |
 | harness `PrecedentReference` | `PrecedentReference` | Native (DR-2026-07-12-precedent-as-citation). |
 | harness `GateRejectionRecorded` | `GateRejectionRecorded` | Native (silent-action DR rule 2, closed 2026-07-12). |
 | swarm `firestore:CRYSTALLIZATION` | `ClaimCreated` + `CrossThreadEvidence` | Original compute archived as precedent: the conclusion as a claim, its cross-thread reach as evidence import. Mapping only; build in Phase 6. |
 | swarm `firestore:RECALL` | `PrecedentReference` | Citation of prior compute — the archived witness of a reuse. Mapping only; build in Phase 6. |
-| swarm `stream:RECALL` | `PrecedentReference` | The gateway's Mantle stream event (emitted on a hit, never `CONSENSUS`) is the at-action-time witness of the same reuse the `firestore:RECALL` document archives — one protocol emission, two swarm-side traces. Mapping only; build in Phase 6. |
-| swarm arbitration | labeled arbitrated: `PositionTaken` per arm + `MinorityReportFiled` for preserved dissent | Arbitrated resolutions are labeled arbitrated with dissent preserved, never laundered as confidence 1.0 (silent-action DR rule 2). Today's Arbitrator does the opposite (`gateway.py:477`); its own DR is still owed — this row records the mapping, not a fix. Build in Phase 6. |
+| swarm `stream:RECALL` | `PrecedentReference` | The gateway's Mantle stream event (emitted on a hit, never `CONSENSUS`) is the at-action-time witness of the same reuse the `firestore:RECALL` document archives — one recall act, two swarm-side traces, exactly one `PrecedentReference` emission (rule 3.5). Mapping only; build in Phase 6. |
+| swarm arbitration | labeled arbitrated: `ClaimCreated` carrying the arbitrated outcome + `PositionTaken` per arm + `MinorityReportFiled` for preserved dissent | Arbitrated resolutions are labeled arbitrated with dissent preserved, never laundered as confidence 1.0 (silent-action DR rule 2). The outcome itself travels as a `ClaimCreated` labeled arbitrated. Today's Arbitrator does the opposite (`gateway.py:477`); its own DR is still owed — this row records the mapping, not a fix. Build in Phase 6. *(Outcome carrier added by pre-seal amendment, 2026-07-12 — resolves `obj_mapping-completeness`.)* |
 
 Every protocol-side name above appears verbatim in
 `packages/protocol/src/event-types.js`.
@@ -163,6 +168,13 @@ Every protocol-side name above appears verbatim in
      6 work; adopting this DR commits the vocabulary, not the
      implementation. The Arbitrator's forced-confidence behavior remains a
      disclosed nonconformance owed its own DR — out of scope here.
+
+3.5. **One recall act, one emission.** A single recall emits exactly ONE
+     `PrecedentReference`. `stream:RECALL` and `firestore:RECALL` are two
+     swarm-side traces of the *same act* and MUST dedupe to that single
+     emission; emitting two `PrecedentReference` events for one recall is
+     malformed. *(Added by pre-seal amendment, 2026-07-12 — resolves
+     `obj_recall-double-emission`.)*
 
 ## Decision 4 — Anchors doctrine
 
@@ -252,6 +264,14 @@ path disclosed.**
 
 5.5. **No key material in any repo or doc.** Ever.
 
+5.6. **The custody disclosure reaches the objector.** The custody-regime
+     disclosure of rule 5.3 travels with objector-facing artifacts: the
+     Slice 6 objection receipt states the custody regime of the objection
+     record it points at — custodial identity, independence downgraded per
+     5.3, upgrade path per 5.4 available — so the objector sees the regime
+     on the receipt itself, without querying the hub. *(Added by pre-seal
+     amendment, 2026-07-12 — resolves `obj_custody-disclosure-reach`.)*
+
 ## Evidence Basis
 
 - **T1 sealed run**
@@ -298,7 +318,28 @@ path disclosed.**
 
 ## Amendments
 
-None yet.
+- **2026-07-12 (pre-seal):** Owner challenge pass on the PROPOSED draft
+  (Phase 5 Wave 0 checkpoint) raised four objections, each resolved by
+  amendment above; the objections file as `ObjectionRaised` events in the
+  seal thread under these ids:
+  - `obj_mapping-completeness` — the Decision 3 table omitted the studio
+    `ObjectionResolved` half of the Slice 6 objection lifecycle and named
+    no carrier for the arbitrated outcome itself. Resolved: `ObjectionResolved`
+    row added; the arbitration row now carries the outcome as a
+    `ClaimCreated` labeled arbitrated, alongside `PositionTaken` per arm
+    and `MinorityReportFiled` for dissent.
+  - `obj_canonicality-boundary` — rule 2.1's "accumulated/anchored"
+    conflated two distinct acts. Resolved: canonicality transfers on
+    accumulation into the hub; anchoring is an external timestamp on an
+    already-canonical artifact and never changes canonicality.
+  - `obj_custody-disclosure-reach` — the rule 5.3 custody disclosure
+    stopped at the hub. Resolved: rule 5.6 threads it through to the
+    Slice 6 objection receipt, so the objector sees the regime without
+    querying the hub.
+  - `obj_recall-double-emission` — the mapping sent both `stream:RECALL`
+    and `firestore:RECALL` to `PrecedentReference` without saying how many
+    emissions one recall act produces. Resolved: rule 3.5 — one recall act,
+    exactly one `PrecedentReference`; the two swarm traces dedupe to it.
 
 ## Seal
 
