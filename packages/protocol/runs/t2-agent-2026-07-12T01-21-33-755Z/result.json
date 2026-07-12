@@ -1,0 +1,68 @@
+{
+  "sourceLog": "runs/t1-agent-2026-07-12T01-19-55-836Z/events.ndjson",
+  "threadId": "thd_sealed_run_mrh3w4h9_d5d01472",
+  "prediction": "T2 fails on attempt one (mutual-reliance-proposal.md §6, sealed 2026-07-11)",
+  "attempts": [
+    {
+      "attempt": 1,
+      "valid": true,
+      "errorCount": 0,
+      "errors": [],
+      "claims": [
+        {
+          "text": "A thread was opened between a maker agent and a checker agent on the question: Should the toy service pin its dependency versions?",
+          "citedEventHashes": [
+            "sha256:eb761e75af517b20638a684deb8e33a4686a646645b52163de4ed686074d3ab4",
+            "sha256:d688abc89436fe7dcffba9ef1e89bdc8a0a017c900aa3df403d49fe18cf8bdcd",
+            "sha256:ff2725fc1afa68226b02e95d310364dca8d473201274c0ed60cb2785fadb1d75"
+          ]
+        },
+        {
+          "text": "The maker, granted decision-owner authority for the thread, committed evidence that a transitive dependency published a breaking minor release last month that would have broken unpinned builds overnight.",
+          "citedEventHashes": [
+            "sha256:9bd8b88fe7c953874729eef1f6a1b24c551b19bb861f24db0bef022f5795cfa3",
+            "sha256:013d21bcadb484131b9b12e76097e9b6fc860f1d1f45bdcc5b452b74a2de2a66"
+          ]
+        },
+        {
+          "text": "The maker declared an open assumption that the team will run a scheduled dependency-update process so that pinning does not silently accumulate unpatched security vulnerabilities.",
+          "citedEventHashes": [
+            "sha256:7ab0913896be5987ce4906c2b3bbb0f9fc872c7dd7544d3cedfa0fc87ae15bcc"
+          ]
+        },
+        {
+          "text": "The maker created a claim, backed by the committed evidence and the declared assumption, that the toy service should pin its dependency versions to exact releases in a lockfile committed to the repository, and opened a decision request on that proposal for review.",
+          "citedEventHashes": [
+            "sha256:0727c1b0d98646986d5591c8ecf5db0fb992fa2c07a4d0384d6cd6ac163f3f24",
+            "sha256:7bd4ee18fd4141088430d16774e49b35c0a3547e81b54d9398044a2ea71e4b8b"
+          ]
+        },
+        {
+          "text": "The checker raised a non-blocking objection that the proposal's safety rested entirely on an unenforced assumption, since the scheduled update process did not yet exist.",
+          "citedEventHashes": [
+            "sha256:5acb50efc9045ce8c96fb096a2e1f9a59a30e0a3b7b87c428e595e5de9a1fa40"
+          ]
+        },
+        {
+          "text": "The objection was resolved by making the update cadence tooling-enforced: the same commit that pins the lockfile ships a Renovate/Dependabot weekly-PR config and a CI job that fails builds on known CVEs, turning stale pins into a merge-blocking condition.",
+          "citedEventHashes": [
+            "sha256:24a00f59d5a02ca03aa9b4d8864a4ef8e5bfdfa22ff670eb2c6b42fa14b37fd0"
+          ]
+        },
+        {
+          "text": "The checker submitted an approving review with no conditions, noting the approval was contingent on the enforcement pieces (bot config and audit CI gate) actually landing in the same commit as the pinned lockfile.",
+          "citedEventHashes": [
+            "sha256:a6f287617bd5288f2177dcb8c0ae46b416eb29d7ca3316e127461f440c2df364"
+          ]
+        },
+        {
+          "text": "The maker merged the decision, recording the rationale that pinning without an enforced cadence would convert reproducibility into indefinite CVE exposure, so the decision makes the cadence tooling-enforced and co-committed with the lockfile.",
+          "citedEventHashes": [
+            "sha256:514327b4d6ee91d667f8de10c3b4b027b707a8188cf1c21782444794c02b0a23"
+          ]
+        }
+      ]
+    }
+  ],
+  "finalValid": true
+}
