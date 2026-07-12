@@ -1,4 +1,5 @@
 # The Night the System Caught Itself
+> **Provenance:** clista@75b79268abc631a3670933a42da7f34921a96b72
 
 **A case study in witnessed failure, 2026-07-10 → 2026-07-11**
 **Status:** Public-ready draft · assembled 2026-07-11

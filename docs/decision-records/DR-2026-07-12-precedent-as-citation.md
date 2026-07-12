@@ -1,4 +1,5 @@
 # Decision Record: Precedent-as-Citation Semantics (`PrecedentReference`)
+> **Provenance:** clista@b9be54ecf9ef727f9ee2c632c473c60fa577190b
 
 **Status:** ADOPTED by owner direction — Mutual Reliance transfer prompt
 (committed `c56b406`, drafted 2026-07-11), Slice 3. Agent-authored draft

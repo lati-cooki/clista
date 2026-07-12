@@ -1,4 +1,5 @@
 # Transfer Prompt: ClisTa New Direction — Mutual Reliance Architecture
+> **Provenance:** clista@21cee4b776c4403e6b9f3c20e2a82f0c7eff235e
 
 Paste everything below this line into Claude Code from the root of `lati-cooki/clista-protocol`.
 

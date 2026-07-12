@@ -1,4 +1,5 @@
 # The Mutual Reliance Proposal
+> **Provenance:** clista@5ea1f592083376978b732eb5443b36f5ac6e9288
 
 **Working title:** Lean On Each Other — A Verification Architecture for Human–AI Reliance
 **Author:** ClubLati, Lati Cooki LLC · Drafted with Claude, 2026-07-11

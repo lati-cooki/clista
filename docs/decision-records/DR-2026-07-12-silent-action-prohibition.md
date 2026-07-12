@@ -1,4 +1,5 @@
 # Decision Record: Silent-Action Prohibition
+> **Provenance:** clista@7ce3c0754504f6457df7a7b5adbbb78c6bcb88ab
 
 **Status:** ADOPTED by owner direction — Mutual Reliance transfer prompt
 (committed `c56b406`, drafted 2026-07-11), Slice 2. Agent-authored draft

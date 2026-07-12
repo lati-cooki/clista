@@ -1,4 +1,5 @@
 # Findings — T1 / T2 (Mutual Reliance Slice 7)
+> **Provenance:** clista@b2a99465f584ce847a80d90b54c94d21fa2a6b79
 
 **Date run:** 2026-07-12
 **Predictions on record** (sealed 2026-07-11 in
