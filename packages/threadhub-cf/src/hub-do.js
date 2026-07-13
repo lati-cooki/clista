@@ -11,6 +11,7 @@
 import { DurableObject } from 'cloudflare:workers';
 import { Hub } from '../../threadhub/src/hub.js';
 import { handle as routeHandle, rateLimiter, errorResponse } from '../../threadhub/src/routes.js';
+import { effectivePublication } from '../../threadhub/src/publication.js';
 import { DOStore } from './store-do.js';
 
 const JSON_TYPE = 'application/json; charset=utf-8';
@@ -74,6 +75,36 @@ export class HubDO extends DurableObject {
       // Text-imported bytes itself. Absent → the route 404s here too.
       checkerSource: undefined,
     });
+  }
+
+  // --- HubInternal service-entrypoint operations (RPC, no HTTP shape) ---
+  // These run on the SAME hub as handle(): one DO, one store, one truth.
+  // The HubInternal WorkerEntrypoint (worker.js) is the only caller; it
+  // reaches this instance via env.HUB.idFromName('hub') — the exact address
+  // the fetch face uses. Return shapes match test/hub-stub.js in the studio
+  // Worker (the contract), not the HTTP route table.
+
+  // Mint one custodial objector identity (the hub holds the key — DR 5.5).
+  // display_name + kind are the ONLY fields that cross (DR 5.6: an objector's
+  // contact string never appears here). No public key → createIdentity
+  // generates the keypair and stores it, exactly as POST /identities does for
+  // a keyless body. Returns { id }. Throws on any hub-side failure, so the
+  // caller's mint-first ordering holds (a throw means nothing was filed).
+  mintIdentity({ display_name, kind } = {}) {
+    const { id } = this.hub.createIdentity({ displayName: display_name, kind });
+    return { id };
+  }
+
+  // Effective publication state of a thread, by slug or id. Pure function of
+  // the thread's records — the LAST publication event governs — computed the
+  // same way the public read path does (routes.js isPublished): parse the
+  // record bodies, run effectivePublication. A missing thread is false: fail
+  // closed, disclose nothing.
+  isPublished(slug) {
+    const thread = this.hub.store.getThread(slug);
+    if (!thread) return false;
+    const envelopes = this.hub.store.recordsOf(thread.id).map((r) => JSON.parse(r.body));
+    return effectivePublication(envelopes).published;
   }
 
   #adminImport(bodyJson) {
