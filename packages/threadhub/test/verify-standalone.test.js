@@ -186,14 +186,26 @@ test('checker header discloses: served by the hub it checks; save and run elsewh
   assert.match(src, /not .*(true|truth)|never proves/i);
 });
 
-test('GET /verify.mjs serves the exact checker bytes as text/javascript', async () => {
-  const { server } = createServer(tmpDb());
+test('GET /verify.mjs serves the exact checker bytes; the viewer imports exactly that URL', async () => {
+  const { server, hub } = createServer(tmpDb());
+  const troy = hub.createIdentity({ id: 'id_troy', displayName: 'Troy', kind: 'human' });
+  hub.createThread({ title: 'Identity', authorId: troy.id, slug: 'identity' });
   const port = await new Promise((r) => server.listen(0, () => r(server.address().port)));
   try {
     const res = await fetch(`http://localhost:${port}/verify.mjs`);
     assert.strictEqual(res.status, 200);
     assert.match(res.headers.get('content-type'), /^text\/javascript/);
     assert.strictEqual(await res.text(), fs.readFileSync(SCRIPT, 'utf8'));
+    // Build-level implementation identity (DR-2026-07-13 rule 4): the viewer
+    // page runs verification only via a module import of exactly /verify.mjs —
+    // the URL whose bytes were just proven identical to the repo file. Any
+    // other script URL on the page would be a second source of truth.
+    const page = await (await fetch(`http://localhost:${port}/t/identity/view`)).text();
+    assert.ok(page.includes("import('/verify.mjs')"), 'viewer must import the literal /verify.mjs');
+    const scriptRefs = [...page.matchAll(/import\s*\(\s*['"]([^'"]+)['"]\s*\)|src=["']([^"']+\.m?js)["']/g)]
+      .map((m) => m[1] ?? m[2]);
+    assert.deepStrictEqual([...new Set(scriptRefs)], ['/verify.mjs'],
+      `the viewer references script URLs other than /verify.mjs: ${scriptRefs.join(', ')}`);
   } finally { server.close(); }
 });
 

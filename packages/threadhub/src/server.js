@@ -17,6 +17,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Hub } = require('./hub');
 const { effectivePublication } = require('./publication');
+const { threadViewHTML } = require('./view');
 
 // The standalone checker's bytes, served verbatim. A checker served by the
 // hub it checks is a convenience, not independence — the file's own header
@@ -192,6 +193,28 @@ function createServer(dbPath, opts = {}) {
           return json(res, 200, hub.verifyThread(thread.id));
         }
         return json(res, 200, hub.verifyThread(slug));
+      }
+      if ((m = p.match(/^\/t\/([^/]+)\/view$/)) && req.method === 'GET') {
+        // The public read page: the record is the interface (DR-2026-07-13
+        // rule 1). The raw /t/:slug viewer stays untouched beside it.
+        const slug = decodeURIComponent(m[1]);
+        const thread = publicMode ? readableThread(slug) : hub.store.getThread(slug);
+        if (!thread) {
+          return json(res, 404, publicMode ? PUBLIC_404 : { error: 'thread not found', code: 'not_found' });
+        }
+        const rows = hub.store.recordsOf(thread.id);
+        const authors = [...new Set(rows.map((r) => r.author_id))].map((id) => {
+          const ident = hub.store.getIdentity(id);
+          return {
+            id,
+            displayName: ident?.display_name ?? null,
+            kind: ident?.kind ?? null,
+            custodial: Boolean(ident?.private_key), // the custody disclosure, derived from the author set
+          };
+        });
+        const html = threadViewHTML({ thread, records: rows, verification: hub.verifyThread(thread.id), authors });
+        res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+        return res.end(html);
       }
       if ((m = p.match(/^\/t\/([^/]+)\/records$/)) && req.method === 'POST') {
         const b = await readBody(req);
