@@ -7,9 +7,15 @@
 //
 // Requirements honored:
 //   - single command, readable output
-//   - writers touch NO key material: model calls go through the local
-//     `claude` CLI's own session auth; this script holds no secrets
-//   - the emitted thread is saved under runs/ as the artifact
+//   - model calls go through the local `claude` CLI's own session auth;
+//     this script reads no API secrets
+//   - keyed writers (Phase 5 Slice 2, DR-phase5-topology rule 5.1): each
+//     role gets a per-run non-custodial ed25519 keypair minted into the run
+//     dir's keys/ (git-ignored, .pem 0600) and signs its own events AT
+//     REASONING TIME through the harness gate; signatures land in
+//     signatures.ndjson beside the event log
+//   - the emitted thread is saved under runs/ as the artifact; anchor it
+//     post-hoc with scripts/anchor-run.mjs (two-timestamp honesty)
 //
 // Pass criterion (T1): the emitted thread passes existing chain verification.
 import { execFileSync } from "node:child_process";
@@ -18,6 +24,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
+import { writeRoleKeypair, signHashHex } from "./run-keys.mjs";
 
 const require = createRequire(import.meta.url);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -103,10 +110,32 @@ const checker2 = extractJson(
 console.log(`    resolution: ${checker2.resolution}\n`);
 
 const cwd = fs.mkdtempSync(path.join(os.tmpdir(), "clista-t1-agent-"));
+
+// Per-run non-custodial writer keys: minted into the run dir before any
+// event, one per role, private halves never printed and never committed
+// (keys/ is git-ignored; DR rule 5.5). The signer closures read the .pem
+// once; each gate append signs at reasoning time.
+const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+const runDir = path.join(root, "runs", `t1-agent-${stamp}`);
+const keysDir = path.join(runDir, "keys");
+const roleIds = ["par_t1_maker", "par_t1_checker"];
+const signers = {};
+const writerKeys = {};
+for (const roleId of roleIds) {
+  const made = writeRoleKeypair(keysDir, roleId);
+  const pem = fs.readFileSync(made.pemPath, "utf8");
+  writerKeys[roleId] = made.publicKeyHex;
+  signers[roleId] = {
+    publicKeyHex: made.publicKeyHex,
+    sign: (hashHex) => signHashHex(hashHex, pem)
+  };
+}
+
 const result = runSealedRun({
   cwd,
   threadTitle: "T1 agent sealed run",
   question,
+  signers,
   roles: {
     maker: {
       proposal: maker1.proposal,
@@ -126,10 +155,9 @@ const result = runSealedRun({
 
 const report = verifyReport(result.events);
 
-const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-const runDir = path.join(root, "runs", `t1-agent-${stamp}`);
 fs.mkdirSync(runDir, { recursive: true });
 fs.copyFileSync(path.join(cwd, ".clista", "events.ndjson"), path.join(runDir, "events.ndjson"));
+fs.copyFileSync(path.join(cwd, ".clista", "signatures.ndjson"), path.join(runDir, "signatures.ndjson"));
 fs.writeFileSync(
   path.join(runDir, "result.json"),
   JSON.stringify(
@@ -143,6 +171,20 @@ fs.writeFileSync(
       reportErrors: report.errors,
       rejections: result.rejections,
       appendedCount: result.appendedCount,
+      // Phase 5 Slice 2: the T1 run's two former knownGaps, closed as
+      // positive claims — plus the one honest residual that remains.
+      provenance: {
+        keyedWriters:
+          "each writer signed its events at reasoning time with a per-run non-custodial ed25519 key " +
+          "(signatures.ndjson; public keys in writerKeys — private halves are 0600 run-local files, never committed)",
+        writerKeys,
+        anchoring:
+          "anchor the head post-hoc with scripts/anchor-run.mjs: the hub envelope's recorded_at is the anchor time; " +
+          "each event's timestamp stays the reasoning-time claim (DR-phase5-topology 4.2/4.3 — a weak external timestamp, never notarization)"
+      },
+      knownGaps: [
+        "orchestrator host held all role key files — per-file isolation, not per-machine"
+      ],
       roles: { maker1, checker1, maker2, checker2 }
     },
     null,
