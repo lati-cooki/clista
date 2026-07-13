@@ -201,6 +201,42 @@ function validateGateRejectionRecorded(event, state) {
   }
 }
 
+// ThreadPublished / ThreadPublicationRevoked (DR-2026-07-13
+// record-is-the-interface, rule 2): publication is a witnessed per-thread
+// governance act — a public read surface serves a thread only while the LAST
+// publication event on it is an effective publish. Revocation is itself an
+// appended event, never a deletion; both acts stay in the record. The action
+// field must agree with the event type so neither can be read against its
+// name, and the only scope registered today is "public-read" — an
+// unregistered scope fails closed rather than publishing more than the
+// vocabulary defines. Does not register into any other state map.
+function validateThreadPublication(event, state) {
+  const expectedAction = event.event_type === "ThreadPublished" ? "publish" : "revoke";
+  const publication = event.payload.threadPublication;
+  if (!publication?.id) {
+    addError(state, event, `${event.event_type} payload missing threadPublication.id`);
+    return;
+  }
+  validateThreadObject(event, publication, state, "threadPublication");
+  for (const field of ["action", "scope", "publishedAt", "publishedByParticipantId"]) {
+    if (!publication[field]) {
+      addError(state, event, `${event.event_type} missing ${field}`);
+    }
+  }
+  if (publication.action && publication.action !== expectedAction) {
+    addError(state, event, `${event.event_type} action must be "${expectedAction}", got "${publication.action}"`);
+  }
+  if (publication.scope && publication.scope !== "public-read") {
+    addError(state, event, `${event.event_type} unsupported scope ${publication.scope}`);
+  }
+  if (publication.publishedByParticipantId && !state.participants.has(publication.publishedByParticipantId)) {
+    addError(state, event, `threadPublication by unknown participant ${publication.publishedByParticipantId}`);
+  }
+  if (publication.note !== undefined && (typeof publication.note !== "string" || !publication.note.trim())) {
+    addError(state, event, `${event.event_type} note must be a non-empty string when present`);
+  }
+}
+
 // PrecedentReference (DR-2026-07-12 precedent-as-citation): a witnessed reuse
 // of a prior conclusion. The HOLDING travels as a tagged citation — source
 // thread/event hash, live + source context hashes, precedent date, regrounding
@@ -545,5 +581,6 @@ module.exports = {
   validatePrecedentReference,
   validateSealedReport,
   validateThreadCreated,
-  validateThreadForked
+  validateThreadForked,
+  validateThreadPublication
 };

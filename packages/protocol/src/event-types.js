@@ -122,7 +122,9 @@ const EVENT_TYPES = Object.freeze([
   "SemanticDegradationRecorded",
   "SemanticMappingRecorded",
   "ThreadCreated",
-  "ThreadForked"
+  "ThreadForked",
+  "ThreadPublicationRevoked",
+  "ThreadPublished"
 ]);
 
 // The M39 branch introduced the same registry under these names; both are
@@ -268,7 +270,8 @@ const PRIMARY_OBJECT_KEYS = Object.freeze([
   "negotiationFailure",
   "sealedReport",
   "precedentReference",
-  "gateRejection"
+  "gateRejection",
+  "threadPublication"
 ]);
 
 // The event primary domain object, or null. Faithful to the prior `||` chains
