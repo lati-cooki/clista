@@ -21,6 +21,10 @@ import checkerSource from '../../threadhub/scripts/verify-standalone.mjs'; // Te
 import { PUBLIC_404_BODY, errorResponse } from '../../threadhub/src/routes.js';
 
 export { HubDO } from './hub-do.js';
+// The hub's service-binding face (studio Worker → HUB). A WorkerEntrypoint,
+// not a DO: no migration, just a named export from main so `services:
+// { entrypoint: "HubInternal" }` can resolve it. Shares the one named HubDO.
+export { HubInternal } from './hub-internal.js';
 
 // Content types pinned to routes.js's values (it does not export them;
 // the byte-identity tests hold both sides to the same strings).
