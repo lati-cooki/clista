@@ -8,9 +8,11 @@
 //   GET  /threads                   list threads
 //   POST /threads                   { title, question?, author }
 //   GET  /t/:slug                   raw viewer (HTML)
+//   GET  /t/:slug/view              public read page (HTML)
 //   GET  /t/:slug.json              full record chain (JSON)
 //   GET  /t/:slug/verify            chain verification report
 //   POST /t/:slug/records           { author, kind, payload }
+//   POST /t/:slug/records/signed    { envelope, signature }
 //   POST /t/:slug/attest            { author, payload_hash, claim? }
 //   GET  /r/:hash                   single record by content address
 //   POST /identities                { display_name, kind }
@@ -30,7 +32,18 @@ const CHECKER_PATH = path.join(__dirname, '..', 'scripts', 'verify-standalone.mj
 function readBody(req) {
   return new Promise((resolve, reject) => {
     let data = '';
-    req.on('data', (c) => { data += c; if (data.length > 5e6) reject(new Error('body too large')); });
+    // On overflow: reject once, STOP accumulating, and tear the request
+    // down. Without the teardown the data listener keeps appending for
+    // the life of the request — an unbounded buffer any POST can reach.
+    const onData = (c) => {
+      data += c;
+      if (data.length > 5e6) {
+        req.removeListener('data', onData);
+        reject(new Error('body too large'));
+        req.destroy();
+      }
+    };
+    req.on('data', onData);
     req.on('end', () => { try { resolve(data ? JSON.parse(data) : {}); } catch (e) { reject(e); } });
     req.on('error', reject);
   });

@@ -137,8 +137,10 @@ ${rows}
 function handle(hub, { method, path: p, bodyJson, publicMode = false, gateWrites = false,
                        ip, allowWrite, checkerSource } = {}) {
   // A matched POST route consuming a body the transport could not
-  // read/parse answers exactly as the old in-route read did.
-  const body = () => { if (bodyJson instanceof Error) throw bodyJson; return bodyJson ?? {}; };
+  // read/parse answers exactly as the old in-route read did. Only
+  // undefined (no body supplied) coalesces to {}: a literal JSON null
+  // body flows through as null, exactly as JSON.parse always returned it.
+  const body = () => { if (bodyJson instanceof Error) throw bodyJson; return bodyJson === undefined ? {} : bodyJson; };
 
   // Publication filtering (public mode): every read surface serves only
   // effectively-published threads — threads whose LAST publication event

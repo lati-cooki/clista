@@ -86,6 +86,25 @@ test('gateWrites: false (what the Node server passes) — POSTs behave exactly a
   assert.strictEqual(JSON.parse(second.body).code, 'rate_limited');
 });
 
+test('literal JSON null body on a routed POST keeps the old-behavior 400: null flows to the handler, not {}', () => {
+  // Old server: JSON.parse('null') -> null -> b.title throws the
+  // property-read TypeError -> 400 bad_request. Only undefined may
+  // coalesce to {}; null must NOT (a coalesced {} would surface as a
+  // SQLite bind error instead — different message bytes).
+  const { hub } = seededHub();
+  const out = handle(hub, {
+    method: 'POST', path: '/threads', bodyJson: null,
+    publicMode: false, gateWrites: false, ip: '1.2.3.4', allowWrite: () => true,
+  });
+  assert.strictEqual(out.status, 400);
+  const parsed = JSON.parse(out.body);
+  assert.strictEqual(parsed.code, 'bad_request');
+  // Message shape, not exact engine wording: the property-read-on-null
+  // TypeError, and definitely not the SQLite bind error a {} body causes.
+  assert.match(parsed.error, /null/);
+  assert.doesNotMatch(parsed.error, /SQLite/i);
+});
+
 // --- 3. Hub constructor duck-typing ---
 
 test('Hub uses a store-shaped argument as-is (getThread + insertRecord quack the duck test)', () => {
