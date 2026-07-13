@@ -18,8 +18,10 @@
 // policy on the caller's side keeps this face a faithful transport.
 import { WorkerEntrypoint } from 'cloudflare:workers';
 
-// The single hub instance, addressed exactly as worker.js addresses it.
-const hubStub = (env) => env.HUB.get(env.HUB.idFromName('hub'));
+// The single hub instance, addressed exactly as worker.js addresses it
+// (instance name bumped 'hub'->'hub-prod' at the consensusprotocol.ai cutover
+// for a fresh DO — MUST stay identical to worker.js).
+const hubStub = (env) => env.HUB.get(env.HUB.idFromName('hub-prod'));
 
 export class HubInternal extends WorkerEntrypoint {
   // mintIdentity({ display_name, kind }) -> { id }

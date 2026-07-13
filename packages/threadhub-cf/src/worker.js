@@ -93,7 +93,12 @@ export default {
     const ip = request.headers.get('cf-connecting-ip') ?? '?';
 
     try {
-      const stub = env.HUB.get(env.HUB.idFromName('hub'));
+      // DO instance name: bumped 'hub'->'hub-prod' at the consensusprotocol.ai
+      // cutover to get a fresh, clean DO (the staging instance held the
+      // key-free fixture + smoke artifacts; a SQLite DO can't be wiped in
+      // place). MUST match hub-internal.js so the fetch face and HubInternal
+      // reach the same instance.
+      const stub = env.HUB.get(env.HUB.idFromName('hub-prod'));
       const out = await stub.handle({ method, path: url.pathname, bodyText, bodyError, role, ip });
       return respond(out); // (5) respond() stamps Cache-Control: no-store
     } catch (e) {

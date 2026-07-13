@@ -31,9 +31,13 @@
     "node:sqlite": "./src/node-sqlite-stub.js"
   },
 
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
 
-  // NO routes / custom domain yet: staging runs on workers.dev first; the
-  // consensusprotocol.ai custom domain lands at cutover (plan phase 8), after
-  // the ANCHORS.md head byte-match gate.
+  // consensusprotocol.ai cutover (phase 8): apex path-split. The hub owns the
+  // apex as a custom domain (wrangler provisions the DNS record + edge cert);
+  // the studio Worker's more-specific /object/* and /api/* routes (in its own
+  // wrangler.jsonc) take precedence for those paths.
+  "routes": [
+    { "pattern": "consensusprotocol.ai", "custom_domain": true }
+  ]
 }
