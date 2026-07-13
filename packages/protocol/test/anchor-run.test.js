@@ -432,6 +432,125 @@ test("anchorRun: mid-run hub failure leaves a partial receipt; re-run resumes, n
   assert.equal(final.landed, events.length);
 });
 
+// ---------------------------------------------------------------------------
+// anchors/ANCHORS.md (DR-phase5-topology 4.1: anchors live in the emitting
+// repo; 4.2/4.3: a row claims a weak external timestamp, never notarization).
+// anchor-run appends a row after a COMPLETED anchor — append-only, existing
+// rows are never edited, and the file is created with the header if missing.
+// ---------------------------------------------------------------------------
+
+test("anchorRun: completed anchor appends a row to anchorsFile, creating it with the header", async () => {
+  const m = await mods();
+  const { runDir, keysDir } = await gateStyleRunDir();
+  const hub = fakeHub(m);
+  const anchorsFile = path.join(tmpDir("clista-anchors-"), "anchors", "ANCHORS.md");
+
+  const receipt = await m.anchorRun({
+    runDir, keysDir, hubUrl: "http://fake-hub:8110",
+    title: "toy-anchors-md", fetchImpl: hub.fetchImpl, now: () => ANCHOR_TIME,
+    anchorsFile
+  });
+  assert.equal(receipt.completed, true);
+
+  const text = fs.readFileSync(anchorsFile, "utf8");
+  // The header states the weak claim (4.2) and disclaims the strong one (4.3).
+  assert.ok(text.startsWith(m.ANCHORS_HEADER), "file starts with the canonical header");
+  assert.match(m.ANCHORS_HEADER, /weak external timestamp/);
+  assert.match(m.ANCHORS_HEADER, /not.*notariz|never.*notariz|notariz.*not/is);
+  assert.match(m.ANCHORS_HEADER, /\| anchored_at \(ISO, UTC\) \| run \| head hash \| reportHash \| hub thread \(slug or —\) \| note \|/);
+
+  const rows = text.slice(m.ANCHORS_HEADER.length).trim().split("\n");
+  assert.equal(rows.length, 1, "exactly one appended row");
+  const cells = rows[0].split("|").map((c) => c.trim());
+  assert.equal(cells[1], ANCHOR_TIME);
+  assert.equal(cells[2], path.basename(runDir));
+  assert.equal(cells[3], receipt.head);
+  assert.equal(cells[4], "—", "toy run has no result.json — reportHash is —");
+  assert.equal(cells[5], hub.state.threads[0].slug);
+  assert.equal(cells[6], "anchored via /records/signed, keyed writers");
+});
+
+test("anchorRun: row carries reportHash when the run dir has a result.json", async () => {
+  const m = await mods();
+  const { runDir, keysDir } = await gateStyleRunDir();
+  const reportHash = "2510a23b".padEnd(64, "0");
+  fs.writeFileSync(path.join(runDir, "result.json"), JSON.stringify({ reportHash }) + "\n");
+  const hub = fakeHub(m);
+  const anchorsFile = path.join(tmpDir("clista-anchors-"), "ANCHORS.md");
+
+  await m.anchorRun({
+    runDir, keysDir, hubUrl: "http://fake-hub:8110",
+    title: "toy-with-result", fetchImpl: hub.fetchImpl, now: () => ANCHOR_TIME,
+    anchorsFile
+  });
+  const row = fs.readFileSync(anchorsFile, "utf8").slice(m.ANCHORS_HEADER.length).trim();
+  assert.ok(row.includes(reportHash), "row cites the run's reportHash");
+});
+
+test("anchorRun: append-only — existing rows survive byte-identical; re-runs never duplicate a row", async () => {
+  const m = await mods();
+  const { runDir, keysDir } = await gateStyleRunDir();
+  const hub = fakeHub(m);
+  const anchorsFile = path.join(tmpDir("clista-anchors-"), "ANCHORS.md");
+  const priorRow = "| 2026-07-12T00:00:00.000Z | t1-run | 660953ee00 | 2510a23b00 | — | retroactive backfill sentinel |\n";
+  fs.mkdirSync(path.dirname(anchorsFile), { recursive: true });
+  fs.writeFileSync(anchorsFile, m.ANCHORS_HEADER + priorRow);
+
+  const opts = {
+    runDir, keysDir, hubUrl: "http://fake-hub:8110",
+    title: "toy-append-only", fetchImpl: hub.fetchImpl, now: () => ANCHOR_TIME,
+    anchorsFile
+  };
+  const first = await m.anchorRun(opts);
+  const afterFirst = fs.readFileSync(anchorsFile, "utf8");
+  assert.ok(afterFirst.startsWith(m.ANCHORS_HEADER + priorRow), "header and prior row untouched");
+  assert.ok(afterFirst.includes(first.head), "new row appended");
+
+  // Anchors are permanent testimony: a convergent re-run (same head already
+  // on file) must not stack duplicate rows.
+  await m.anchorRun(opts);
+  assert.equal(fs.readFileSync(anchorsFile, "utf8"), afterFirst, "re-run appends nothing new");
+});
+
+test("anchorRun: a failed anchor writes NO anchors row", async () => {
+  const m = await mods();
+  const { runDir, keysDir } = await gateStyleRunDir();
+  const hub = fakeHub(m);
+  const anchorsFile = path.join(tmpDir("clista-anchors-"), "ANCHORS.md");
+  let signedPosts = 0;
+  const flakyFetch = async (url, opts) => {
+    if (/\/records\/signed$/.test(new URL(url).pathname) && (opts?.method ?? "GET") === "POST") {
+      signedPosts += 1;
+      if (signedPosts === 2) throw new Error("hub unreachable (injected)");
+    }
+    return hub.fetchImpl(url, opts);
+  };
+
+  await assert.rejects(m.anchorRun({
+    runDir, keysDir, hubUrl: "http://fake-hub:8110",
+    title: "toy-failed", fetchImpl: flakyFetch, now: () => ANCHOR_TIME,
+    anchorsFile
+  }), /hub unreachable/);
+  assert.equal(fs.existsSync(anchorsFile), false, "no row for a partial anchor");
+});
+
+test("anchors/ANCHORS.md: committed file wears the canonical header and the T1 retroactive row, as recorded", async () => {
+  const m = await mods();
+  const committed = fs.readFileSync(path.join(ROOT, "anchors", "ANCHORS.md"), "utf8");
+  assert.ok(committed.startsWith(m.ANCHORS_HEADER), "the committed header IS the header anchor-run writes");
+
+  // The T1 row testifies to the run as it was: full hashes straight from the
+  // run's own result.json, string-writer era disclosed, backfill disclosed.
+  const t1 = JSON.parse(fs.readFileSync(path.join(
+    ROOT, "runs", "t1-claude-code-sealed-run-2026-07-12T01-42-20Z", "result.json"), "utf8"));
+  const row = committed.split("\n").find((l) => l.includes("t1-claude-code-sealed-run-2026-07-12T01-42-20Z"));
+  assert.ok(row, "T1 retroactive row present");
+  assert.ok(row.includes(t1.sealHash), "full head hash from result.json");
+  assert.ok(row.includes(t1.reportHash), "full reportHash from result.json");
+  assert.match(row, /\| — \|/, "no hub thread — the run is not yet accumulated to the hub");
+  assert.match(row, /retroactive backfill; string-writer era run \(knownGaps stand as recorded\); anchored_at is backfill time, not run time/);
+});
+
 test("anchorRun: a divergent anchored prefix is a hard error, never a silent re-append", async () => {
   const m = await mods();
   const { runDir, keysDir } = await gateStyleRunDir();

@@ -66,6 +66,41 @@ import { contentAddress, signHashHex, readPublicKeyHex } from "./run-keys.mjs";
 
 const RECORD_SCHEMA = "threadhub.record.v0";
 
+// --- anchors/ANCHORS.md (DR-phase5-topology 4.1–4.3) --------------------
+// Anchors live in the emitting repo; the header states the weak claim (4.2)
+// and disclaims the strong one (4.3). This exact text is also the committed
+// file's header — the test suite holds them identical.
+export const ANCHORS_HEADER = `# Run anchors — clista-protocol
+
+DR-phase5-topology 4.1–4.3. A row here claims a weak external timestamp:
+the anchored head hash existed no later than the push of the commit that
+added the row, witnessed by the hosting provider's git history. It claims
+nothing stronger — this is not notarization, no trusted timestamp authority
+stands behind these rows, a host or a force-push can rewrite history, and
+rows are appended, never edited.
+
+| anchored_at (ISO, UTC) | run | head hash | reportHash | hub thread (slug or —) | note |
+| --- | --- | --- | --- | --- | --- |
+`;
+
+// Append one row (creating the file with the header if missing). Append-only:
+// existing bytes are never rewritten. Convergent: a head already on file is
+// never anchored twice — re-runs add no duplicate testimony.
+export function appendAnchorRow(anchorsFile, { anchoredAt, run, head, reportHash, thread, note }) {
+  const cell = (v) => String(v ?? "—").replace(/\|/g, "\\|").replace(/\s*\r?\n\s*/g, " ").trim() || "—";
+  let existing;
+  if (fs.existsSync(anchorsFile)) {
+    existing = fs.readFileSync(anchorsFile, "utf8");
+  } else {
+    fs.mkdirSync(path.dirname(anchorsFile), { recursive: true });
+    fs.writeFileSync(anchorsFile, ANCHORS_HEADER);
+    existing = ANCHORS_HEADER;
+  }
+  if (head && existing.includes(head)) return false; // already on file — converge, don't duplicate
+  fs.appendFileSync(anchorsFile, `| ${[anchoredAt, run, head, reportHash, thread, note].map(cell).join(" | ")} |\n`);
+  return true;
+}
+
 // Load a run's events: gate.py runs keep thread.jsonl in the run dir;
 // harness runs keep events.ndjson (at the run dir root or under .clista/).
 export function loadRunEvents(runDir) {
@@ -126,7 +161,8 @@ export async function anchorRun({
   title,
   question,
   fetchImpl = fetch,
-  now = () => new Date().toISOString()
+  now = () => new Date().toISOString(),
+  anchorsFile // when set, a COMPLETED anchor appends a row (main() passes anchors/ANCHORS.md)
 }) {
   const base = hubUrl.replace(/\/$/, "");
   const { file, format, events } = loadRunEvents(runDir);
@@ -306,7 +342,27 @@ export async function anchorRun({
 
   const verify = await get(`/t/${encodeURIComponent(threadKey)}/verify`);
   threadKey = verify.thread;
-  return writeReceipt({ head: verify.head, valid: verify.valid });
+  const receipt = writeReceipt({ head: verify.head, valid: verify.valid, slug: verify.slug });
+
+  // Final step: a COMPLETED anchor earns a row in anchors/ANCHORS.md (DR 4.1
+  // — anchors live in the emitting repo). NOTE: this script never
+  // git-commits. Unlike the studio's server-side anchor hook, protocol runs
+  // are orchestrated manually this phase, so the anchor commit — the event
+  // that actually starts the weak external timestamp (DR 4.2) — happens at
+  // the controller's merge/execution time.
+  if (anchorsFile && receipt.completed) {
+    const resultFile = path.join(runDir, "result.json");
+    const result = fs.existsSync(resultFile) ? JSON.parse(fs.readFileSync(resultFile, "utf8")) : null;
+    appendAnchorRow(anchorsFile, {
+      anchoredAt: now(),
+      run: path.basename(runDir),
+      head: receipt.head,
+      reportHash: result?.reportHash ?? "—",
+      thread: verify.slug ?? threadKey,
+      note: "anchored via /records/signed, keyed writers"
+    });
+  }
+  return receipt;
 }
 
 function parseArgs(argv) {
@@ -329,11 +385,13 @@ async function main() {
   const keysDir = args.keys;
   const hubUrl = args.hub;
   if (!runDir || !keysDir || !hubUrl) {
-    throw new Error("usage: anchor-run.mjs --run-dir <dir> --keys <keysDir> --hub <url> [--slug <thread>] [--title <t>] [--question <q>]");
+    throw new Error("usage: anchor-run.mjs --run-dir <dir> --keys <keysDir> --hub <url> [--slug <thread>] [--title <t>] [--question <q>] [--anchors <ANCHORS.md>]");
   }
   const receipt = await anchorRun({
     runDir, keysDir, hubUrl,
-    slug: args.slug, title: args.title, question: args.question
+    slug: args.slug, title: args.title, question: args.question,
+    anchorsFile: args.anchors
+      ?? path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "anchors", "ANCHORS.md")
   });
   process.stdout.write(JSON.stringify(receipt, null, 2) + "\n");
 }
