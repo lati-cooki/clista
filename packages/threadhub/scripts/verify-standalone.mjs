@@ -16,6 +16,10 @@
 // Records may arrive bare (the hub's current export omits record_hash and
 // signature) or with those sidecar fields; unsigned records are verified by
 // hash chain only, and the summary discloses exactly how many were signed.
+// On a bare export nothing holds the LAST record's body but the printed
+// head — a rewritten tail prints a self-consistent PASS — so always compare
+// the printed head against an independently held head (e.g. the DR rule 1.3
+// citation's verify.head).
 import { createHash, createPublicKey, verify } from "node:crypto";
 import { readFileSync } from "node:fs";
 import process from "node:process";

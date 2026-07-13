@@ -39,8 +39,20 @@ const { witnessRejection } = require("../gate");
 // (rule 2.1) are identical with or without signers, and every existing
 // verifier keeps working unmodified. This mirrors ThreadHub itself, where
 // the signature sits beside the envelope it signs, never inside it. The
-// signature covers the event's content_hash; under hash v2 semantics that
-// hash commits to the whole prefix chain the writer saw when it signed.
+// signature covers the event's content_hash.
+//
+// HONESTY BOUNDARY — what that signature holds under v1: createEvent stamps
+// hash_version clista.event_hash.v1, whose hash material EXCLUDES
+// previous_hash (integrity.js canonicalEventHashMaterial; verified
+// empirically — recomputing the same event under a different previous_hash
+// yields the same content_hash). So the sidecar signature commits to the
+// event's OWN material only, not to the prefix chain the writer saw when it
+// signed; chain binding lives in the unsigned previous_hash field and is
+// held by chain verification, not by these signatures. Contrast gate.py,
+// whose record hash material includes prev and therefore does bind the
+// chain. Migrating the harness to v2 (canonicalEventHashMaterialV2 retains
+// previous_hash, making each hash a rolling commitment to the prefix) is a
+// future DR, not this comment's job.
 const SIGNATURES_FILE = "signatures.ndjson";
 
 function signaturesPath(cwd = process.cwd()) {

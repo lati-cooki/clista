@@ -1,12 +1,14 @@
 # Decision Record: The Curation Check (`omitted_dissent` + verifyReport check 4)
 > **Provenance:** clista@6bf906fe6b49a3d5f048e9648dc03291e302c4b6
 
-**Status:** ADOPTED by owner direction — the Phase 5 plan (Wave 2 / Slice 4,
-under DR-phase5-topology) directs this DR and its implementation.
-Agent-authored draft without a separate challenge pass — disclosed here, per
-the 2026-07-10 monorepo precedent.
-**Seal:** Pending — to be sealed by the controller through the studio flow;
-no seal is claimed by this document.
+**Status:** ADOPTED — sealed 2026-07-12
+(`sha256:a077f6d0dfe905276b4a81b8657d3e398c1b09b25acc059bddccc2fd4fb471af`)
+on ThreadHub thread `dr-2026-07-12-curation-check` (`thd_7d96f3851c00`);
+see the Seal section for the sealed evidence and custody disclosure.
+Adopted by owner direction — the Phase 5 plan (Wave 2 / Slice 4, under
+DR-phase5-topology) directs this DR and its implementation. Agent-authored
+draft without a separate challenge pass — disclosed here, per the
+2026-07-10 monorepo precedent.
 **Decision owner:** troy_builds
 **Date raised:** 2026-07-12
 **Applies to:** `packages/protocol` (engine + gate + CLI + harness),

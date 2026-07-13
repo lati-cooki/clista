@@ -86,6 +86,15 @@ test('checker: tampered payload on a BARE export still fails via the chain (next
   assert.match(err, /broken chain/i);
 });
 
+test('checker limitation (disclosed in header): tampered LAST record of a bare export passes — only the printed head betrays it', () => {
+  const { bare, head } = seededExport();
+  bare[2].payload.n = 999; // last record: no next prev, no signature — held by the head alone
+  const { code, out } = run(writeJSON(bare));
+  assert.strictEqual(code, 0);
+  assert.match(out, /^PASS/);
+  assert.ok(!out.includes(head), 'printed head must differ from the independently held head — the comparison the header demands');
+});
+
 test('checker: broken prev link fails loudly, naming the seq', () => {
   const { full } = seededExport();
   full[2].prev = 'sha256:' + 'ab'.repeat(32);
