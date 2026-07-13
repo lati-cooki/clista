@@ -16,6 +16,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { spawn, spawnSync } = require('node:child_process');
+const { pathToFileURL } = require('node:url');
 const { Hub } = require('../src/hub');
 const { createServer } = require('../src/server');
 
@@ -127,15 +128,55 @@ test('checker: usage error on missing argument', () => {
   assert.match(err, /usage/i);
 });
 
-test('checker: imports NOTHING beyond node: builtins (copy-ability is the feature)', () => {
+test('checker: imports NOTHING — zero imports, full stop (the browser runs these exact bytes)', () => {
+  // Stricter than the old node:-builtins allowance: the single-source rule
+  // (DR-2026-07-13 rule 4) makes this file the in-browser verifier via a
+  // direct import of /verify.mjs, so it may depend on nothing an environment
+  // could resolve differently. import.meta is syntax, not an import.
   const src = fs.readFileSync(SCRIPT, 'utf8');
   assert.ok(!/require\s*\(/.test(src), 'no require() at all');
-  const imports = [...src.matchAll(/^\s*import\s.*?from\s+["']([^"']+)["']/gms)].map((m) => m[1]);
-  assert.ok(imports.length > 0, 'sanity: the import scan found the imports');
-  for (const spec of imports) {
-    assert.match(spec, /^node:/, `import "${spec}" is not a node: builtin`);
-  }
-  assert.ok(!/import\s*\(/.test(src), 'no dynamic import()');
+  assert.ok(!/^\s*import[\s"'(]/m.test(src), 'no static import declarations');
+  assert.ok(!/\bimport\s*\(/.test(src), 'no dynamic import()');
+});
+
+test('checker: verifyExport returns the structured result the viewer renders', async () => {
+  // The same environment-agnostic path a browser page takes: import the
+  // module (no CLI side effects), hand it the records, read the structure.
+  const { full, bare, head } = seededExport();
+  const { verifyExport } = await import(pathToFileURL(SCRIPT).href);
+
+  const ok = await verifyExport(full);
+  assert.strictEqual(ok.ok, true);
+  assert.strictEqual(ok.records, 3);
+  assert.strictEqual(ok.head, head);
+  assert.strictEqual(ok.signaturesVerified, 3);
+  assert.strictEqual(ok.signatureVerificationAvailable, true);
+  assert.strictEqual(ok.failure, null);
+  assert.match(ok.line, /^PASS: 3 records/);
+  assert.ok(ok.line.includes(head));
+
+  const bareOk = await verifyExport(bare);
+  assert.strictEqual(bareOk.ok, true);
+  assert.strictEqual(bareOk.signaturesVerified, 0);
+  assert.match(bareOk.line, /0\/3/);
+  assert.match(bareOk.line, /hash chain only/i);
+
+  full[1].payload.n = 999;
+  const bad = await verifyExport(full);
+  assert.strictEqual(bad.ok, false);
+  assert.strictEqual(bad.failure.seq, 1);
+  assert.match(bad.line, /^FAIL at seq 1: hash mismatch/i);
+
+  const empty = await verifyExport([]);
+  assert.strictEqual(empty.ok, false);
+  assert.match(empty.line, /^FAIL: input is not a non-empty array/);
+});
+
+test('checker: importing the module runs NO CLI side effects (guarded entry)', async () => {
+  // Importing from a page (or a test) must not read argv, print, or exit.
+  const before = process.exitCode;
+  await import(pathToFileURL(SCRIPT).href);
+  assert.strictEqual(process.exitCode, before);
 });
 
 test('checker header discloses: served by the hub it checks; save and run elsewhere; structure not truth', () => {
@@ -145,14 +186,28 @@ test('checker header discloses: served by the hub it checks; save and run elsewh
   assert.match(src, /not .*(true|truth)|never proves/i);
 });
 
-test('GET /verify.mjs serves the exact checker bytes as text/javascript', async () => {
-  const { server } = createServer(tmpDb());
+test('GET /verify.mjs serves the exact checker bytes; the viewer imports exactly that URL', async () => {
+  const { server, hub } = createServer(tmpDb());
+  const troy = hub.createIdentity({ id: 'id_troy', displayName: 'Troy', kind: 'human' });
+  hub.createThread({ title: 'Identity', authorId: troy.id, slug: 'identity' });
   const port = await new Promise((r) => server.listen(0, () => r(server.address().port)));
   try {
     const res = await fetch(`http://localhost:${port}/verify.mjs`);
     assert.strictEqual(res.status, 200);
     assert.match(res.headers.get('content-type'), /^text\/javascript/);
     assert.strictEqual(await res.text(), fs.readFileSync(SCRIPT, 'utf8'));
+    // Build-level implementation identity (DR-2026-07-13 rule 4): the viewer
+    // page runs verification only via a module import of exactly /verify.mjs —
+    // the URL whose bytes were just proven identical to the repo file. Any
+    // other script URL on the page would be a second source of truth.
+    const page = await (await fetch(`http://localhost:${port}/t/identity/view`)).text();
+    assert.ok(page.includes("import('/verify.mjs')"), 'viewer must import the literal /verify.mjs');
+    // Catches dynamic import(), static `import … from` inside an inline
+    // module script, and script src= attributes alike.
+    const scriptRefs = [...page.matchAll(/import\s*\(\s*['"]([^'"]+)['"]\s*\)|\bimport\s[^('"]*?from\s*['"]([^'"]+)['"]|src=["']([^"']+\.m?js)["']/g)]
+      .map((m) => m[1] ?? m[2] ?? m[3]);
+    assert.deepStrictEqual([...new Set(scriptRefs)], ['/verify.mjs'],
+      `the viewer references script URLs other than /verify.mjs: ${scriptRefs.join(', ')}`);
   } finally { server.close(); }
 });
 

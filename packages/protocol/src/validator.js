@@ -140,7 +140,8 @@ const {
   validatePrecedentReference,
   validateSealedReport,
   validateThreadCreated,
-  validateThreadForked
+  validateThreadForked,
+  validateThreadPublication
 } = require("./validator/thread");
 
 class ValidationError extends Error {
@@ -421,6 +422,10 @@ function validateEvents(events) {
         break;
       case "ThreadForked":
         validateThreadForked(event, index, state);
+        break;
+      case "ThreadPublished":
+      case "ThreadPublicationRevoked":
+        validateThreadPublication(event, state);
         break;
       case "EvidenceCommitted":
         validateEvidenceCommitted(event, state);

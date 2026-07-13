@@ -16,6 +16,8 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const { Hub } = require('./hub');
+const { effectivePublication } = require('./publication');
+const { threadViewHTML } = require('./view');
 
 // The standalone checker's bytes, served verbatim. A checker served by the
 // hub it checks is a convenience, not independence — the file's own header
@@ -115,6 +117,26 @@ ${rows}
 function createServer(dbPath, opts = {}) {
   const hub = new Hub(dbPath);
   const allowWrite = rateLimiter(opts.rateLimit);
+
+  // Public mode (THREADHUB_PUBLIC_MODE=1): every read surface serves only
+  // effectively-published threads — threads whose LAST publication event is
+  // a ThreadPublished (DR-2026-07-13-record-is-the-interface rule 2).
+  // Unpublished and nonexistent must be indistinguishable from outside
+  // (rule 5: slugs are names, not credentials), so every filtered surface
+  // 404s with the SAME body, byte for byte — including the fallthrough 404,
+  // so an unpublished thread looks exactly like a route that never existed.
+  const publicMode = opts.publicMode ?? process.env.THREADHUB_PUBLIC_MODE === '1';
+  const PUBLIC_404 = { error: 'not found', code: 'not_found' };
+  const parsedRecords = (threadId) => hub.store.recordsOf(threadId).map((r) => JSON.parse(r.body));
+  const isPublished = (threadId) => effectivePublication(parsedRecords(threadId)).published;
+  // The thread, as the public may see it: null when missing OR unpublished.
+  const readableThread = (idOrSlug) => {
+    const thread = hub.store.getThread(idOrSlug);
+    if (!thread) return null;
+    if (publicMode && !isPublished(thread.id)) return null;
+    return thread;
+  };
+
   const server = http.createServer(async (req, res) => {
     try {
       const url = new URL(req.url, 'http://x');
@@ -125,12 +147,21 @@ function createServer(dbPath, opts = {}) {
       }
 
       if (req.method === 'GET' && p === '/') {
+        const threads = hub.store.listThreads().filter((t) => !publicMode || isPublished(t.id));
         return json(res, 200, {
-          instance: 'threadhub.v0', records: hub.store.countRecords(),
-          threads: hub.store.listThreads().map(t => ({ id: t.id, slug: t.slug, title: t.title })),
+          instance: 'threadhub.v0',
+          // In public mode even the record COUNT is computed over published
+          // threads only — a total that moves with unpublished writes would
+          // disclose activity the record has not published.
+          records: publicMode
+            ? threads.reduce((n, t) => n + hub.store.recordsOf(t.id).length, 0)
+            : hub.store.countRecords(),
+          threads: threads.map(t => ({ id: t.id, slug: t.slug, title: t.title })),
         });
       }
-      if (req.method === 'GET' && p === '/threads') return json(res, 200, hub.store.listThreads());
+      if (req.method === 'GET' && p === '/threads') {
+        return json(res, 200, hub.store.listThreads().filter((t) => !publicMode || isPublished(t.id)));
+      }
       if (req.method === 'GET' && p === '/verify.mjs') {
         res.writeHead(200, { 'content-type': 'text/javascript; charset=utf-8' });
         return res.end(fs.readFileSync(CHECKER_PATH));
@@ -146,10 +177,44 @@ function createServer(dbPath, opts = {}) {
 
       let m;
       if ((m = p.match(/^\/t\/([^/]+)\.json$/)) && req.method === 'GET') {
-        return json(res, 200, hub.exportThread(decodeURIComponent(m[1])));
+        const slug = decodeURIComponent(m[1]);
+        if (publicMode) {
+          const thread = readableThread(slug);
+          if (!thread) return json(res, 404, PUBLIC_404);
+          return json(res, 200, hub.exportThread(thread.id));
+        }
+        return json(res, 200, hub.exportThread(slug));
       }
       if ((m = p.match(/^\/t\/([^/]+)\/verify$/)) && req.method === 'GET') {
-        return json(res, 200, hub.verifyThread(decodeURIComponent(m[1])));
+        const slug = decodeURIComponent(m[1]);
+        if (publicMode) {
+          const thread = readableThread(slug);
+          if (!thread) return json(res, 404, PUBLIC_404);
+          return json(res, 200, hub.verifyThread(thread.id));
+        }
+        return json(res, 200, hub.verifyThread(slug));
+      }
+      if ((m = p.match(/^\/t\/([^/]+)\/view$/)) && req.method === 'GET') {
+        // The public read page: the record is the interface (DR-2026-07-13
+        // rule 1). The raw /t/:slug viewer stays untouched beside it.
+        const slug = decodeURIComponent(m[1]);
+        const thread = publicMode ? readableThread(slug) : hub.store.getThread(slug);
+        if (!thread) {
+          return json(res, 404, publicMode ? PUBLIC_404 : { error: 'thread not found', code: 'not_found' });
+        }
+        const rows = hub.store.recordsOf(thread.id);
+        const authors = [...new Set(rows.map((r) => r.author_id))].map((id) => {
+          const ident = hub.store.getIdentity(id);
+          return {
+            id,
+            displayName: ident?.display_name ?? null,
+            kind: ident?.kind ?? null,
+            custodial: Boolean(ident?.private_key), // the custody disclosure, derived from the author set
+          };
+        });
+        const html = threadViewHTML({ thread, records: rows, verification: hub.verifyThread(thread.id), authors });
+        res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+        return res.end(html);
       }
       if ((m = p.match(/^\/t\/([^/]+)\/records$/)) && req.method === 'POST') {
         const b = await readBody(req);
@@ -168,14 +233,22 @@ function createServer(dbPath, opts = {}) {
       }
       if ((m = p.match(/^\/t\/([^/]+)$/)) && req.method === 'GET') {
         const slug = decodeURIComponent(m[1]);
-        const thread = hub.store.getThread(slug);
-        if (!thread) return json(res, 404, { error: 'thread not found', code: 'not_found' });
+        const thread = publicMode ? readableThread(slug) : hub.store.getThread(slug);
+        if (!thread) {
+          return json(res, 404, publicMode ? PUBLIC_404 : { error: 'thread not found', code: 'not_found' });
+        }
         const html = viewerHTML(thread, hub.store.recordsOf(thread.id), hub.verifyThread(thread.id));
         res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
         return res.end(html);
       }
       if ((m = p.match(/^\/r\/(sha256:[0-9a-f]{64})$/)) && req.method === 'GET') {
         const r = hub.store.getRecord(m[1]);
+        if (publicMode) {
+          // A record fetched by hash is a read of its thread: unpublished
+          // thread, missing record — same answer, same bytes.
+          if (!r || !isPublished(r.thread_id)) return json(res, 404, PUBLIC_404);
+          return json(res, 200, JSON.parse(r.body));
+        }
         return r ? json(res, 200, JSON.parse(r.body)) : json(res, 404, { error: 'record not found', code: 'not_found' });
       }
       json(res, 404, { error: 'not found', code: 'not_found' });
