@@ -157,7 +157,7 @@ function threadViewHTML({ thread, records, verification, authors }) {
 
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${esc(thread.title)} — Thread Hub</title>
+<title>${esc(thread.title)} — Consensus Protocol</title>
 <style>
   :root { --bg:#101312; --ink:#cfd8d3; --dim:#6d7a74; --ok:#7fd1a8; --bad:#e08585; --line:#232a27; --acc:#d8c27a; --dissent:#e0a057; }
   body { background:var(--bg); color:var(--ink); font:15px/1.6 ui-monospace,'SF Mono',Menlo,monospace; margin:0; padding:2.5rem 1.25rem; }
@@ -239,7 +239,7 @@ ${threads.map((t) =>
     : '<p class="empty">No published records yet.</p>';
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Thread Hub — public decision records</title>
+<title>Consensus Protocol — public decision records</title>
 <style>
   :root { --bg:#101312; --ink:#cfd8d3; --dim:#6d7a74; --ok:#7fd1a8; --line:#232a27; --acc:#d8c27a; }
   body { background:var(--bg); color:var(--ink); font:15px/1.6 ui-monospace,'SF Mono',Menlo,monospace; margin:0; padding:2.5rem 1.25rem; }
@@ -256,7 +256,7 @@ ${threads.map((t) =>
   .note { color:var(--dim); font-size:.85rem; margin:.6rem 0 0; border-top:1px solid var(--line); padding-top:1rem; }
   .note a { color:var(--acc); }
 </style></head><body><main>
-<h1>Thread Hub</h1>
+<h1>Consensus Protocol</h1>
 <p class="intro">A public ledger of sealed decision records. Each thread below is an append-only, hash-chained log of a decision — the proposal, the challenge, the concessions, and the surviving reservations, in the order they were witnessed.</p>
 ${list}
 <p class="note">The record verifies on your machine, not on our word — open a thread and use “verify this thread”, or save <a href="/verify.mjs">/verify.mjs</a> and run it yourself.</p>
