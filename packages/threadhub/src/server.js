@@ -10,9 +10,17 @@
 //   POST /t/:slug/attest            { author, payload_hash, claim? }
 //   GET  /r/:hash                   single record by content address
 //   POST /identities                { display_name, kind }
+//   GET  /verify.mjs                standalone checker (save it, run it elsewhere)
 'use strict';
 const http = require('node:http');
+const fs = require('node:fs');
+const path = require('node:path');
 const { Hub } = require('./hub');
+
+// The standalone checker's bytes, served verbatim. A checker served by the
+// hub it checks is a convenience, not independence — the file's own header
+// says so and tells the reader to save it and run it elsewhere.
+const CHECKER_PATH = path.join(__dirname, '..', 'scripts', 'verify-standalone.mjs');
 
 // HubError codes -> HTTP status. Anything uncoded is a plain 400.
 const STATUS_FOR = {
@@ -123,6 +131,10 @@ function createServer(dbPath, opts = {}) {
         });
       }
       if (req.method === 'GET' && p === '/threads') return json(res, 200, hub.store.listThreads());
+      if (req.method === 'GET' && p === '/verify.mjs') {
+        res.writeHead(200, { 'content-type': 'text/javascript; charset=utf-8' });
+        return res.end(fs.readFileSync(CHECKER_PATH));
+      }
       if (req.method === 'POST' && p === '/threads') {
         const b = await readBody(req);
         return json(res, 201, hub.createThread({ title: b.title, question: b.question, authorId: b.author }));
