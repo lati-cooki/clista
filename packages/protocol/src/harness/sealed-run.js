@@ -13,10 +13,48 @@
 //
 // T1 pass criterion (the only one that counts): the emitted thread passes
 // existing chain verification.
+const fs = require("node:fs");
+const path = require("node:path");
 const { createEvent, readEvents, appendEvent, newId } = require("../events");
 const { validateEvents } = require("../validator");
 const { verifyEventIntegrity, prepareEventForAppend } = require("../integrity");
 const { witnessRejection } = require("../gate");
+
+// --- injected signers (Phase 5 Slice 2, DR-phase5-topology rule 5.1) ---
+//
+// A signer is the non-custodial voice of one writer role:
+//   { publicKeyHex: string, sign(hashHex: string) -> signatureHex: string }
+// (per-run ed25519 keys; see scripts/run-keys.mjs for the primitive and the
+// derived signature preimage — the raw 32 bytes of the hex hash, exactly
+// what ThreadHub's /records/signed verifies).
+//
+// Signing happens AT REASONING TIME: the same gate call that appends an
+// event writes its signature. Signatures live in a sidecar NDJSON next to
+// the event log — NOT inside the events — so the canonical thread bytes
+// (rule 2.1) are identical with or without signers, and every existing
+// verifier keeps working unmodified. This mirrors ThreadHub itself, where
+// the signature sits beside the envelope it signs, never inside it. The
+// signature covers the event's content_hash; under hash v2 semantics that
+// hash commits to the whole prefix chain the writer saw when it signed.
+const SIGNATURES_FILE = "signatures.ndjson";
+
+function signaturesPath(cwd = process.cwd()) {
+  return path.join(cwd, ".clista", SIGNATURES_FILE);
+}
+
+function recordSignature(event, signer, cwd) {
+  const record = {
+    schema: "clista.run_signature.v0",
+    event_id: event.event_id,
+    content_hash: event.content_hash,
+    actor_id: event.actor_id,
+    public_key: signer.publicKeyHex,
+    signature: signer.sign(event.content_hash.slice(7)),
+    signed_at: new Date().toISOString()
+  };
+  fs.appendFileSync(signaturesPath(cwd), `${JSON.stringify(record)}\n`, "utf8");
+  return record;
+}
 
 // The sidecar-gate pattern generalized to any event type: build the candidate,
 // chain it onto the real log IN MEMORY, run the same validateEvents the
@@ -26,7 +64,9 @@ const { witnessRejection } = require("../gate");
 // unless the witness itself cannot validate (empty log, undeclared writer),
 // in which case nothing appends and rejectionEvent is null: the gate never
 // corrupts the log in order to witness a refusal.
-function appendThroughGate({ type, threadId, actorId, payload }, cwd) {
+// `signer` is optional; without one, behavior is byte-identical to the
+// pre-signer harness (tested in test/sealed-run-signers.test.js).
+function appendThroughGate({ type, threadId, actorId, payload }, cwd, signer) {
   const existing = readEvents(cwd);
   const draft = createEvent({ type, threadId, actorId, payload });
   const previousHash = existing.length ? existing[existing.length - 1].content_hash : undefined;
@@ -49,7 +89,10 @@ function appendThroughGate({ type, threadId, actorId, payload }, cwd) {
     return { valid: false, errors, event: null, rejectionEvent };
   }
   appendEvent(draft, cwd);
-  return { valid: true, errors: [], event: draft };
+  // Sign at reasoning time: the append and its signature are one gate call.
+  // A rejected candidate is never signed (nothing above this line appended).
+  const signature = signer ? recordSignature(draft, signer, cwd) : undefined;
+  return { valid: true, errors: [], event: draft, signature };
 }
 
 // Run the maker/checker toy decision end to end. `roles` supplies the free
@@ -60,18 +103,26 @@ function appendThroughGate({ type, threadId, actorId, payload }, cwd) {
 //              decisionSummary, decisionRationale },
 //   checker: { objection, resolution, reviewNotes }
 // }
-function runSealedRun({ cwd, threadTitle, question, roles, now }) {
+//
+// `signers` (optional) maps writer actor ids to injected signers
+// ({ par_t1_maker, par_t1_checker }); each event is then signed at append
+// time by its own writer's key. Absent signers, nothing changes.
+function runSealedRun({ cwd, threadTitle, question, roles, now, signers }) {
   const at = now || (() => new Date().toISOString());
   const rejections = [];
   const appended = [];
+  const signatures = signers ? [] : undefined;
 
   const gate = (spec) => {
-    const result = appendThroughGate(spec, cwd);
+    const result = appendThroughGate(spec, cwd, signers?.[spec.actorId]);
     if (!result.valid) {
       rejections.push({ type: spec.type, errors: result.errors });
       throw new SealedRunRejection(spec.type, result.errors);
     }
     appended.push(result.event);
+    if (result.signature) {
+      signatures.push(result.signature);
+    }
     return result.event;
   };
 
@@ -245,7 +296,8 @@ function runSealedRun({ cwd, threadTitle, question, roles, now }) {
       validation,
       sealEventId: reportEvt.event_id,
       rejections,
-      appendedCount: appended.length
+      appendedCount: appended.length,
+      signatures
     };
   } catch (error) {
     if (error instanceof SealedRunRejection) {
@@ -258,7 +310,8 @@ function runSealedRun({ cwd, threadTitle, question, roles, now }) {
         validation: validateEvents(events),
         sealEventId: null,
         rejections,
-        appendedCount: appended.length
+        appendedCount: appended.length,
+        signatures
       };
     }
     throw error;
@@ -274,4 +327,4 @@ class SealedRunRejection extends Error {
   }
 }
 
-module.exports = { appendThroughGate, runSealedRun, SealedRunRejection };
+module.exports = { appendThroughGate, runSealedRun, SealedRunRejection, signaturesPath };
