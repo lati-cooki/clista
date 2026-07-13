@@ -30,7 +30,7 @@
 //   })
 'use strict';
 const { effectivePublication } = require('./publication');
-const { threadViewHTML, landingHTML } = require('./view');
+const { threadViewHTML, landingHTML, CP_STYLE } = require('./view');
 
 // HubError codes -> HTTP status. Anything uncoded is a plain 400.
 const STATUS_FOR = {
@@ -86,8 +86,9 @@ function errorResponse(e) {
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
 
-// Deliberately spare viewer: monospace ledger aesthetic. The record is
-// the interface; the page just refuses to get in its way.
+// Spare raw viewer (design Disclosure component): the full record set as
+// collapsible rows, each one click from its raw JSON. Warm-paper design
+// system, shared CP_STYLE tokens with the landing + thread viewer.
 function viewerHTML(thread, records, verification) {
   const rows = records.map((r) => {
     const env = JSON.parse(r.body);
@@ -107,28 +108,31 @@ function viewerHTML(thread, records, verification) {
     : `<span class="bad">CHAIN INVALID · ${verification.problems.length} problem(s)</span>`;
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${esc(thread.title)} — Thread Hub</title>
-<style>
-  :root { --bg:#101312; --ink:#cfd8d3; --dim:#6d7a74; --ok:#7fd1a8; --bad:#e08585; --line:#232a27; --acc:#d8c27a; }
-  body { background:var(--bg); color:var(--ink); font:14px/1.55 ui-monospace,'SF Mono',Menlo,monospace; margin:0; padding:2.5rem 1.25rem; }
-  main { max-width:880px; margin:0 auto; }
-  h1 { font-size:1.05rem; font-weight:600; letter-spacing:.02em; margin:0 0 .25rem; }
-  .meta { color:var(--dim); font-size:.8rem; margin-bottom:1.5rem; word-break:break-all; }
-  .ok { color:var(--ok); } .bad { color:var(--bad); }
-  .rec { border-top:1px solid var(--line); padding:.45rem 0; }
-  .rec:last-child { border-bottom:1px solid var(--line); }
-  summary { cursor:pointer; display:flex; gap:.9rem; align-items:baseline; list-style:none; }
-  summary::-webkit-details-marker { display:none; }
-  summary:focus-visible { outline:1px solid var(--acc); outline-offset:3px; }
-  .seq { color:var(--acc); min-width:2.5rem; }
-  .kind { flex:1; }
-  .hash, .author { color:var(--dim); font-size:.78rem; }
-  pre { background:#0a0d0c; border:1px solid var(--line); padding:.9rem; overflow-x:auto; font-size:.78rem; margin:.6rem 0 .3rem; }
-  .sig { color:var(--dim); font-size:.72rem; margin-bottom:.4rem; }
-  .trust { color:var(--dim); font-size:.78rem; margin-top:1.5rem; border-top:1px solid var(--line); padding-top:.75rem; }
+<title>${esc(thread.title)} — Consensus Protocol</title>
+<style>${CP_STYLE}
+main{max-width:880px}
+h1{font-family:var(--font-serif);font-size:26px;font-weight:600;line-height:1.2;color:var(--ink-0);margin:0 0 .3rem;text-wrap:balance}
+.meta{font-family:var(--font-mono);font-size:12px;color:var(--ink-3);margin-bottom:1.4rem;word-break:break-all}
+.badge-row{margin:.2rem 0 1.4rem}
+.ok,.bad{display:inline-flex;align-items:center;font:600 12px/1 var(--font-sans);border-radius:2px;padding:5px 10px}
+.ok{color:var(--verify-ink);background:var(--verify-wash);border:1px solid var(--verify-rule)}
+.bad{color:var(--dissent-ink);background:var(--dissent-wash);border:1px solid var(--dissent-rule)}
+.rec{border-top:1px solid var(--rule);padding:.55rem 0}
+.rec:last-of-type{border-bottom:1px solid var(--rule)}
+summary{cursor:pointer;display:flex;gap:.9rem;align-items:baseline;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary:hover .kind{color:var(--ink-0)}
+summary:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(178,58,30,.20);border-radius:2px}
+.seq{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);min-width:2.5rem}
+.kind{flex:1;font-family:var(--font-sans);font-size:13px;color:var(--ink-1)}
+.hash,.author{font-family:var(--font-mono);font-size:12px;color:var(--ink-3)}
+pre{background:var(--paper-2);border:1px solid var(--rule);border-radius:2px;padding:.8rem;overflow-x:auto;font-family:var(--font-mono);font-size:12px;line-height:1.6;color:var(--ink-1);margin:.6rem 0 .3rem}
+.sig{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);margin-bottom:.4rem}
+.trust{font-size:13px;color:var(--ink-2);margin-top:1.6rem;border-top:1px solid var(--rule);padding-top:.9rem;max-width:64ch;line-height:1.5}
 </style></head><body><main>
 <h1>${esc(thread.title)}</h1>
-<div class="meta">${esc(thread.id)} · /t/${esc(thread.slug)} · genesis ${esc(thread.genesis_hash ?? '')}<br>${badge}</div>
+<div class="meta">${esc(thread.id)} · /t/${esc(thread.slug)} · genesis ${esc(thread.genesis_hash ?? '')}</div>
+<div class="badge-row">${badge}</div>
 ${rows}
 <div class="trust">trusted: false — chain verification proves structure, never content. Cite records by hash.</div>
 </main></body></html>`;
