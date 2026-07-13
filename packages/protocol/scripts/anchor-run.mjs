@@ -238,7 +238,9 @@ export async function anchorRun({
   } else {
     const courier = await post("/identities", {
       display_name: "anchor-run courier (custodial, thread genesis only)",
-      kind: "orchestrator"
+      // hub CHECK constraint allows only human|agent|org — the courier is an
+      // automated agent; its courier-only role lives in the display_name.
+      kind: "agent"
     });
     const created = await post("/threads", {
       title: title ?? `anchored run ${path.basename(runDir)}`,

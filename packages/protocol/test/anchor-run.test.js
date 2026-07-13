@@ -50,6 +50,11 @@ function fakeHub({ contentAddress, verifyHashHex }) {
     state.requests.push({ method, pathname, body, raw: opts.body });
 
     if (method === "POST" && pathname === "/identities") {
+      // mirror the real hub's schema CHECK (identities.kind) — a fake hub
+      // that accepts any kind hides exactly the 400 the live hub returns.
+      if (!["human", "agent", "org"].includes(body.kind)) {
+        return jsonRes(400, { error: "CHECK constraint failed: kind IN ('human','agent','org')" });
+      }
       const identity = {
         id: `id_fake_${nextId++}`,
         display_name: body.display_name,
