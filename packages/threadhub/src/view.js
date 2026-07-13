@@ -130,7 +130,7 @@ function recordBlock(row, env, author) {
   return `<article class="rec${dissent ? ' dissent' : ''}" data-event-type="${esc(eventType)}">
 <header><span class="type">${esc(eventType)}</span><span class="author">${esc(who)}</span><time datetime="${esc(env.recorded_at)}">${esc(env.recorded_at)}</time></header>
 ${body}
-<div class="chain">seq ${env.seq} · ${esc(row.record_hash)} · prev ${esc(env.prev ?? 'null (genesis)')}</div>
+<div class="chain">seq ${esc(env.seq)} · ${esc(row.record_hash)} · prev ${esc(env.prev ?? 'null (genesis)')}</div>
 </article>`;
 }
 

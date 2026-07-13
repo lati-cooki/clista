@@ -202,8 +202,10 @@ test('GET /verify.mjs serves the exact checker bytes; the viewer imports exactly
     // other script URL on the page would be a second source of truth.
     const page = await (await fetch(`http://localhost:${port}/t/identity/view`)).text();
     assert.ok(page.includes("import('/verify.mjs')"), 'viewer must import the literal /verify.mjs');
-    const scriptRefs = [...page.matchAll(/import\s*\(\s*['"]([^'"]+)['"]\s*\)|src=["']([^"']+\.m?js)["']/g)]
-      .map((m) => m[1] ?? m[2]);
+    // Catches dynamic import(), static `import … from` inside an inline
+    // module script, and script src= attributes alike.
+    const scriptRefs = [...page.matchAll(/import\s*\(\s*['"]([^'"]+)['"]\s*\)|\bimport\s[^('"]*?from\s*['"]([^'"]+)['"]|src=["']([^"']+\.m?js)["']/g)]
+      .map((m) => m[1] ?? m[2] ?? m[3]);
     assert.deepStrictEqual([...new Set(scriptRefs)], ['/verify.mjs'],
       `the viewer references script URLs other than /verify.mjs: ${scriptRefs.join(', ')}`);
   } finally { server.close(); }

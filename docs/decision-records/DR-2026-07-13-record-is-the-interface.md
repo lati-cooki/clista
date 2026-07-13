@@ -108,6 +108,20 @@ doctrine. Binding rules:
    viewer. Nothing else on the public surface may disclose that an
    unpublished thread exists.
 
+   **Publication AUTHORITY is currently a deployment property, not a hub
+   property.** The hub validates a publication act's shape and position,
+   never its author's standing: `hub.append` accepts any existing custodial
+   identity as author for any thread, and `POST /identities` is open. On an
+   exposed, unproxied write surface an outsider could therefore mint an
+   identity and append a well-formed `ThreadPublished` to any slug —
+   granting themselves read access through the write path — or
+   revoke-vandalize a published thread. So this rule's access-control claim
+   holds ONLY where the write surface is proxied away or disabled; any
+   public exposure MUST do one or the other. Binding publication authority
+   to specific identities in the hub itself is named future work: it would
+   be the hub's first authorization concept, and it is deliberately not
+   smuggled in through this record.
+
 3. **Dissent-forward rendering.** Events whose payload event type is in
    the protocol registry's `DISSENT_BEARING_TYPES`
    (`packages/protocol/src/event-types.js`,
@@ -161,6 +175,12 @@ doctrine. Binding rules:
 
 ## Consequences Accepted
 
+- **The read gate trusts the deployment to close the write gate.** Rule 2
+  filters reads; it grants no one publication authority, because the hub
+  has no authorization concept to grant it with. Until that future work
+  lands, the boundary of "who may publish" is exactly the boundary of "who
+  can reach the write surface" — accepted, stated in rule 2, and binding
+  on every exposure.
 - **Publishing is a deliberate extra step.** Every thread meant for the
   public needs an explicit witnessed act, including demo and founding
   threads. Accepted: the step IS the control.
@@ -184,7 +204,16 @@ doctrine. Binding rules:
 
 ## Amendments
 
-None yet.
+- **2026-07-13 (pre-seal):** the review pass on this slice probed the hub
+  and found rule 2's access-control claim understated its precondition —
+  the hub validates a publication act's shape, never its author's
+  standing, so on an unproxied write surface any mintable identity could
+  publish or revoke any thread. Resolved before seal: rule 2 now states
+  that publication authority is a deployment property (write surface
+  proxied away or disabled on any public exposure), the third-party
+  publication/revocation consequence is named, and hub-level publication
+  authorization is recorded as future work rather than smuggled in; a
+  matching entry added to Consequences.
 
 ## Seal
 

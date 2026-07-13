@@ -125,7 +125,11 @@ if (isCLI) {
   const die = (msg) => { console.error(msg); process.exit(1); };
   const src = process.argv[2] ?? die("usage: node verify-standalone.mjs <thread.json file | http(s) URL>");
   // Local files are read via process.getBuiltinModule — builtin access
-  // without an import statement, so the no-imports guarantee holds.
+  // without an import statement, so the no-imports guarantee holds. It
+  // arrived in Node 22.3; on older Nodes, say so instead of TypeError-ing.
+  if (!/^https?:\/\//.test(src) && typeof globalThis.process.getBuiltinModule !== "function") {
+    die("file mode needs Node >= 22.3 (process.getBuiltinModule); pass an http(s) URL instead");
+  }
   const raw = /^https?:\/\//.test(src)
     ? await (await fetch(src)).text()
     : globalThis.process.getBuiltinModule("node:fs").readFileSync(src, "utf8");
