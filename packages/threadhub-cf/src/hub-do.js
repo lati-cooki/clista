@@ -32,7 +32,7 @@ export class HubDO extends DurableObject {
 
   // The one RPC. Returns a routes.js response descriptor
   // { status, contentType, body } — the Worker writes it verbatim.
-  handle({ method, path, bodyText, bodyError, role, ip } = {}) {
+  handle({ method, path, bodyText, bodyError, role, ip, accept } = {}) {
     // Body parsing mirrors server.js: absent/empty body stays undefined
     // (routes.js body() coalesces it to {}); a failed read/parse is passed
     // through AS the Error value, so only a matched POST route that
@@ -74,6 +74,9 @@ export class HubDO extends DurableObject {
       // /verify.mjs never reaches the DO — the Worker serves the
       // Text-imported bytes itself. Absent → the route 404s here too.
       checkerSource: undefined,
+      // Content negotiation for GET / only (browser → HTML landing). Optional
+      // everywhere; undefined keeps the JSON listing.
+      accept,
     });
   }
 

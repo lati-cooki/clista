@@ -157,7 +157,7 @@ function threadViewHTML({ thread, records, verification, authors }) {
 
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${esc(thread.title)} — Thread Hub</title>
+<title>${esc(thread.title)} — Consensus Protocol</title>
 <style>
   :root { --bg:#101312; --ink:#cfd8d3; --dim:#6d7a74; --ok:#7fd1a8; --bad:#e08585; --line:#232a27; --acc:#d8c27a; --dissent:#e0a057; }
   body { background:var(--bg); color:var(--ink); font:15px/1.6 ui-monospace,'SF Mono',Menlo,monospace; margin:0; padding:2.5rem 1.25rem; }
@@ -222,4 +222,46 @@ document.getElementById('verify-btn').addEventListener('click', async () => {
 </main></body></html>`;
 }
 
-module.exports = { threadViewHTML, DISSENT_BEARING_TYPES };
+// landingHTML — the content-negotiated root page (GET /) for browsers.
+// A browser hitting the bare domain gets this spare index; every API client
+// keeps the JSON listing. Same monospace-ledger aesthetic as the viewer, so
+// the landing and the thread pages read as one system. `threads` is the
+// SAME published-filtered list the JSON path builds — [{ id, slug, title }] —
+// so an unpublished thread can never reach the page. Everything escaped;
+// no external resources (the CF CSP forbids external hosts).
+function landingHTML(threads) {
+  const list = threads.length
+    ? `<ul class="threads">
+${threads.map((t) =>
+      `<li><a href="/t/${esc(encodeURIComponent(t.slug))}/view">${esc(t.title)}</a> <span class="slug">/t/${esc(t.slug)}</span></li>`
+    ).join('\n')}
+</ul>`
+    : '<p class="empty">No published records yet.</p>';
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Consensus Protocol — public decision records</title>
+<style>
+  :root { --bg:#101312; --ink:#cfd8d3; --dim:#6d7a74; --ok:#7fd1a8; --line:#232a27; --acc:#d8c27a; }
+  body { background:var(--bg); color:var(--ink); font:15px/1.6 ui-monospace,'SF Mono',Menlo,monospace; margin:0; padding:2.5rem 1.25rem; }
+  main { max-width:820px; margin:0 auto; }
+  h1 { font-size:1.3rem; font-weight:650; margin:0 0 .6rem; }
+  .intro { margin:0 0 1.8rem; }
+  .threads { list-style:none; padding:0; margin:0 0 1.8rem; }
+  .threads li { border-top:1px solid var(--line); padding:.6rem 0; }
+  .threads li:last-child { border-bottom:1px solid var(--line); }
+  .threads a { color:var(--acc); text-decoration:none; }
+  .threads a:hover { text-decoration:underline; }
+  .slug { color:var(--dim); font-size:.78rem; margin-left:.5rem; word-break:break-all; }
+  .empty { color:var(--dim); margin:0 0 1.8rem; }
+  .note { color:var(--dim); font-size:.85rem; margin:.6rem 0 0; border-top:1px solid var(--line); padding-top:1rem; }
+  .note a { color:var(--acc); }
+</style></head><body><main>
+<h1>Consensus Protocol</h1>
+<p class="intro">A public ledger of sealed decision records. Each thread below is an append-only, hash-chained log of a decision — the proposal, the challenge, the concessions, and the surviving reservations, in the order they were witnessed.</p>
+${list}
+<p class="note">The record verifies on your machine, not on our word — open a thread and use “verify this thread”, or save <a href="/verify.mjs">/verify.mjs</a> and run it yourself.</p>
+<p class="note">The chain proves what was recorded and when — never that the decision was good.</p>
+</main></body></html>`;
+}
+
+module.exports = { threadViewHTML, landingHTML, DISSENT_BEARING_TYPES };

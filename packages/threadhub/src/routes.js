@@ -30,7 +30,7 @@
 //   })
 'use strict';
 const { effectivePublication } = require('./publication');
-const { threadViewHTML } = require('./view');
+const { threadViewHTML, landingHTML } = require('./view');
 
 // HubError codes -> HTTP status. Anything uncoded is a plain 400.
 const STATUS_FOR = {
@@ -135,7 +135,7 @@ ${rows}
 }
 
 function handle(hub, { method, path: p, bodyJson, publicMode = false, gateWrites = false,
-                       ip, allowWrite, checkerSource } = {}) {
+                       ip, allowWrite, checkerSource, accept } = {}) {
   // A matched POST route consuming a body the transport could not
   // read/parse answers exactly as the old in-route read did. Only
   // undefined (no body supplied) coalesces to {}: a literal JSON null
@@ -169,6 +169,15 @@ function handle(hub, { method, path: p, bodyJson, publicMode = false, gateWrites
 
     if (method === 'GET' && p === '/') {
       const threads = hub.store.listThreads().filter((t) => !publicMode || isPublished(t.id));
+      // Content negotiation, GET / ONLY: a browser (Accept: text/html) gets
+      // the spare landing page; every API client (curl/urllib/anchor gate
+      // send */* or no Accept, never text/html) keeps the EXACT JSON below,
+      // byte-for-byte. accept is optional — undefined always means JSON, so
+      // the Node server path (which does not pass it) is unchanged.
+      const wantsHtml = typeof accept === 'string' && accept.includes('text/html');
+      if (wantsHtml) {
+        return html(200, landingHTML(threads.map((t) => ({ id: t.id, slug: t.slug, title: t.title }))));
+      }
       return json(200, {
         instance: 'threadhub.v0',
         // In public mode even the record COUNT is computed over published
