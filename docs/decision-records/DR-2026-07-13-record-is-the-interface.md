@@ -1,9 +1,11 @@
 # Decision Record: The Record Is the Interface (publication gate, public viewer, single-source verifier)
 > **Provenance:** clista@4de4c24b99f205e9d94c975cc116460b4be20aed
 
-**Status:** ADOPTED by owner direction 2026-07-13. Agent-authored draft
-without a separate challenge pass — disclosed, per the 2026-07-10 monorepo
-precedent. Seal Pending — the controller seals.
+**Status:** ADOPTED by owner direction 2026-07-13 — sealed 2026-07-13
+(`sha256:f188271ee3d7072378cc5ba59d7efbe8dd2906bb79180f6ad4cbb36d926361ee`)
+on ThreadHub thread `dr-2026-07-13-record-is-the-interface`
+(`thd_bb82066ad694`); see the Seal section. Agent-authored draft without a
+separate challenge pass — disclosed, per the 2026-07-10 monorepo precedent.
 **Decision owner:** troy_builds
 **Date raised:** 2026-07-13
 **Applies to:** `packages/threadhub` (server read surfaces, viewer,
@@ -221,6 +223,13 @@ doctrine. Binding rules:
 
 ## Seal
 
-Seal Pending — the controller seals. This DR adopts by owner direction
-2026-07-13; the sealed evidence thread lands through the studio seal flow
-and this section is amended post-seal, per the append-only rule.
+Sealed 2026-07-13 through the studio seal flow: ThreadHub thread
+`dr-2026-07-13-record-is-the-interface` (`thd_bb82066ad694`), 8 records,
+chain `valid: true`, head
+`sha256:f188271ee3d7072378cc5ba59d7efbe8dd2906bb79180f6ad4cbb36d926361ee`.
+The sealed evidence pins this document at merged main (`ec08ea0`) and the
+import-free checker artifact. The seal self-anchored through the live hook
+(`anchored: true, anchor_pushed: true`) — the first DR sealed after the
+anchoring machinery went automatic. Sealed under the legacy single
+custodial studio author via the manual seal route (disclosed; per-record
+writers for manual seals remain a filed follow-up, DR-phase5 rule 5.3).
