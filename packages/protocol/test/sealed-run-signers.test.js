@@ -182,3 +182,26 @@ test("appendThroughGate: a signer signs its own append; rejection signs nothing"
   assert.equal(rejected.signature, undefined);
   assert.equal(fs.readFileSync(signaturesPath(cwd), "utf8"), sidecarBefore);
 });
+
+test("a signers map missing an appending writer throws — partial custody is misconfiguration", async () => {
+  const signers = await keypairSigners();
+  delete signers.par_t1_checker; // maker keyed, checker forgotten
+  const cwd = tempCwd();
+
+  // Rule 5.1: every writer keyed. A provided-but-incomplete signers map must
+  // never silently append unsigned events for the missing writer.
+  assert.throws(
+    () => runSealedRun({
+      cwd, threadTitle: "T1 partial custody", question: "misconfigured?", roles: ROLES, signers
+    }),
+    /par_t1_checker/
+  );
+
+  // Everything that DID land was signed; nothing unsigned slipped through.
+  const events = readEvents(cwd);
+  const sidecar = fs.existsSync(signaturesPath(cwd))
+    ? fs.readFileSync(signaturesPath(cwd), "utf8").split(/\r?\n/).filter(Boolean).map(JSON.parse)
+    : [];
+  assert.equal(sidecar.length, events.length, "every appended event carries a signature");
+  assert.ok(events.every((e) => e.actor_id === "par_t1_maker"), "no unsigned checker event was appended");
+});

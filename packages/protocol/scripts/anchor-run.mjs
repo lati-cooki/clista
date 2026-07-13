@@ -36,6 +36,27 @@
 //     POST /threads; every anchored record is signed by the run's own
 //     writer keys, never the courier's.
 //
+//   * RE-RUNS CONVERGE — anchors are permanent testimony, so anchoring the
+//     same run twice must never duplicate anything:
+//       - Identity reuse: the hub exposes no identity lookup route
+//         (packages/threadhub/src/server.js has only POST /identities), so
+//         the first registration persists keys/<writer>.identity.json
+//         ({id, public_key, ...}) beside the key files and re-runs reuse
+//         it. A receipt whose public_key no longer matches the .pub is a
+//         hard error — a stale identity never wears a new key's mask.
+//       - Resume/skip: before appending, the target thread's existing
+//         records are fetched (GET /t/:key.json) and the already-anchored
+//         prefix is verified 1:1, IN ORDER, against the run's events by
+//         payload content address; verified events are skipped. Any
+//         mismatch in the overlap is a hard error naming the divergent
+//         seq — never a silent re-append.
+//       - Receipt: anchor-receipt.json is written into the run directory
+//         incrementally (after every landed record) and on failure, so a
+//         partial anchor is always legible ({landed, total, completed,
+//         error?}) and the next run resumes from it (it also pins the
+//         target thread). The receipt is run-local anchoring metadata —
+//         thread.jsonl / events.ndjson are never touched.
+//
 // Zero-dep: node:crypto/fs/path only; crypto + canonicalization come from
 // the reimplemented spec in ./run-keys.mjs (never imported from ThreadHub).
 import fs from "node:fs";
@@ -129,21 +150,55 @@ export async function anchorRun({
   const post = (p, body) => request(fetchImpl, base + p, { method: "POST", body: JSON.stringify(body) });
   const get = (p) => request(fetchImpl, base + p);
 
-  // Register each writer non-custodially: public key only.
+  // Register each writer non-custodially: public key only. First
+  // registration persists keys/<writer>.identity.json; re-runs reuse it —
+  // the hub has no identity lookup route, so the local receipt is the only
+  // way a re-run can converge instead of minting duplicates.
   const identities = {};
   for (const writer of writers) {
-    identities[writer] = await post("/identities", {
+    const identityFile = path.join(keysDir, `${writer}.identity.json`);
+    if (fs.existsSync(identityFile)) {
+      const saved = JSON.parse(fs.readFileSync(identityFile, "utf8"));
+      if (saved.public_key !== keys[writer].publicKeyHex) {
+        throw new Error(
+          `${identityFile} was minted for a different public key than ${writer}.pub — ` +
+          "refusing to reuse a stale identity (regenerate or remove the receipt deliberately)"
+        );
+      }
+      identities[writer] = saved;
+      continue;
+    }
+    const minted = await post("/identities", {
       display_name: writer,
       kind: "agent",
       public_key: keys[writer].publicKeyHex
     });
+    const receipt = {
+      id: minted.id,
+      public_key: keys[writer].publicKeyHex,
+      display_name: writer,
+      hub: base,
+      minted_at: now()
+    };
+    fs.writeFileSync(identityFile, JSON.stringify(receipt, null, 2) + "\n");
+    identities[writer] = receipt;
   }
 
-  // Target thread: an existing one when --slug is given; otherwise create it
-  // through a disclosed custodial courier (see header comment).
+  // Target thread, in priority order: explicit --slug; the thread a prior
+  // (possibly partial) anchor of this run already landed on; else a new
+  // thread created through a disclosed custodial courier (header comment).
+  const receiptPath = path.join(runDir, "anchor-receipt.json");
+  const priorReceipt = fs.existsSync(receiptPath)
+    ? JSON.parse(fs.readFileSync(receiptPath, "utf8"))
+    : null;
   let threadKey;
   if (slug) {
     threadKey = slug;
+  } else if (priorReceipt?.thread) {
+    if (priorReceipt.hub && priorReceipt.hub !== base) {
+      throw new Error(`anchor-receipt.json points at ${priorReceipt.hub}, not ${base} — refusing to fork the anchor across hubs`);
+    }
+    threadKey = priorReceipt.thread;
   } else {
     const courier = await post("/identities", {
       display_name: "anchor-run courier (custodial, thread genesis only)",
@@ -157,52 +212,101 @@ export async function anchorRun({
     threadKey = created.id;
   }
 
+  const runKind = format === "gate" ? "run.event" : "clista.event";
   const anchoredAt = now();
-  const records = [];
-  for (const event of events) {
-    const writer = writerOf(event, format);
-    // Chain position from the hub's verify view; the hub re-checks on
-    // submit, so a race means a clean stale-position rejection, not a fork.
-    const head = await get(`/t/${encodeURIComponent(threadKey)}/verify`);
-    const envelope = buildEnvelope({
-      threadId: head.thread,
-      seq: head.records,
-      prev: head.head,
-      author: identities[writer].id,
-      authorKeyHex: keys[writer].publicKeyHex,
-      recordedAt: anchoredAt, // anchor time — NOT the reasoning time
-      kind: format === "gate" ? "run.event" : "clista.event",
-      payload: event // verbatim; inner ts/timestamp stays the reasoning-time claim
-    });
-    const recordHash = contentAddress(envelope);
-    const signature = signHashHex(recordHash.slice(7), keys[writer].privateKeyPem);
-    const accepted = await post(`/t/${encodeURIComponent(threadKey)}/records/signed`, { envelope, signature });
-    records.push({
-      seq: accepted.seq,
-      record_hash: accepted.record_hash,
-      writer,
-      reasoning_ts: event.ts ?? event.timestamp ?? null,
-      recorded_at: anchoredAt
-    });
+
+  // Resume/skip: whatever this run already anchored must correspond 1:1, in
+  // order, to the run's events — matched by payload content address. A
+  // divergent overlap is a hard error: anchors are permanent testimony, and
+  // silently re-appending would fork it.
+  const existing = await get(`/t/${encodeURIComponent(threadKey)}.json`);
+  const anchoredPrefix = existing.filter((env) => env.kind === runKind);
+  if (anchoredPrefix.length > events.length) {
+    throw new Error(
+      `thread ${threadKey} already holds ${anchoredPrefix.length} ${runKind} records ` +
+      `but the run has only ${events.length} events — wrong thread?`
+    );
+  }
+  const records = anchoredPrefix.map((env, i) => {
+    if (contentAddress(env.payload) !== contentAddress(events[i])) {
+      throw new Error(
+        `anchored record at thread seq ${env.seq} diverges from run event ${i} ` +
+        "(payload content addresses differ) — refusing to re-append over a divergent overlap"
+      );
+    }
+    return {
+      seq: env.seq,
+      record_hash: contentAddress(env),
+      writer: writerOf(events[i], format),
+      reasoning_ts: events[i].ts ?? events[i].timestamp ?? null,
+      recorded_at: env.recorded_at,
+      resumed: true
+    };
+  });
+
+  // The receipt makes the anchor legible at every moment: rewritten after
+  // each landed record and on failure, so a partial anchor names exactly
+  // what landed and the next run resumes instead of duplicating.
+  const writeReceipt = (extra = {}) => {
+    const receipt = {
+      schema: "clista.anchor_receipt.v0",
+      runDir,
+      eventsFile: file,
+      format,
+      hub: base,
+      thread: threadKey,
+      anchoredAt,
+      writers: writers.map((w) => ({ writer: w, identity: identities[w].id, public_key: keys[w].publicKeyHex })),
+      total: events.length,
+      landed: records.length,
+      completed: records.length === events.length,
+      records,
+      // DR 4.2/4.3: what this receipt does and does not prove.
+      proves: "weak external timestamp: these events existed no later than anchoredAt",
+      doesNotProve: "notarization or live witnessing; inner ts values are the writers' reasoning-time claims",
+      ...extra
+    };
+    fs.writeFileSync(receiptPath, JSON.stringify(receipt, null, 2) + "\n");
+    return receipt;
+  };
+
+  try {
+    for (const event of events.slice(records.length)) {
+      const writer = writerOf(event, format);
+      // Chain position from the hub's verify view; the hub re-checks on
+      // submit, so a race means a clean stale-position rejection, not a fork.
+      const head = await get(`/t/${encodeURIComponent(threadKey)}/verify`);
+      const envelope = buildEnvelope({
+        threadId: head.thread,
+        seq: head.records,
+        prev: head.head,
+        author: identities[writer].id,
+        authorKeyHex: keys[writer].publicKeyHex,
+        recordedAt: anchoredAt, // anchor time — NOT the reasoning time
+        kind: runKind,
+        payload: event // verbatim; inner ts/timestamp stays the reasoning-time claim
+      });
+      const recordHash = contentAddress(envelope);
+      const signature = signHashHex(recordHash.slice(7), keys[writer].privateKeyPem);
+      const accepted = await post(`/t/${encodeURIComponent(threadKey)}/records/signed`, { envelope, signature });
+      records.push({
+        seq: accepted.seq,
+        record_hash: accepted.record_hash,
+        writer,
+        reasoning_ts: event.ts ?? event.timestamp ?? null,
+        recorded_at: anchoredAt
+      });
+      threadKey = head.thread; // pin the id for the receipt
+      writeReceipt();
+    }
+  } catch (error) {
+    writeReceipt({ error: error.message });
+    throw error;
   }
 
   const verify = await get(`/t/${encodeURIComponent(threadKey)}/verify`);
-  return {
-    schema: "clista.anchor_receipt.v0",
-    runDir,
-    eventsFile: file,
-    format,
-    hub: base,
-    thread: verify.thread,
-    anchoredAt,
-    writers: writers.map((w) => ({ writer: w, identity: identities[w].id, public_key: keys[w].publicKeyHex })),
-    records,
-    head: verify.head,
-    valid: verify.valid,
-    // DR 4.2/4.3: what this receipt does and does not prove.
-    proves: "weak external timestamp: these events existed no later than anchoredAt",
-    doesNotProve: "notarization or live witnessing; inner ts values are the writers' reasoning-time claims"
-  };
+  threadKey = verify.thread;
+  return writeReceipt({ head: verify.head, valid: verify.valid });
 }
 
 function parseArgs(argv) {

@@ -176,6 +176,11 @@ def append_event(writer, etype, payload):
 
 
 def cmd_init(args):
+    if os.path.basename(HERE) == "scripts":
+        sys.exit(
+            "GATE REJECT: gate.py is running from its template location (a scripts/ dir); "
+            "copy it into a fresh run directory first — a run's thread.jsonl lives with the run, not the template"
+        )
     if load():
         sys.exit("GATE REJECT: thread already exists")
     with open(args.prompt_file) as f:

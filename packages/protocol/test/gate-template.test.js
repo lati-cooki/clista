@@ -195,3 +195,14 @@ test("next-run provenance: t1-agent-run.mjs gens per-run keys and states the hon
   );
   assert.ok(!source.includes("privateKeyPem"), "no private key handles outside signer closures — key files only");
 });
+
+test("gate.py template refuses to init in place from scripts/", { skip: !HAVE_PYTHON }, () => {
+  // Running the template where it lives would create scripts/thread.jsonl;
+  // the guard fires before any file is read or written.
+  const res = spawnSync("python3", [TEMPLATE, "init", "--prompt-file", "does-not-matter.md", "--thread", "oops"], {
+    encoding: "utf8", env: GATE_ENV, cwd: os.tmpdir()
+  });
+  assert.notEqual(res.status, 0);
+  assert.match(res.stderr + res.stdout, /copy/i, "the refusal says to copy the template first");
+  assert.ok(!fs.existsSync(path.join(ROOT, "scripts", "thread.jsonl")), "no log was created in scripts/");
+});

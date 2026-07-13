@@ -114,6 +114,15 @@ function runSealedRun({ cwd, threadTitle, question, roles, now, signers }) {
   const signatures = signers ? [] : undefined;
 
   const gate = (spec) => {
+    // Rule 5.1: every writer keyed. A provided-but-incomplete signers map is
+    // misconfiguration, not a mode — throwing beats silently appending an
+    // unsigned event for the forgotten writer.
+    if (signers && !signers[spec.actorId]) {
+      throw new Error(
+        `signers map provided but has no signer for "${spec.actorId}" — ` +
+        "every writer must be keyed (DR-phase5-topology rule 5.1); partial custody is misconfiguration, not a mode"
+      );
+    }
     const result = appendThroughGate(spec, cwd, signers?.[spec.actorId]);
     if (!result.valid) {
       rejections.push({ type: spec.type, errors: result.errors });
