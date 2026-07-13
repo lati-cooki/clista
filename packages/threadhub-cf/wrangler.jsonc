@@ -1,0 +1,39 @@
+// wrangler.jsonc — threadhub on Cloudflare: one Worker, one SQLite Durable
+// Object. The Worker is the front door (auth → role, public-404 write gate,
+// /verify.mjs bytes); the DO holds the store and the route table.
+//
+// Secret (never in this file): THREADHUB_WRITE_TOKEN — set with
+//   wrangler secret put THREADHUB_WRITE_TOKEN
+// Tests inject it via vitest.config.js miniflare bindings.
+{
+  "name": "threadhub-cf",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-07-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  "durable_objects": {
+    "bindings": [{ "name": "HUB", "class_name": "HubDO" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["HubDO"] }],
+
+  // /verify.mjs byte-identity by construction: the Worker Text-imports the
+  // repo file itself (../threadhub/scripts/verify-standalone.mjs) and serves
+  // those bytes verbatim. No copy, no build step to drift.
+  "rules": [
+    { "type": "Text", "globs": ["**/verify-standalone.mjs"], "fallthrough": true }
+  ],
+
+  // store.js (required by hub.js) pulls node:sqlite at module load. The DO
+  // supplies its own store (duck-typed), so Store is never constructed here;
+  // the alias makes the bundle inert instead of unbuildable. Mirrored in
+  // vitest.config.js resolve.alias for the test pool.
+  "alias": {
+    "node:sqlite": "./src/node-sqlite-stub.js"
+  },
+
+  "observability": { "enabled": true }
+
+  // NO routes / custom domain yet: staging runs on workers.dev first; the
+  // consensusprotocol.ai custom domain lands at cutover (plan phase 8), after
+  // the ANCHORS.md head byte-match gate.
+}

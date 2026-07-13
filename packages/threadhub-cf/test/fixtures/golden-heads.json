@@ -1,0 +1,92 @@
+[
+  {
+    "thread_id": "thd_032624ba7f19",
+    "slug": "dr-2026-07-12-fcp-metrics",
+    "records": 8,
+    "head": "sha256:ff7aef2f69da0091df84f6c5b9e78f2665eef083c978e49c80416cf094493bc3"
+  },
+  {
+    "thread_id": "thd_05761164f67c",
+    "slug": "promote-premium-enterprise-review-v1-0-to-production",
+    "records": 7,
+    "head": "sha256:ac8e8519a249649f5a7b05fe4422215602264aa9f87cf8e2896d91bc4c9d3f69"
+  },
+  {
+    "thread_id": "thd_1a2fb69683e7",
+    "slug": "promote-lite-fast-review-v1-0-to-production",
+    "records": 7,
+    "head": "sha256:78d9bbd3d39c56f0bced7869f948cd7a400cc2e57275e214b09da1c548712091"
+  },
+  {
+    "thread_id": "thd_4773b17369c9",
+    "slug": "promote-agent-operational-checklist-v1-1-0-to-production",
+    "records": 9,
+    "head": "sha256:fb388e3109bfa72ca65650c17895a76fa03dd4ebd0b4eaeb51425ee37c39dd40"
+  },
+  {
+    "thread_id": "thd_5074435c1aba",
+    "slug": "promote-agent-operational-checklist-v1-0-0-to-production",
+    "records": 7,
+    "head": "sha256:7ec6ba9c444ed8877acf334014b9ef1c4d89921c9988b86ab98decface19239b"
+  },
+  {
+    "thread_id": "thd_64281f82b251",
+    "slug": "promote-industry-playbook-technology-v1-0-to-production",
+    "records": 7,
+    "head": "sha256:6a79e18480f0c6fa2e013e7a101c14d3386bbd14efce8ad84b830afd798fa32b"
+  },
+  {
+    "thread_id": "thd_725f1cef76ac",
+    "slug": "dr-phase5-topology",
+    "records": 12,
+    "head": "sha256:a406d40ae108df11160bbee04c9e927432761c90245da74bf7ae9e2c9060706a"
+  },
+  {
+    "thread_id": "thd_7d96f3851c00",
+    "slug": "dr-2026-07-12-curation-check",
+    "records": 8,
+    "head": "sha256:a077f6d0dfe905276b4a81b8657d3e398c1b09b25acc059bddccc2fd4fb471af"
+  },
+  {
+    "thread_id": "thd_80c47882fb67",
+    "slug": "prompt-studio-2026-07-13-phase-5-ships",
+    "records": 10,
+    "head": "sha256:738a304e511429219eafa6084e189ac9093e73648da022cdc610ed4fa706c6c7"
+  },
+  {
+    "thread_id": "thd_85fb8e66ae8c",
+    "slug": "founding-architecture",
+    "records": 14,
+    "head": "sha256:96ca38e6a2260ab9271ba50c996c2b13ae1aa421ec900101347dea5ff91c568c"
+  },
+  {
+    "thread_id": "thd_9c9cb876922b",
+    "slug": "promote-consensus-protocol-v1-1-0-to-production",
+    "records": 7,
+    "head": "sha256:1233b6d89cee1c4ab32f2958ab2f6c483edcbfad4c840bbec3c6eb1f8b0f0161"
+  },
+  {
+    "thread_id": "thd_a90077496e2e",
+    "slug": "prompt-studio-2026-07-12-threads-phase-4-ships",
+    "records": 15,
+    "head": "sha256:203b7c2f93be210be81d979c3d93b1447079ccd1f5f6c8955ce081494f937233"
+  },
+  {
+    "thread_id": "thd_bb82066ad694",
+    "slug": "dr-2026-07-13-record-is-the-interface",
+    "records": 8,
+    "head": "sha256:f188271ee3d7072378cc5ba59d7efbe8dd2906bb79180f6ad4cbb36d926361ee"
+  },
+  {
+    "thread_id": "thd_bc679070f90a",
+    "slug": "challenge-agent-operational-checklist-purpose-fit-directive-v1-1",
+    "records": 15,
+    "head": "sha256:01add139d42b8dbfe275f946105bae3a9bbbf82068f6c31df60c345d95b06515"
+  },
+  {
+    "thread_id": "thd_d8772aa588a9",
+    "slug": "ship-the-support-beta",
+    "records": 9,
+    "head": "sha256:00a0a3f7a700ce44432cc0e3d158783eda5504841099c8fcb24f76bf20a799f7"
+  }
+]
