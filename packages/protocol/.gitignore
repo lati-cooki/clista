@@ -9,5 +9,11 @@ package-lock.json
 __pycache__/
 *.pyc
 
+# Per-run writer signing keys are non-custodial and run-local
+# (DR-phase5-topology rules 5.1/5.5): private key material is NEVER
+# committable. .pub files inside run key dirs stay local too.
+*.pem
+runs/**/keys/
+
 # Local lati agent docs (not part of the protocol)
 docs/lati-*.md
