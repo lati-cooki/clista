@@ -250,7 +250,11 @@ export async function anchorRun({
     threadKey = created.id;
   }
 
-  const runKind = format === "gate" ? "run.event" : "clista.event";
+  // Hub CHECK allows genesis|clista.event|attestation|note. Gate-format
+  // events are NOT ClisTa-grammar events (the T2b baseline finding turns on
+  // exactly that), so they anchor as the generic 'note' kind — the payload
+  // carries the gate event verbatim; the label never overclaims grammar.
+  const runKind = format === "gate" ? "note" : "clista.event";
   const anchoredAt = now();
 
   // Resume/skip: whatever this run already anchored must correspond 1:1, in

@@ -112,6 +112,11 @@ function fakeHub({ contentAddress, verifyHashHex }) {
       if (envelope.thread !== thread.id) {
         return jsonRes(400, { error: "envelope.thread does not match thread", code: "bad_request" });
       }
+      // mirror the real records-table schema CHECK on kind — a fake hub that
+      // accepts any kind hides exactly the 400 the live hub returns.
+      if (!["genesis", "clista.event", "attestation", "note"].includes(envelope.kind)) {
+        return jsonRes(400, { error: "CHECK constraint failed: kind IN ('genesis','clista.event','attestation','note')" });
+      }
       const author = state.identities.find((i) => i.id === envelope.author);
       if (!author) return jsonRes(404, { error: `unknown identity: ${envelope.author}`, code: "not_found" });
       if (envelope.author_key !== author.public_key) {
@@ -235,7 +240,7 @@ test("anchorRun: gate.py-format run anchors per-event with signed envelopes", as
     assert.deepEqual(envelope.payload, events[i]);
     assert.equal(envelope.payload.ts, events[i].ts);
     assert.notEqual(envelope.payload.ts, envelope.recorded_at);
-    assert.equal(envelope.kind, "run.event");
+    assert.equal(envelope.kind, "note");
     // The writer's own key signed it.
     const writerPub = fs.readFileSync(path.join(keysDir, `${events[i].writer}.pub`), "utf8").trim();
     assert.equal(envelope.author_key, writerPub);
