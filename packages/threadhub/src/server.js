@@ -75,6 +75,10 @@ function createServer(dbPath, opts = {}) {
         ip: req.socket.remoteAddress ?? '?',
         allowWrite,
         checkerSource: () => fs.readFileSync(CHECKER_PATH, 'utf8'),
+        // Content negotiation for GET / only: a browser gets the HTML landing,
+        // every API client (no/`*/*` Accept) keeps the JSON. Optional — absent
+        // means JSON, so nothing else changes.
+        accept: req.headers.accept,
       });
     } catch (e) {
       out = errorResponse(e);

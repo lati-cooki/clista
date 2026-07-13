@@ -91,6 +91,11 @@ export default {
       }
     }
     const ip = request.headers.get('cf-connecting-ip') ?? '?';
+    // The ONE client header that crosses the RPC boundary, as a scalar: the
+    // Accept string. GET / content-negotiates on it (browser → HTML landing,
+    // API client → JSON). Everything else ignores it. Absent → undefined →
+    // JSON, so a header-less client is unchanged.
+    const accept = request.headers.get('accept') ?? undefined;
 
     try {
       // DO instance name: bumped 'hub'->'hub-prod' at the consensusprotocol.ai
@@ -99,7 +104,7 @@ export default {
       // place). MUST match hub-internal.js so the fetch face and HubInternal
       // reach the same instance.
       const stub = env.HUB.get(env.HUB.idFromName('hub-prod'));
-      const out = await stub.handle({ method, path: url.pathname, bodyText, bodyError, role, ip });
+      const out = await stub.handle({ method, path: url.pathname, bodyText, bodyError, role, ip, accept });
       return respond(out); // (5) respond() stamps Cache-Control: no-store
     } catch (e) {
       // Same last-resort shaping as the Node adapter's outer catch.
