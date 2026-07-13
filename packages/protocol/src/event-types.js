@@ -143,6 +143,11 @@ const PROTOCOL_EVENT_TYPES = EVENT_TYPES;
 // event type forces a deliberate classification here or fails loudly — the
 // same three-coordinated-edits discipline as the registry itself.
 //
+// Dispositions of dissent are themselves dissent-bearing: ObjectionResolved
+// is listed deliberately, so a report that cites an objection but not its
+// resolution fails curation — the disposition of dissent is part of the
+// dissent (DR-2026-07-12-curation-check, Consequences).
+//
 // Maintenance: keep this array sorted and unique; every name must appear
 // verbatim in EVENT_TYPES.
 const DISSENT_BEARING_TYPES = Object.freeze([

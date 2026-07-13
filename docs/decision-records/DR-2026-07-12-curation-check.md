@@ -153,6 +153,12 @@ Adopt Option C. Binding rules:
   write a bad reason; the check only forbids silence. Auditing reason
   *quality* is human/probe territory (T3/T4), same boundary as prose
   claims.
+- **Dispositions of dissent are themselves dissent-bearing.**
+  `ObjectionResolved` is in the set deliberately, so a renderer that cites
+  an objection but not its resolution fails curation — the disposition of
+  dissent is part of the dissent, and a report that shows the challenge
+  while silently dropping how it was answered curates just as surely as one
+  that drops the challenge.
 - **The flagship T1 run stays unmeasured until a mapping lands.** A
   meaningful curation verdict on the gate.py-format run requires mapping
   rows added by amendment to DR-phase5-topology Decision 3 (or a
