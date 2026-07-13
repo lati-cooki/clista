@@ -115,9 +115,13 @@ doctrine. Binding rules:
    exposed, unproxied write surface an outsider could therefore mint an
    identity and append a well-formed `ThreadPublished` to any slug —
    granting themselves read access through the write path — or
-   revoke-vandalize a published thread. So this rule's access-control claim
-   holds ONLY where the write surface is proxied away or disabled; any
-   public exposure MUST do one or the other. Binding publication authority
+   revoke-vandalize a published thread. An exposed write surface also
+   leaks unpublished-thread EXISTENCE the read gate hides (a rejected
+   append's stale_chain error differs from an unknown-thread error) — the
+   milder oracle, named here so the read gate's indistinguishability claim
+   is not mistaken for covering the write path. So this rule's
+   access-control claim holds ONLY where the write surface is proxied away
+   or disabled; any public exposure MUST do one or the other. Binding publication authority
    to specific identities in the hub itself is named future work: it would
    be the hub's first authorization concept, and it is deliberately not
    smuggled in through this record.
