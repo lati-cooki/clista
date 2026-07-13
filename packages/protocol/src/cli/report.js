@@ -1,8 +1,11 @@
-// T2 — the ventriloquism diff (Mutual Reliance Slice 6). Given a log
-// containing SealedReport events, extract every claim and verify it against
-// the union of witnessed events: chain verifies, every cited hash exists
-// earlier in the report's own thread, no claim lacks a citation. Output is
-// the list of unwitnessed claims — an empty list is the pass.
+// T2 — the ventriloquism diff (Mutual Reliance Slice 6), plus T2b — the
+// curation check (DR-2026-07-12-curation-check). Given a log containing
+// SealedReport events, extract every claim and verify it against the union
+// of witnessed events: chain verifies, every cited hash exists earlier in
+// the report's own thread, no claim lacks a citation, and no dissent-bearing
+// event is silently omitted (cited by some claim, or disclosed in
+// omitted_dissent[] with a reason). Output is the list of unwitnessed claims
+// and silenced dissent — an empty list is the pass.
 //
 // The check itself is src/report.js verifyReport (pure engine function);
 // this wrapper does file IO, option parsing, exit-code mapping, and the
@@ -30,6 +33,7 @@ function reportVerify(options, cwd) {
   const chainErrors = result.errors.filter((e) => e.check === "chain");
   const structureErrors = result.errors.filter((e) => e.check === "structure");
   const unwitnessed = result.errors.filter((e) => e.check === "existence" || e.check === "coverage");
+  const silenced = result.errors.filter((e) => e.check === "curation");
 
   lines.push(`chain:             ${chainErrors.length === 0 ? "VERIFIES" : `BROKEN (${chainErrors.length} reasons)`}`);
   for (const err of chainErrors) {
@@ -44,15 +48,24 @@ function reportVerify(options, cwd) {
     lines.push(`  - ${err.reason}`);
   }
 
+  lines.push(`silenced dissent:  ${silenced.length}`);
+  for (const err of silenced) {
+    lines.push(`  - ${err.reason}`);
+  }
+
   if (result.reportCount === 0) {
     lines.push("");
     lines.push("no SealedReport events in this log — nothing to diff (vacuous pass)");
   } else if (result.valid) {
     lines.push("");
-    lines.push("PASS — every claim in every report cites a witnessed event");
+    lines.push("PASS — every claim in every report cites a witnessed event; no dissent-bearing event silently omitted");
   } else {
+    const grounds = [];
+    if (unwitnessed.length) grounds.push("the claims listed above are not witnessed by the log they describe");
+    if (silenced.length) grounds.push("the dissent-bearing events listed above were silently omitted from a report");
+    if (!grounds.length) grounds.push("the log fails report-layer verification (see above)");
     lines.push("");
-    lines.push("FAIL — the claims listed above are not witnessed by the log they describe");
+    lines.push(`FAIL — ${grounds.join("; ")}`);
   }
   writeOut(`${lines.join("\n")}\n`);
 

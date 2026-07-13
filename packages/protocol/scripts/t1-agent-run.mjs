@@ -17,7 +17,9 @@
 //   - the emitted thread is saved under runs/ as the artifact; anchor it
 //     post-hoc with scripts/anchor-run.mjs (two-timestamp honesty)
 //
-// Pass criterion (T1): the emitted thread passes existing chain verification.
+// Pass criteria (T1): the emitted thread passes chain verification, full
+// validation, and report-layer verification (chain/existence/coverage and,
+// from 2026-07-12, T2b curation — DR-2026-07-12-curation-check).
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -199,5 +201,5 @@ console.log(`log validates:     ${result.validation.valid}`);
 console.log(`report verifies:   ${report.valid} (${report.errors.length} errors)`);
 console.log(`gate rejections:   ${result.rejections.length}`);
 console.log(`artifacts:         ${path.relative(process.cwd(), runDir)}`);
-console.log(`\nT1 ${result.pass ? "PASS" : "FAIL"} — emitted thread ${result.pass ? "passes" : "does NOT pass"} chain verification`);
+console.log(`\nT1 ${result.pass ? "PASS" : "FAIL"} — emitted thread ${result.pass ? "passes" : "does NOT pass"} chain, validation, and report-layer checks (incl. T2b curation)`);
 process.exit(result.pass ? 0 : 1);

@@ -11,13 +11,18 @@
 //   - agent:         payloads produced by live model calls
 //                    (scripts/t1-agent-run.mjs)
 //
-// T1 pass criterion (the only one that counts): the emitted thread passes
-// existing chain verification.
+// T1 pass criteria: the emitted thread passes existing chain verification,
+// full validation, and report-layer verification — chain, existence,
+// coverage, and (T2b, DR-2026-07-12-curation-check) curation: no
+// dissent-bearing event silently omitted from the seal. Curation joined the
+// pass criteria for runs from 2026-07-12 on; earlier run artifacts are
+// immutable and keep the verdicts they were measured under.
 const fs = require("node:fs");
 const path = require("node:path");
 const { createEvent, readEvents, appendEvent, newId } = require("../events");
 const { validateEvents } = require("../validator");
 const { verifyEventIntegrity, prepareEventForAppend } = require("../integrity");
+const { verifyReport } = require("../report");
 const { witnessRejection } = require("../gate");
 
 // --- injected signers (Phase 5 Slice 2, DR-phase5-topology rule 5.1) ---
@@ -293,16 +298,19 @@ function runSealedRun({ cwd, threadTitle, question, roles, now, signers }) {
       }
     });
 
-    // T1 pass criterion: the emitted thread passes existing chain verification.
+    // T1 pass criteria: chain verification, full validation, and the
+    // report-layer checks (chain/existence/coverage/curation — T2b).
     const events = readEvents(cwd);
     const integrity = verifyEventIntegrity(events);
     const validation = validateEvents(events);
+    const report = verifyReport(events);
     return {
-      pass: integrity.valid && validation.valid,
+      pass: integrity.valid && validation.valid && report.valid,
       threadId,
       events,
       integrity,
       validation,
+      report,
       sealEventId: reportEvt.event_id,
       rejections,
       appendedCount: appended.length,
@@ -317,6 +325,7 @@ function runSealedRun({ cwd, threadTitle, question, roles, now, signers }) {
         events,
         integrity: verifyEventIntegrity(events),
         validation: validateEvents(events),
+        report: verifyReport(events),
         sealEventId: null,
         rejections,
         appendedCount: appended.length,

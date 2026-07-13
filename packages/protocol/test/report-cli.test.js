@@ -88,6 +88,101 @@ test("report verify --json returns the raw verifyReport result", () => {
   assert.deepEqual(parsed.errors, []);
 });
 
+// ---- T2b: the curation bucket (DR-2026-07-12-curation-check) ----
+//
+// Rebuild the sealed-run log with ONE extra ObjectionRaised inserted just
+// before the seal, re-chaining so the chain stays valid. The harness report
+// cites the run's own objection and resolution, so this inserted event is
+// the only dissent the report does not cite — cited/disclosed/silent is then
+// entirely up to the fixture.
+function rechainWithExtraObjection(cwd, mutateReport) {
+  const events = readEvents(cwd);
+  const report = events.at(-1);
+  assert.equal(report.event_type, "SealedReport");
+  const objection = {
+    event_id: "evt_extra_objection",
+    event_type: "ObjectionRaised",
+    thread_id: report.thread_id,
+    actor_id: "par_t1_checker",
+    timestamp: report.timestamp,
+    payload: {
+      objection: {
+        id: "obj_extra_uncited",
+        object: "objection",
+        threadId: report.thread_id,
+        participantId: "par_t1_checker",
+        status: "open",
+        blocking: false,
+        statement: "a second objection the report never acknowledges",
+        raisedAt: report.timestamp
+      }
+    }
+  };
+  const sequence = [...events.slice(0, -1), objection, report];
+  const rechained = [];
+  let previousHash;
+  for (const event of sequence) {
+    if (event === report && mutateReport) {
+      // By now the inserted objection is chained; hand its hash to the fixture.
+      const chainedObjection = rechained.find((e) => e.event_id === "evt_extra_objection");
+      mutateReport(report.payload.sealedReport, chainedObjection);
+    }
+    const prepared = prepareEventForAppend(event, previousHash);
+    previousHash = prepared.content_hash;
+    rechained.push(prepared);
+  }
+  const rechainedPath = path.join(cwd, "curation.ndjson");
+  fs.writeFileSync(rechainedPath, serializeEventsNdjson(rechained));
+  return rechainedPath;
+}
+
+test("curation: a clean sealed run passes with zero silenced dissent", () => {
+  const cwd = sealedRunCwd();
+  const result = runCaptured(["report", "verify"], cwd);
+  assert.equal(result.exitCode, 0, result.stderr);
+  assert.match(result.stdout, /silenced dissent: {2}0/);
+  assert.match(
+    result.stdout,
+    /PASS — every claim in every report cites a witnessed event; no dissent-bearing event silently omitted/
+  );
+});
+
+test("curation: uncited dissent disclosed in omitted_dissent with a reason passes", () => {
+  const cwd = sealedRunCwd();
+  const eventsPath = rechainWithExtraObjection(cwd, (sealedReport, chainedObjection) => {
+    sealedReport.omitted_dissent = [
+      { eventHash: chainedObjection.content_hash, reason: "objection withdrawn out of band; outside report scope" }
+    ];
+  });
+  const result = runCaptured(["report", "verify", "--events", eventsPath], cwd);
+  assert.equal(result.exitCode, 0, result.stdout);
+  assert.match(result.stdout, /chain: {13}VERIFIES/);
+  assert.match(result.stdout, /silenced dissent: {2}0/);
+});
+
+test("curation: silently omitted dissent fails, naming index, type, and hash, and exits 1", () => {
+  const cwd = sealedRunCwd();
+  const eventsPath = rechainWithExtraObjection(cwd);
+  const result = runCaptured(["report", "verify", "--events", eventsPath], cwd);
+  assert.equal(result.exitCode, 1);
+  assert.match(result.stdout, /chain: {13}VERIFIES/);
+  assert.match(result.stdout, /unwitnessed claims: 0/);
+  assert.match(result.stdout, /silenced dissent: {2}1/);
+  assert.match(result.stdout, /dissent-bearing event evt_extra_objection at index \d+ \(ObjectionRaised, sha256:/);
+  assert.match(result.stdout, /neither cited by any claim nor disclosed in omitted_dissent/);
+  assert.match(result.stdout, /FAIL — the dissent-bearing events listed above were silently omitted from a report/);
+});
+
+test("curation: an omitted_dissent entry with an empty reason does not satisfy the check", () => {
+  const cwd = sealedRunCwd();
+  const eventsPath = rechainWithExtraObjection(cwd, (sealedReport, chainedObjection) => {
+    sealedReport.omitted_dissent = [{ eventHash: chainedObjection.content_hash, reason: "" }];
+  });
+  const result = runCaptured(["report", "verify", "--events", eventsPath], cwd);
+  assert.equal(result.exitCode, 1);
+  assert.match(result.stdout, /silenced dissent: {2}1/);
+});
+
 test("report verify on a log with no reports is a vacuous pass", () => {
   const cwd = fs.mkdtempSync(path.join(os.tmpdir(), "clista-t2-empty-"));
   runCaptured(["init"], cwd);
