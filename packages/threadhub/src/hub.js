@@ -50,8 +50,18 @@ function slugify(s) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 64);
 }
 
+// A "store" is anything that quacks like ./store.js — the duck test is
+// the two methods every code path needs (reads route through getThread,
+// the one write path through insertRecord). Passing a store instead of a
+// path lets another runtime (e.g. a Durable Object's SQL storage) supply
+// the persistence while Hub's invariants stay identical.
+const quacksLikeStore = (x) =>
+  x != null && typeof x.getThread === 'function' && typeof x.insertRecord === 'function';
+
 class Hub {
-  constructor(dbPath) { this.store = new Store(dbPath); }
+  constructor(storeOrPath) {
+    this.store = quacksLikeStore(storeOrPath) ? storeOrPath : new Store(storeOrPath);
+  }
 
   // --- identities (custodial keys in v1) ---
   // Pass publicKey to register non-custodially: the hub stores only the
