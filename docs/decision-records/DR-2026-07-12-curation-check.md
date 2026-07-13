@@ -170,3 +170,16 @@ Adopt Option C. Binding rules:
 ## Amendments
 
 None yet.
+
+## Seal
+
+Sealed 2026-07-12 through the studio seal flow: ThreadHub thread
+`dr-2026-07-12-curation-check` (`thd_7d96f3851c00`), 8 records, chain
+`valid: true`, head
+`sha256:a077f6d0dfe905276b4a81b8657d3e398c1b09b25acc059bddccc2fd4fb471af`.
+The sealed evidence pins this document at commit `ec4b9ff` and the T2b
+baseline section of FINDINGS-T1-T2.md (appended `6bf906f`; reproduced
+byte-for-byte by independent review). Sealed under the legacy single
+custodial studio author (pre-Slice-2 live server) — custody regime
+disclosed per DR-phase5-topology rule 5.3; the anchor row lands via the
+retroactive backfill at merge time.

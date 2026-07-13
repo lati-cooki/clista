@@ -156,5 +156,15 @@ None yet.
 
 ## Seal
 
-Pending — the controller seals this record through the studio seal flow;
-the seal is not the drafting agent's to run.
+Sealed 2026-07-12 through the studio seal flow: ThreadHub thread
+`dr-2026-07-12-fcp-metrics` (`thd_032624ba7f19`), 8 records, chain
+`valid: true`, head
+`sha256:ff7aef2f69da0091df84f6c5b9e78f2665eef083c978e49c80416cf094493bc3`.
+The sealed evidence pins this document at commit `cbfc008` and the live
+0/5 baseline measurement (fcp_waive_ratio 0.0 measured, contested 0/5
+with the table-absence disclosure). Definitions are immutable from this
+seal forward — changes take a NEW metric name by amendment, never a
+redefinition. Sealed under the legacy single custodial studio author
+(pre-Slice-2 live server) — custody regime disclosed per
+DR-phase5-topology rule 5.3; the anchor row lands via the retroactive
+backfill at merge time.
