@@ -1,0 +1,19 @@
+{
+  "name": "threadhub-cf",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cloudflare Worker + SQLite Durable Object adapter for threadhub. All route logic, bytes, and invariants live in ../threadhub (zero-dependency); this package is transport + persistence only.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.18.4",
+    "vitest": "^4.1.10",
+    "wrangler": "^4.110.0"
+  },
+  "allowScripts": {
+    "workerd@1.20260708.1": true
+  }
+}
