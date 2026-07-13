@@ -20,6 +20,7 @@ jobs:
       protocol: ${{ steps.filter.outputs.protocol }}
       threadhub: ${{ steps.filter.outputs.threadhub }}
       app: ${{ steps.filter.outputs.app }}
+      docs: ${{ steps.filter.outputs.docs }}
     steps:
       - uses: actions/checkout@v5
       - id: filter
@@ -34,6 +35,9 @@ jobs:
               - '.github/workflows/tests.yml'
             app:
               - 'app/**'
+              - '.github/workflows/tests.yml'
+            docs:
+              - 'docs/**'
               - '.github/workflows/tests.yml'
 
   protocol-js:
@@ -98,6 +102,22 @@ jobs:
         with:
           node-version: 24
       - run: npm test
+
+  docs-pins:
+    name: docs · provenance pins
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      # Same-repo pins verify via the API with the workflow token; pins to
+      # repos this token cannot see are disclosed as unverifiable, not failed.
+      - run: node docs/scripts/validate-pins.mjs
+        env:
+          PIN_VALIDATION_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   app:
     name: app · node + worker tests

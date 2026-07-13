@@ -5,5 +5,5 @@
   "license": "MIT",
   "engines": { "node": ">=22" },
   "bin": { "threadhub": "bin/cli.js" },
-  "scripts": { "test": "node --test test/test.js test/octopus.test.js test/octopus-cli.test.js test/hardening.test.js test/agent-loop/loop.test.js test/publish-to-app.test.js", "serve": "node bin/cli.js serve" }
+  "scripts": { "test": "node --test test/test.js test/octopus.test.js test/octopus-cli.test.js test/hardening.test.js test/agent-loop/loop.test.js test/publish-to-app.test.js test/verify-standalone.test.js", "serve": "node bin/cli.js serve" }
 }

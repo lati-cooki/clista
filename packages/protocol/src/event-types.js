@@ -130,6 +130,51 @@ const EVENT_TYPES = Object.freeze([
 // they alias the one canonical list rather than duplicating it.
 const PROTOCOL_EVENT_TYPES = EVENT_TYPES;
 
+// Dissent-bearing event types (T2b curation check,
+// DR-2026-07-12-curation-check). A SealedReport must either claim-cite every
+// earlier same-thread event of one of these types or disclose it in its
+// omitted_dissent[] block with a reason — silent omission fails curation
+// (src/report.js check 4).
+//
+// EXPLICIT ENUMERATION, deliberately: no wildcard/suffix matching happens at
+// runtime. Every `*FailureRecorded` and `*ViolationRecorded` type in the
+// registry above is listed by name; test/curation-check.test.js sweeps the
+// registry for those suffixes at TEST time, so adding a new failure/violation
+// event type forces a deliberate classification here or fails loudly — the
+// same three-coordinated-edits discipline as the registry itself.
+//
+// Dispositions of dissent are themselves dissent-bearing: ObjectionResolved
+// is listed deliberately, so a report that cites an objection but not its
+// resolution fails curation — the disposition of dissent is part of the
+// dissent (DR-2026-07-12-curation-check, Consequences).
+//
+// Maintenance: keep this array sorted and unique; every name must appear
+// verbatim in EVENT_TYPES.
+const DISSENT_BEARING_TYPES = Object.freeze([
+  "CompatibilityFailureRecorded",
+  "ContributionAttributionDisputed",
+  "DelegationViolationRecorded",
+  "ExecutionViolationRecorded",
+  "GateRejectionRecorded",
+  "InteroperabilityFailureRecorded",
+  "LearningDisputed",
+  "LearningViolationRecorded",
+  "MinorityReportFiled",
+  "NegotiationDifferenceRecorded",
+  "NegotiationFailureRecorded",
+  "NegotiationTermsRejected",
+  "ObjectionRaised",
+  "ObjectionResolved",
+  "OutcomeDisputed",
+  "OutcomeViolationRecorded",
+  "PositionTaken",
+  "RecoveryViolationRecorded",
+  "ReviewDisputed",
+  "ReviewViolationRecorded"
+]);
+
+const DISSENT_BEARING_TYPE_SET = new Set(DISSENT_BEARING_TYPES);
+
 const EVENT_TYPE_SET = new Set(EVENT_TYPES);
 const PROTOCOL_EVENT_TYPE_SET = EVENT_TYPE_SET;
 
@@ -239,6 +284,8 @@ function primaryObject(event) {
 }
 
 module.exports = {
+  DISSENT_BEARING_TYPES,
+  DISSENT_BEARING_TYPE_SET,
   EVENT_TYPES,
   EVENT_TYPE_SET,
   PRIMARY_OBJECT_KEYS,

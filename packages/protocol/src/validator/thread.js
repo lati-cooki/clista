@@ -277,10 +277,6 @@ function validateSealedReport(event, state) {
   } else if (!state.participants.has(report.renderedByParticipantId)) {
     addError(state, event, `sealedReport rendered by unknown participant ${report.renderedByParticipantId}`);
   }
-  if (!Array.isArray(report.claims) || report.claims.length === 0) {
-    addError(state, event, "SealedReport claims must be a non-empty array");
-    return;
-  }
   // Hashes citable by this report: every already-processed event in the same
   // thread (state.events holds strictly earlier events at this point, so
   // forward and self citation are unrepresentable here by construction).
@@ -289,6 +285,38 @@ function validateSealedReport(event, state) {
     if (earlier?.thread_id === event.thread_id && earlier.content_hash) {
       earlierHashes.add(earlier.content_hash);
     }
+  }
+  // omitted_dissent (DR-2026-07-12-curation-check): optional disclosure block
+  // for dissent-bearing events the renderer left uncited. Entries are
+  // {eventHash, reason}. The gate enforces the same existence rule it already
+  // enforces for citedEventHashes — a disclosed hash must resolve to an
+  // earlier event in this thread — plus well-formedness and a non-empty
+  // reason. Whether every UNdisclosed dissent event is cited is the curation
+  // check's job (src/report.js check 4), not the append gate's.
+  if (report.omitted_dissent !== undefined) {
+    if (!Array.isArray(report.omitted_dissent)) {
+      addError(state, event, "SealedReport omitted_dissent must be an array when present");
+    } else {
+      report.omitted_dissent.forEach((entry, index) => {
+        const label = `SealedReport omitted_dissent entry ${index + 1}`;
+        if (!entry || typeof entry !== "object") {
+          addError(state, event, `${label} must be an object with eventHash and reason`);
+          return;
+        }
+        if (!entry.eventHash || !HASH_PATTERN.test(entry.eventHash)) {
+          addError(state, event, `${label} eventHash is not a sha256 hash: ${entry.eventHash}`);
+        } else if (!earlierHashes.has(entry.eventHash)) {
+          addError(state, event, `${label} eventHash does not exist in thread: ${entry.eventHash}`);
+        }
+        if (typeof entry.reason !== "string" || !entry.reason.trim()) {
+          addError(state, event, `${label} missing reason`);
+        }
+      });
+    }
+  }
+  if (!Array.isArray(report.claims) || report.claims.length === 0) {
+    addError(state, event, "SealedReport claims must be a non-empty array");
+    return;
   }
   report.claims.forEach((claim, index) => {
     if (!claim || typeof claim.text !== "string" || claim.text.length === 0) {

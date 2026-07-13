@@ -25,23 +25,29 @@ import { homedir } from "node:os";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 const REPOS = {
+  // Legacy pre-monorepo repos — kept so pins written in that era stay checkable.
   "clista-protocol": { github: "lati-club/ClisTa-Protocol", local: join(homedir(), "clista-protocol") },
   "ThreadHub":       { github: "lati-club/ThreadHub",       local: join(homedir(), "ThreadHub") },
   "clista-ai-app":   { github: "lati-club/clista-ai-app",   local: join(homedir(), "Documents", "clista-ai-app") },
+  // Current era: the monorepo itself, and the prompt-studio workstream.
+  "clista":          { github: "lati-cooki/clista",         local: join(homedir(), "Projects", "clista") },
+  "prompt-studio":   { github: "lati-cooki/prompt-studio",  local: join(homedir(), "DevSwarmProjects", "Clista") },
 };
 
 const TOKEN = process.env.PIN_VALIDATION_TOKEN || process.env.GITHUB_TOKEN || "";
 
 function pages() {
-  const out = [join(ROOT, "README.md"), join(ROOT, "HANDOFF.md")];
+  // ROOT is docs/ itself (monorepo layout; this script lives in docs/scripts).
+  // Walk it recursively — README/HANDOFF are inside the walk — skipping scripts/.
+  const out = [];
   const walk = (dir) => {
     for (const e of readdirSync(dir)) {
       const p = join(dir, e);
-      if (statSync(p).isDirectory()) walk(p);
+      if (statSync(p).isDirectory()) { if (p !== join(ROOT, "scripts")) walk(p); }
       else if (e.endsWith(".md")) out.push(p);
     }
   };
-  walk(join(ROOT, "docs"));
+  walk(ROOT);
   return out;
 }
 
@@ -57,6 +63,12 @@ function localHas(repoPath, sha) {
 async function ghCommitExists(slug, sha) {
   const headers = { "User-Agent": "clista-atlas-pin-validator", Accept: "application/vnd.github+json" };
   if (TOKEN) headers.Authorization = `Bearer ${TOKEN}`;
+  // GitHub answers 404 (not 403) for private repos a token cannot see, so a
+  // bare commit 404 conflates "commit missing" with "no API access". Check
+  // repo visibility first: an invisible repo is UNVERIFIABLE (disclosed, per
+  // the header contract), while a missing commit in a visible repo fails.
+  const repo = await fetch(`https://api.github.com/repos/${slug}`, { headers });
+  if (repo.status !== 200) return null; // repo not visible to this token → unverifiable
   const res = await fetch(`https://api.github.com/repos/${slug}/commits/${sha}`, { headers });
   if (res.status === 200) return true;
   if (res.status === 404 || res.status === 422) return false;

@@ -1,4 +1,5 @@
 # Decision Record: Claim-Citation Report Events (`SealedReport`)
+> **Provenance:** clista@c56b406600df36ccc8e5fdc7153c5fedf57324db
 
 **Status:** ADOPTED by owner direction — the Mutual Reliance transfer prompt
 (committed `c56b406`, drafted 2026-07-11) directs this DR and its

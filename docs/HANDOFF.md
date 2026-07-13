@@ -1,4 +1,5 @@
 # Transfer prompt — the ClisTa monorepo / MRM pivot
+> **Provenance:** clista@fbc13652273269587e9793cae0b6dd6c9cd874a7
 
 Paste this into a fresh session. This repo — **lati-cooki/clista**, local
 `~/clista` — is the single authoritative home for the whole system (see the
