@@ -39,8 +39,11 @@ it('GET / — browser → the prototype front door; */* → EXACT JSON, publicat
   // The apex front door is the SAME bytes as /prototype.
   const proto = await pubGet('/prototype');
   expect(await proto.text()).toBe(html);
-  // No external hosts (CSP-safe, self-contained).
-  expect(html).not.toMatch(/src="https?:\/\//);
+  // Self-contained except for the single documented Turnstile script (Phase 4:
+  // the Genesis seal's bot-protection widget, hostname-locked to
+  // consensusprotocol.ai). Exactly one external src, and it is that host.
+  const externalSrcs = html.match(/src="https?:\/\/[^"]+"/g) || [];
+  expect(externalSrcs).toEqual(['src="https://challenges.cloudflare.com/turnstile/v0/api.js"']);
 
   // --- API client: EXACT JSON, unchanged (operator plane / anchor gate) ---
   const api = await pubGet('/'); // pubGet sends no explicit Accept (defaults to */*)

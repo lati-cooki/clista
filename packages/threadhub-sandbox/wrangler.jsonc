@@ -52,8 +52,14 @@
     "node:sqlite": "./src/node-sqlite-stub.js"
   },
 
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
 
-  // NO routes here. The apex path-split (consensusprotocol.ai/try/* → this
-  // Worker) is wired at deploy time (Phase 5, owner-gated), not in this build.
+  // Apex path-split (Phase-5 prep): route consensusprotocol.ai/try/* to THIS
+  // Worker. More-specific than the hub's apex custom_domain catch-all, so it
+  // wins for /try/* exactly as studio's /object/* + /api/* routes win over the
+  // same catch-all (proven live at cutover). The route only takes effect on a
+  // deploy (owner-gated, Phase 5). workers_dev left as-is (unset).
+  "routes": [
+    { "pattern": "consensusprotocol.ai/try/*", "zone_name": "consensusprotocol.ai" }
+  ]
 }
