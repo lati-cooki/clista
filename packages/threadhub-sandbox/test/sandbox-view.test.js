@@ -25,6 +25,19 @@ it('renders the unmissable sandbox disclosure banner with the TTL', () => {
   expect(html).toContain('expires and is deleted within 24 hours');
 });
 
+it('the pinned variant drops the 24h-expiry line but keeps every other honest limit', () => {
+  const { args } = fixture();
+  const html = sandboxViewHTML(args, 24, true); // pinned = true
+  // Kept: the record is real/verifiable, not governance, never anchored, persistent.
+  expect(html).toContain('a real, signed, hash-chained record you can verify below');
+  expect(html).toContain('not a governance record');
+  expect(html).toContain('never anchored');
+  expect(html).toContain('persistent demonstration');
+  // Dropped: the ephemeral-expiry line (the whole point of pinning).
+  expect(html).not.toContain('expires and is deleted within');
+  expect(html).not.toContain('SANDBOX — ephemeral demonstration');
+});
+
 it('repoints the checker import + link, the records fetch + link, and the header URL to /try/', () => {
   const { slug, args } = fixture();
   const html = sandboxViewHTML(args, 24);

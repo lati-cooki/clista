@@ -25,13 +25,27 @@ import { threadViewHTML } from '../../threadhub/src/view.js';
 // esc() must match view.js's escaping so the banner copy is consistent.
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-function bannerHTML(ttlHours) {
-  return `<aside class="sandbox-banner" role="note" aria-label="Sandbox disclosure">
-<strong>SANDBOX — ephemeral demonstration.</strong>
+// The disclosure banner. Two honest variants, chosen by `pinned`:
+//   • regular (pinned=false): the ephemeral banner — includes the "expires and
+//     is deleted within <N> hours" line. UNCHANGED.
+//   • pinned=true (the curated demo): DROPS the 24h-expiry line, since the demo
+//     is TTL-exempt and persists — but KEEPS every other honest limit (real,
+//     signed, hash-chained, verifiable · not a governance record · never
+//     anchored · a persistent demonstration). Still unmistakably a SANDBOX
+//     record: never anchored, not governance.
+function bannerHTML(ttlHours, pinned) {
+  const inner = pinned
+    ? `<strong>SANDBOX — persistent demonstration.</strong>
+This is a real, signed, hash-chained record you can verify below &middot; <b>not a governance record</b> &middot;
+<b>never anchored</b> &middot; a persistent demonstration. It carries none of the production audit chain's
+guarantees — it is a curated, lasting example of the loop, kept for sharing.`
+    : `<strong>SANDBOX — ephemeral demonstration.</strong>
 This thread is a real, signed, hash-chained record you can independently verify below —
 but it is <b>not a governance record</b>: it expires and is deleted within ${esc(ttlHours)} hours,
 it is <b>never anchored</b>, and it carries none of the production audit chain's guarantees.
-Paste something you don't mind the world seeing, then throwing away.
+Paste something you don't mind the world seeing, then throwing away.`;
+  return `<aside class="sandbox-banner" role="note" aria-label="Sandbox disclosure">
+${inner}
 </aside>
 <style>
 .sandbox-banner{font-family:var(--font-sans);font-size:13px;line-height:1.55;color:var(--dissent-ink);
@@ -44,13 +58,14 @@ Paste something you don't mind the world seeing, then throwing away.
 }
 
 // Render the sandbox thread page. args are exactly threadViewHTML's:
-// { thread, records, verification, authors }. ttlHours drives the banner copy.
-export function sandboxViewHTML(args, ttlHours = 24) {
+// { thread, records, verification, authors }. ttlHours drives the banner copy;
+// `pinned` selects the persistent-demo banner variant (no 24h-expiry line).
+export function sandboxViewHTML(args, ttlHours = 24, pinned = false) {
   const slug = args.thread.slug;
   let html = threadViewHTML(args);
 
   // (1) Banner immediately after <main> opens, before any thread content.
-  html = html.replace('<body><main>', '<body><main>' + bannerHTML(ttlHours));
+  html = html.replace('<body><main>', '<body><main>' + bannerHTML(ttlHours, pinned));
 
   // (2) Repoints — each anchored to a literal view.js emits (and, for the
   //     record paths, to the unguessable random slug).

@@ -132,11 +132,21 @@ export class SandboxStore {
   // --- ephemeral TTL support (sandbox-only; impossible on the prod store,
   //     whose records_no_delete trigger would RAISE(ABORT) on every DELETE) ---
 
-  // Threads whose created_at is strictly older than the ISO cutoff. Used by
-  // the DO alarm to find what to sweep.
-  threadsOlderThan(cutoffISO) {
+  // Threads whose created_at is strictly older than the ISO cutoff, EXCLUDING
+  // any whose slug is in exemptSlugs (the pinned demo). Used by the DO alarm to
+  // find what to sweep — the exemption is enforced in SQL (`slug NOT IN (...)`)
+  // so a pinned thread is never even returned to the cascade delete. Uses the
+  // existing `slug` column; no schema change (store-parity stays intact).
+  threadsOlderThan(cutoffISO, exemptSlugs = []) {
+    if (exemptSlugs.length === 0) {
+      return this.sql.exec(
+        'SELECT * FROM threads WHERE created_at < ? ORDER BY created_at', cutoffISO
+      ).toArray();
+    }
+    const placeholders = exemptSlugs.map(() => '?').join(', ');
     return this.sql.exec(
-      'SELECT * FROM threads WHERE created_at < ? ORDER BY created_at', cutoffISO
+      `SELECT * FROM threads WHERE created_at < ? AND slug NOT IN (${placeholders}) ORDER BY created_at`,
+      cutoffISO, ...exemptSlugs
     ).toArray();
   }
 
