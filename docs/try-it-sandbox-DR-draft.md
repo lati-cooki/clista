@@ -235,3 +235,46 @@ design-project source in sync.
 operator screens stay demonstrations (only Genesis becomes real) · **no sandbox data git-anchored** ·
 design-project `ConsensusApp.jsx` kept canonical. Model A + the `/try/*` route + a separate DO make the
 first four structural rather than vigilance-dependent, which is why Model A is recommended.
+
+---
+
+## 7. Security-review hardening (branch `sandbox-worker`, pre-Phase-3)
+
+The independent review verdict was "Ready for Phase 3 with hardening before deploy" — all HARD INVARIANTS
+hold. The confirmed findings below were fixed on `sandbox-worker` (sandbox-only diff; no
+`threadhub/**` or `threadhub-cf/**` changes), each with a regression test. Isolation, the fail-closed
+Turnstile seam, trigger-free store scope, TTL, and the signed export are unregressed.
+
+- **FINDING 1 — MEDIUM — ADDRESSED.** `POST /try` buffered the body (`await request.text()`) *before* the
+  size check, Turnstile, and the rate limiter, letting an unauthenticated caller force the isolate to buffer
+  up to the platform limit unmetered. `src/worker.js` now pre-checks `Content-Length` and returns 413
+  *before* `request.text()` and any downstream work; the post-read fallback (absent/lying Content-Length) is
+  now **byte-accurate** — it measures UTF-8 bytes via `TextEncoder`, not `bodyText.length` (UTF-16 units) —
+  against the intended `5e6` cap. *Regression:* `test/hardening.test.js` — oversized body → 413 with no
+  thread minted and the rate-limiter budget intact (proves the DO/limiter/mint were never reached); a
+  multi-byte body under the char cap but over the byte cap → 413; a normal body still succeeds.
+
+- **FINDING 2 — LOW — ADDRESSED.** `sandbox-do.js` `createTry`'s mint → `createThread`(genesis) →
+  `append`(ThreadPublished) had no rollback, so a failure after `createThread` left a genesis-only thread
+  permanently occupying a 300-cap slot. The sequence is now wrapped: on any post-mint throw the thread id
+  (pre-generated so it is known even if `createThread` throws mid-way) is cleaned up via
+  `deleteThreadCascade` (thread + records + the 1:1 custodial writer), and the writer identity is dropped
+  explicitly for the create-before-insert case. DO SQL is synchronous, so the cleanup is atomic to the call.
+  *Regression:* `test/hardening.test.js` injects a publish-step failure and asserts zero threads, zero
+  records, zero identities remain (cap count unchanged).
+
+- **FINDING 3 — LOW — ADDRESSED (defense-in-depth, aligns with D-PUBGATE).** The read path served
+  `getThread()` unconditionally. `handle()` now enforces effective publication on both `/try/<slug>/view`
+  and `/try/<slug>.json` by reusing `packages/threadhub/src/publication.js` `effectivePublication`; an
+  unpublished/half thread returns the same `PUBLIC_404_BODY` bytes as a nonexistent slug (no oracle). This
+  closes the window where a half-thread (e.g. from FINDING 2's failure path) would still render. *Regression:*
+  `test/hardening.test.js` — a half (genesis-only, unpublished) thread 404s byte-identically to a nonexistent
+  slug on both surfaces, while a properly published thread is still served 200.
+
+- **FINDING 5 — LOW — NOTED (accepted v1 limitation / later-hardening item).** `src/turnstile.js`
+  `verifyTurnstile()` checks the siteverify response's `success` field ONLY; it does not additionally assert
+  the returned `hostname` or `action` match the expected sandbox origin/action. A stolen/replayed token from
+  another Turnstile-protected surface on the same account could therefore pass. Accepted for v1 (the seam is
+  still fail-closed on missing/invalid/errored tokens and the write path is rate- and cap-bounded regardless).
+  **Later-hardening item:** when the widget is created in Phase 3, pin `hostname` to `consensusprotocol.ai`
+  and `action` to the Genesis-screen action in `verifyTurnstile`.

@@ -18,8 +18,10 @@ export { SandboxDO } from './sandbox-do.js';
 const JSON_TYPE = 'application/json; charset=utf-8';
 const CHECKER_TYPE = 'text/javascript; charset=utf-8';
 
-// Same body ceiling as the hub Worker / Node adapter.
-const MAX_BODY_CHARS = 5e6;
+// Same body ceiling as the hub Worker / Node adapter. Byte-accurate: the cap
+// is measured in UTF-8 bytes (Content-Length / TextEncoder), never UTF-16
+// string units, so a multi-byte paste cannot slip past a char-count check.
+const MAX_BODY_BYTES = 5e6;
 
 const respond = ({ status, contentType, body }) =>
   new Response(body, {
@@ -49,13 +51,23 @@ export default {
     // (2) The one public write path. Everything else that is not a GET/HEAD is
     // a write shape with no route here → the shared not-found bytes.
     if (path === '/try' && method === 'POST') {
+      // Pre-check the declared size BEFORE buffering the body. An oversized
+      // Content-Length is refused here — before request.text(), before
+      // Turnstile, before the DO/rate-limiter/mint — so an unauthenticated
+      // caller cannot force the isolate to buffer up to the platform limit.
+      const declaredBytes = Number(request.headers.get('content-length'));
+      if (Number.isFinite(declaredBytes) && declaredBytes > MAX_BODY_BYTES) {
+        return jsonError(413, 'payload_too_large', 'request body is too large');
+      }
       let bodyText;
       try {
         bodyText = await request.text();
       } catch {
         return jsonError(400, 'bad_request', 'could not read request body');
       }
-      if (bodyText.length > MAX_BODY_CHARS) {
+      // Fallback for an absent or lying Content-Length: measure the actual
+      // UTF-8 byte length (not bodyText.length, which counts UTF-16 units).
+      if (new TextEncoder().encode(bodyText).byteLength > MAX_BODY_BYTES) {
         return jsonError(413, 'payload_too_large', 'request body is too large');
       }
       let body;

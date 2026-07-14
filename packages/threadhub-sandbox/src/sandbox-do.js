@@ -13,6 +13,7 @@
 import { DurableObject } from 'cloudflare:workers';
 import { Hub } from '../../threadhub/src/hub.js';
 import { rateLimiter, errorResponse, PUBLIC_404_BODY } from '../../threadhub/src/routes.js';
+import { effectivePublication } from '../../threadhub/src/publication.js';
 import { SandboxStore } from './sandbox-store.js';
 import { sandboxViewHTML } from './sandbox-view.js';
 
@@ -41,6 +42,16 @@ function randomSlug() {
   return `try-${s}`;
 }
 
+// Pre-generate the thread id (same shape as hub.js rid('thd')) so the write
+// path can roll back a partially-created thread by id even if createThread
+// throws mid-way, before it can return the id.
+function randomThreadId() {
+  const bytes = crypto.getRandomValues(new Uint8Array(6));
+  let s = '';
+  for (const b of bytes) s += b.toString(16).padStart(2, '0');
+  return `thd_${s}`;
+}
+
 // The witnessed publication act, same clista.event shape the hub uses
 // (helpers.js publicationEvent / effectivePublication reads exactly this).
 function publicationEvent(actorId, threadId) {
@@ -66,12 +77,21 @@ function publicationEvent(actorId, threadId) {
 // record_hash sidecar, so verify-standalone.mjs verifies signatures (n/n), not
 // just the hash chain (owner ruling: signed export = YES). Prod's exportThread
 // stays bare; this is a sandbox-only, stronger-demo export.
-function signedExport(store, threadId) {
-  return store.recordsOf(threadId).map((r) => ({
+function signedExport(rows) {
+  return rows.map((r) => ({
     ...JSON.parse(r.body),
     record_hash: r.record_hash,
     signature: r.signature,
   }));
+}
+
+// Defense-in-depth publication gate (DR D-PUBGATE): a sandbox thread is served
+// ONLY if its records' effective publication is published — the same pure
+// function the production public read path uses. An unpublished / half thread
+// (e.g. a genesis-only thread from a partial-failure window) is treated as
+// nonexistent: same PUBLIC_404_BODY bytes, no oracle.
+function isPublished(rows) {
+  return effectivePublication(rows.map((r) => JSON.parse(r.body))).published;
 }
 
 function deriveTitle(decision) {
@@ -124,22 +144,38 @@ export class SandboxDO extends DurableObject {
       }
 
       const writer = this.hub.createIdentity({ displayName: 'sandbox writer', kind: 'agent' });
-      const thread = this.hub.createThread({
-        title: title && String(title).trim() ? String(title).slice(0, 200) : deriveTitle(decision),
-        question: decision,
-        authorId: writer.id,
-        slug: randomSlug(),
-      });
-      // The witnessed publication act, authored by the custodial writer.
-      const pub = this.hub.append({
-        threadId: thread.id,
-        authorId: writer.id,
-        kind: 'clista.event',
-        payload: publicationEvent(writer.id, thread.id),
-      });
+      const threadId = randomThreadId();
+      const slug = randomSlug();
+      try {
+        const thread = this.hub.createThread({
+          id: threadId,
+          title: title && String(title).trim() ? String(title).slice(0, 200) : deriveTitle(decision),
+          question: decision,
+          authorId: writer.id,
+          slug,
+        });
+        // The witnessed publication act, authored by the custodial writer.
+        const pub = this.hub.append({
+          threadId: thread.id,
+          authorId: writer.id,
+          kind: 'clista.event',
+          payload: publicationEvent(writer.id, thread.id),
+        });
 
-      await this.#ensureAlarm();
-      return json(200, { slug: thread.slug, headHash: pub.record_hash, viewUrl: `/try/${thread.slug}/view` });
+        await this.#ensureAlarm();
+        return json(200, { slug: thread.slug, headHash: pub.record_hash, viewUrl: `/try/${thread.slug}/view` });
+      } catch (e) {
+        // No orphan threads on partial failure: if any step after the mint
+        // throws (e.g. the publish append), remove whatever was created so a
+        // genesis-only thread cannot persist and occupy a cap slot. DO SQL is
+        // synchronous, so this cleanup is atomic w.r.t. this call.
+        // deleteThreadCascade drops the thread + its records + its 1:1 writer
+        // when the thread row exists; the explicit identity delete covers the
+        // case where createThread threw before inserting the thread.
+        this.store.deleteThreadCascade(threadId);
+        this.store.sql.exec('DELETE FROM identities WHERE id = ?', writer.id);
+        throw e;
+      }
     } catch (e) {
       return errorResponse(e); // hub errors (e.g. payload_too_large) → mapped status
     }
@@ -152,12 +188,15 @@ export class SandboxDO extends DurableObject {
       if ((m = path.match(/^\/try\/([^/]+)\.json$/)) && method === 'GET') {
         const thread = this.store.getThread(decodeURIComponent(m[1]));
         if (!thread) return { ...NOT_FOUND };
-        return json(200, signedExport(this.store, thread.id));
+        const rows = this.store.recordsOf(thread.id);
+        if (!isPublished(rows)) return { ...NOT_FOUND };
+        return json(200, signedExport(rows));
       }
       if ((m = path.match(/^\/try\/([^/]+)\/view$/)) && method === 'GET') {
         const thread = this.store.getThread(decodeURIComponent(m[1]));
         if (!thread) return { ...NOT_FOUND };
         const rows = this.store.recordsOf(thread.id);
+        if (!isPublished(rows)) return { ...NOT_FOUND };
         const authors = [...new Set(rows.map((r) => r.author_id))].map((id) => {
           const ident = this.store.getIdentity(id);
           return {
