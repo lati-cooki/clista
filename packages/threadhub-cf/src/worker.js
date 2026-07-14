@@ -72,8 +72,23 @@ export default {
     // (1b) The connected design-system prototype — a self-contained
     // (React + DS bundle + tokens all inlined) navigable click-through,
     // served verbatim from the Text-imported repo file. Static, no DO hop.
+    // It is BOTH the site's front door (a browser hitting the apex, below)
+    // and its own stable path /prototype.
     if (method === 'GET' && (url.pathname === '/prototype' || url.pathname === '/prototype/')) {
       return respond({ status: 200, contentType: HTML_TYPE, body: prototypeHtml });
+    }
+
+    // (1c) The apex is the first look: a browser hitting GET / gets the
+    // prototype. API clients (operator plane, anchor gate, export — all
+    // send Accept: */* or none, never text/html) fall through to the DO and
+    // keep the EXACT JSON instance summary byte-for-byte, so nothing
+    // downstream changes. Only the browser branch of the old content
+    // negotiation moves here; the JSON branch still lives in routes.js.
+    if (method === 'GET' && url.pathname === '/') {
+      const accept = request.headers.get('accept') ?? '';
+      if (accept.includes('text/html')) {
+        return respond({ status: 200, contentType: HTML_TYPE, body: prototypeHtml });
+      }
     }
 
     // (2) Role. Computed once, here, never anywhere else.
