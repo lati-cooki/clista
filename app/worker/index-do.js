@@ -1,4 +1,5 @@
 import { DurableObject } from 'cloudflare:workers';
+import { assemblePortfolio } from './portfolio-signals.js';
 
 // A single Durable Object holding the thread_id → card index for the list view.
 // Per-thread DOs are the source of truth; this is a derived projection updated
@@ -22,6 +23,20 @@ export class IndexDO extends DurableObject {
     // Back-fill the hidden column on DOs created before it existed.
     const threadCols = new Set(this.sql.exec('PRAGMA table_info(threads)').toArray().map((r) => r.name));
     if (!threadCols.has('hidden')) this.sql.exec('ALTER TABLE threads ADD COLUMN hidden INTEGER DEFAULT 0');
+    // Portfolio health-signal columns (nullable; back-filled on next append, or
+    // in bulk via POST /api/portfolio/rebuild). ADD COLUMN is a no-op once present.
+    for (const [name, decl] of [
+      ['stage', 'TEXT'],
+      ['open_objections', 'INTEGER'],
+      ['evidence_count', 'INTEGER'],
+      ['claims_total', 'INTEGER'],
+      ['claims_grounded', 'INTEGER'],
+      ['outstanding_conditions', 'INTEGER'],
+      ['re_review', 'INTEGER'],
+      ['chain_valid', 'INTEGER'],
+    ]) {
+      if (!threadCols.has(name)) this.sql.exec(`ALTER TABLE threads ADD COLUMN ${name} ${decl}`);
+    }
     // Per-thread status rows (DO metadata, NOT protocol events — kept out of
     // the append-only log so the chain stays clean). Originally the clistahermes
     // deliberation flag queue (agent automation retired 2026-07-07; the queue/
@@ -94,12 +109,15 @@ export class IndexDO extends DurableObject {
   upsert(card) {
     if (!card || !card.id) return { ok: false };
     this.sql.exec(
-      `INSERT INTO threads (id, title, question, status, owner, events, last, updated_ms)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO threads (id, title, question, status, owner, events, last, updated_ms,
+         stage, open_objections, evidence_count, claims_total, claims_grounded, outstanding_conditions, re_review, chain_valid)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
          title=excluded.title, question=excluded.question, status=excluded.status,
-         owner=excluded.owner, events=excluded.events, last=excluded.last,
-         updated_ms=excluded.updated_ms`,
+         owner=excluded.owner, events=excluded.events, last=excluded.last, updated_ms=excluded.updated_ms,
+         stage=excluded.stage, open_objections=excluded.open_objections, evidence_count=excluded.evidence_count,
+         claims_total=excluded.claims_total, claims_grounded=excluded.claims_grounded,
+         outstanding_conditions=excluded.outstanding_conditions, re_review=excluded.re_review, chain_valid=excluded.chain_valid`,
       card.id,
       card.title ?? null,
       card.question ?? null,
@@ -107,7 +125,15 @@ export class IndexDO extends DurableObject {
       card.owner ?? null,
       card.events ?? 0,
       card.last ?? null,
-      card.updated_ms ?? 0
+      card.updated_ms ?? 0,
+      card.stage ?? null,
+      card.open_objections ?? null,
+      card.evidence_count ?? null,
+      card.claims_total ?? null,
+      card.claims_grounded ?? null,
+      card.outstanding_conditions ?? null,
+      card.re_review == null ? null : card.re_review ? 1 : 0,
+      card.chain_valid == null ? null : card.chain_valid ? 1 : 0
     );
     return { ok: true };
   }
@@ -134,6 +160,20 @@ export class IndexDO extends DurableObject {
           )
           .toArray();
     return { threads };
+  }
+
+  // The portfolio projection: every visible thread's enriched card + a summary.
+  // Time-relative signals (staleness/overdue) and attention are computed at read.
+  portfolio() {
+    const rows = this.sql
+      .exec(
+        `SELECT id, title, question, status, owner, events, last, updated_ms,
+                stage, open_objections, evidence_count, claims_total, claims_grounded,
+                outstanding_conditions, re_review, chain_valid
+         FROM threads WHERE COALESCE(hidden, 0) = 0 ORDER BY updated_ms DESC`
+      )
+      .toArray();
+    return assemblePortfolio(rows, Date.now());
   }
 
   // Hide/unhide a thread card in the list projection. DO metadata only — the
