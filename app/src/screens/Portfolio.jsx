@@ -94,7 +94,7 @@ export function Portfolio({ openThread }) {
       </div>
 
       {/* lifecycle pipeline */}
-      <div style={css('display:grid; grid-template-columns:repeat(4, 1fr); gap:14px;')}>
+      <div style={css('display:grid; grid-template-columns:repeat(' + COLUMNS.length + ', 1fr); gap:14px;')}>
         {COLUMNS.map((col) => {
           const cards = threads.filter((t) => col.stages.includes(t.stage));
           return (
@@ -131,9 +131,13 @@ function PortfolioCard({ t, onOpen }) {
     >
       <div style={css('display:flex; align-items:baseline; gap:6px; margin-bottom:7px;')}>
         <span style={css('flex:1; min-width:0; font-size:13px; font-weight:500; color:#1a1a1a; line-height:1.35; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;')}>{t.question || t.title || t.id}</span>
-        <span title="chain verified" style={css('flex:none; color:' + (t.chain_valid === false ? '#b3343c' : '#1c7a4f') + ';')}>
-          <Svg html={ico(t.chain_valid === false ? 'circleX' : 'check', { size: 12, sw: 2.2 })} />
-        </span>
+        {t.chain_valid == null ? (
+          <span title="chain not yet verified" style={css('flex:none; color:#c0c0be; ' + MONO + ' font-size:11px;')}>·</span>
+        ) : (
+          <span title={t.chain_valid ? 'chain verified' : 'chain INVALID'} style={css('flex:none; color:' + (t.chain_valid === false ? '#b3343c' : '#1c7a4f') + ';')}>
+            <Svg html={ico(t.chain_valid === false ? 'circleX' : 'check', { size: 12, sw: 2.2 })} />
+          </span>
+        )}
       </div>
       <div style={css('display:flex; align-items:center; gap:10px; margin-bottom:6px;')}>
         {glyph('◇', t.open_objections || 0, '#9a6b07')}

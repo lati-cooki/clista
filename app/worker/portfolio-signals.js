@@ -7,18 +7,27 @@ const DAY_MS = 86400000;
 const STAGES = ['active', 'in_review', 'decided', 'decided_with_conditions', 're_review', 'degraded', 'failed'];
 const ATTENTION = ['re_review', 'contested', 'overdue', 'unevidenced', 'with_conditions'];
 
+// Raw thread status -> lifecycle stage enum (does not account for conditions).
+export function statusToStage(status) {
+  switch (status) {
+    case 'failed': return 'failed';
+    case 'degraded': return 'degraded';
+    case 're-review': return 're_review';
+    case 'decided': return 'decided';
+    case 'review': return 'in_review';
+    default: return 'active';
+  }
+}
+
 // Lifecycle stage from the projected thread status (+ conditions splits decided).
 export function deriveStage(state) {
   const status = (state.thread && state.thread.status) || 'active';
-  if (status === 'failed') return 'failed';
-  if (status === 'degraded') return 'degraded';
-  if (status === 're-review') return 're_review';
-  if (status === 'decided') {
+  const stage = statusToStage(status);
+  if (stage === 'decided') {
     const d = state.decisionStatus && state.decisionStatus.decisionRecord;
     return d && Array.isArray(d.conditions) && d.conditions.length > 0 ? 'decided_with_conditions' : 'decided';
   }
-  if (status === 'review') return 'in_review';
-  return 'active';
+  return stage;
 }
 
 // Time-invariant signals (staleness/overdue are computed at read, see computeTiming).
@@ -74,7 +83,7 @@ export function deriveAttention(card) {
   if (card.re_review) t.push('re_review');
   if ((card.open_objections || 0) > 0) t.push('contested');
   if (card.overdue) t.push('overdue');
-  if (['in_review', 'decided', 'decided_with_conditions'].includes(card.stage) && (card.claims_grounded || 0) === 0) t.push('unevidenced');
+  if (['in_review', 'decided', 'decided_with_conditions'].includes(card.stage) && card.claims_grounded === 0) t.push('unevidenced');
   if ((card.outstanding_conditions || 0) > 0) t.push('with_conditions');
   return t;
 }
@@ -95,7 +104,7 @@ export function summarize(cards) {
 // SQLite integer booleans and adds read-time timing + attention.
 export function assemblePortfolio(rows, nowMs) {
   const threads = rows.map((r) => {
-    const stage = r.stage || r.status || 'active';
+    const stage = r.stage || statusToStage(r.status);
     const { staleness_days, overdue } = computeTiming(stage, r.updated_ms || 0, nowMs);
     const card = {
       ...r,

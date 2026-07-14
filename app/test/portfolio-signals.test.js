@@ -3,7 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  OVERDUE_DAYS, deriveStage, deriveSignals, buildCard,
+  OVERDUE_DAYS, statusToStage, deriveStage, deriveSignals, buildCard,
   computeTiming, deriveAttention, summarize, assemblePortfolio,
 } from '../worker/portfolio-signals.js';
 
@@ -14,6 +14,17 @@ const state = (over = {}) => ({
   allEvidence: over.allEvidence || [],
   unresolvedObjections: over.unresolvedObjections || [],
   decisionStatus: { decisionRecord: over.decisionRecord || null },
+});
+
+test('statusToStage maps raw thread status to the stage enum', () => {
+  assert.equal(statusToStage('review'), 'in_review');
+  assert.equal(statusToStage('re-review'), 're_review');
+  assert.equal(statusToStage('decided'), 'decided');
+  assert.equal(statusToStage('failed'), 'failed');
+  assert.equal(statusToStage('degraded'), 'degraded');
+  assert.equal(statusToStage('active'), 'active');
+  assert.equal(statusToStage('bogus'), 'active');
+  assert.equal(statusToStage(undefined), 'active');
 });
 
 test('deriveStage maps status + conditions to a lifecycle stage', () => {
@@ -86,4 +97,20 @@ test('assemblePortfolio adds timing + attention and summarizes', () => {
   assert.equal(summary.allChainValid, true);
   assert.ok(threads[0].attention.includes('contested'));
   assert.equal(threads[0].chain_valid, true);    // 1 → true
+});
+
+test('assemblePortfolio falls back to status→stage for pre-backfill rows (null signals)', () => {
+  const now = Date.parse('2026-07-20T00:00:00.000Z');
+  const rows = [
+    { id: 'p', status: 'review', updated_ms: now, stage: null, claims_grounded: null, chain_valid: null },
+    { id: 'd', status: 'decided', stage: null, claims_grounded: null, chain_valid: null, updated_ms: now },
+  ];
+  const { summary, threads } = assemblePortfolio(rows, now);
+  const review = threads.find((t) => t.id === 'p');
+  const decided = threads.find((t) => t.id === 'd');
+  assert.equal(review.stage, 'in_review');
+  assert.equal(summary.byStage.in_review, 1);
+  assert.ok(!decided.attention.includes('unevidenced'));
+  assert.equal(review.chain_valid, null);
+  assert.equal(decided.chain_valid, null);
 });
