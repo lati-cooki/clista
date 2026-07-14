@@ -1,5 +1,6 @@
 import { DurableObject } from 'cloudflare:workers';
 import * as engine from './engine/index.js';
+import { buildCard } from './portfolio-signals.js';
 
 // One Durable Object per decision thread. Its SQLite holds that thread's
 // append-only, hash-chained event log — the source of truth. Projection and
@@ -184,24 +185,14 @@ export class ThreadDO extends DurableObject {
     const events = this._readAll();
     if (!events.length) return null;
     const state = engine.selectThreadState(engine.projectEvents(events));
-    const thread = state.thread || {};
-    const participants = (state.identityState && state.identityState.participants) || [];
-    const decision = state.decisionStatus && state.decisionStatus.decisionRecord;
-    const ownerId =
-      (decision && decision.decidedByParticipantId) ||
-      (participants.find((p) => /owner/.test(p.role || '')) || participants[0] || {}).id;
-    const ownerName = (participants.find((p) => p.id === ownerId) || {}).name || ownerId || 'unknown';
-    const last = thread.updatedAt || events.at(-1)?.timestamp || null;
-    return {
-      id: thread.id || null,
-      title: thread.title || null,
-      question: thread.question || null,
-      status: thread.status || 'active',
-      owner: ownerName,
-      events: events.length,
-      last,
-      updated_ms: last ? Date.parse(last) : 0,
-    };
+    const integrity = engine.verifyEventIntegrity(events, { strict: events.length > 0 });
+    const validation = engine.validateEvents(events);
+    const lastTimestamp = (state.thread && state.thread.updatedAt) || events.at(-1)?.timestamp || null;
+    return buildCard(state, {
+      chainValid: integrity.valid && validation.valid,
+      eventCount: events.length,
+      lastTimestamp,
+    });
   }
 
   // Purge this thread's log. The router only calls this for ORPHAN threads

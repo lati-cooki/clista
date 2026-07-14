@@ -570,6 +570,30 @@ export default {
           return json(await indexStub(env).list(url.searchParams.get('hidden') === '1'));
         }
 
+        // GET /api/portfolio — the cross-thread governance dashboard projection.
+        if (parts[1] === 'portfolio' && !parts[2] && request.method === 'GET') {
+          return json(await indexStub(env).portfolio());
+        }
+
+        // POST /api/portfolio/rebuild — one-shot backfill: re-project every
+        // registered thread's index card so pre-existing threads gain signals.
+        if (parts[1] === 'portfolio' && parts[2] === 'rebuild' && request.method === 'POST') {
+          const identity = await resolveIdentity(request, env);
+          if (!identity.authenticated) {
+            return json({ error: 'unauthenticated', reason: identity.reason || 'sign in required' }, 401);
+          }
+          const listed = await indexStub(env).list(true);
+          let rebuilt = 0;
+          for (const t of listed.threads || []) {
+            const card = await threadStub(env, t.id).indexCard();
+            if (card && card.id) {
+              await indexStub(env).upsert(card);
+              rebuilt += 1;
+            }
+          }
+          return json({ ok: true, rebuilt });
+        }
+
         // POST /api/threads — open a new thread. The creator becomes its first
         // participant (decision owner). Server mints the thread id and the
         // canonical two-event genesis log (ParticipantDeclared → ThreadCreated)
