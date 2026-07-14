@@ -6,6 +6,7 @@ import { ico, octopus } from './icons.js';
 import { navItemStyle, navCountStyle } from './styles.js';
 import { Cockpit } from './screens/Cockpit.jsx';
 import { ThreadIndex } from './screens/ThreadIndex.jsx';
+import { Portfolio } from './screens/Portfolio.jsx';
 import { Compose } from './screens/Compose.jsx';
 import { Kit } from './screens/Kit.jsx';
 import { api, DEMO_THREAD_ID } from './api.js';
@@ -15,6 +16,7 @@ const initials = (s) => (s || '').split(/\s+/).filter(Boolean).map((w) => w[0]).
 const NAV = [
   { key: 'cockpit', label: 'Thread Cockpit', count: '', icon: ico('cockpit', { size: 18 }) },
   { key: 'index', label: 'Thread Index', count: '', icon: ico('index', { size: 18 }) },
+  { key: 'portfolio', label: 'Portfolio', count: '', icon: ico('fileSearch', { size: 18 }) },
   { key: 'compose', label: 'Compose / Append', count: '', icon: ico('plus', { size: 18 }) },
   { key: 'kit', label: 'Component Kit', count: '', icon: ico('kit', { size: 18 }) },
 ];
@@ -142,6 +144,7 @@ export function App() {
       >
         {screen === 'cockpit' && threadId && <Cockpit threadId={threadId} me={me} go={go} />}
         {screen === 'index' && <ThreadIndex openThread={openThread} me={me} />}
+        {screen === 'portfolio' && <Portfolio openThread={openThread} me={me} />}
         {screen === 'compose' && threadId && <Compose threadId={threadId} me={me} go={go} />}
         {screen === 'kit' && <Kit />}
       </main>
