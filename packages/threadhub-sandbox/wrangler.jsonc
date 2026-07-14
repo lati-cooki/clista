@@ -1,0 +1,59 @@
+// wrangler.jsonc — the public "Try It" sandbox: one Worker, one SQLite
+// Durable Object, ISOLATED from the production hub (threadhub-cf / hub-prod).
+//
+// ISOLATION (owner ruling: Model A). This is a SEPARATE Worker with its OWN
+// DO class (SandboxDO) and its OWN instance name ('sandbox-prod'). It has NO
+// binding to the hub's HubDO and no HUB service binding — there is no code
+// path from here to any production listing/export/anchor. A sandbox thread
+// can only ever be read at this Worker's /try/* routes.
+//
+// EPHEMERALITY: the SandboxDO's store variant DROPS the append-only triggers
+// (see src/sandbox-store.js) so a DO alarm can DELETE threads older than 24h.
+// This is a DELIBERATE, DISCLOSED relaxation of tamper-evidence FOR THE
+// SANDBOX ONLY — sandbox records are never anchored and every sandbox view
+// carries an "ephemeral, expires within 24h, not a governance record" banner.
+//
+// Secret (never in this file, owner-gated, Phase 3): TURNSTILE_SECRET — set
+//   wrangler secret put TURNSTILE_SECRET
+// When UNSET the Turnstile seam is a no-op/allow (tests + pre-widget builds);
+// when SET it is fail-closed (a missing/invalid token refuses POST /try).
+{
+  "name": "threadhub-sandbox",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-07-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  "durable_objects": {
+    "bindings": [{ "name": "SANDBOX", "class_name": "SandboxDO" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["SandboxDO"] }],
+
+  // Ephemerality knobs (env, not secret — cheap to tune post-launch). The DO
+  // reads these with the ratified defaults as fallbacks: 300-thread hard cap,
+  // 24h TTL. Present here so a deploy can retune without a code change.
+  "vars": {
+    "SANDBOX_MAX_THREADS": "300",
+    "SANDBOX_TTL_HOURS": "24"
+  },
+
+  // /try/verify.mjs byte-identity by construction: the Worker Text-imports the
+  // SAME repo file the hub serves at /verify.mjs and serves those bytes
+  // verbatim at its own path (owner ruling D-VERIFY-IDENTITY). No copy, no
+  // build step to drift — the whole payoff is that the SAME checker passes.
+  "rules": [
+    { "type": "Text", "globs": ["**/verify-standalone.mjs"], "fallthrough": true }
+  ],
+
+  // store.js (required by hub.js) pulls node:sqlite at module load. The DO
+  // supplies its own duck-typed store, so Store is never constructed here; the
+  // alias makes the bundle inert instead of unbuildable. Mirrored in
+  // vitest.config.js resolve.alias for the test pool.
+  "alias": {
+    "node:sqlite": "./src/node-sqlite-stub.js"
+  },
+
+  "observability": { "enabled": true }
+
+  // NO routes here. The apex path-split (consensusprotocol.ai/try/* → this
+  // Worker) is wired at deploy time (Phase 5, owner-gated), not in this build.
+}

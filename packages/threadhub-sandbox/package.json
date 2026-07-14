@@ -1,0 +1,19 @@
+{
+  "name": "threadhub-sandbox",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Isolated public 'Try It' sandbox Worker + SandboxDO. Reuses ../threadhub (hub.js/view.js/publication.js/verify-standalone.mjs) as libraries, but with its OWN trigger-free store variant, DO class, and instance name. Shares NO state with the production hub (hub-prod). Ephemeral: a DO alarm sweeps threads older than 24h.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run && vitest run --config vitest.node.config.js"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.18.4",
+    "vitest": "^4.1.10",
+    "wrangler": "^4.110.0"
+  },
+  "allowScripts": {
+    "workerd@1.20260708.1": true
+  }
+}
