@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Consensus Protocol — connected prototype</title>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
 <style>
@@ -3499,21 +3500,100 @@ function fauxHash(str) {
   }
   return out.join("");
 }
+const TURNSTILE_SITE_KEY = "0x4AAAAAAD1kLJ0DwuCQav66";
 function GenesisScreen({ NS, go }) {
   const { Button } = NS;
   const [text, setText] = useState("");
   const [cites, setCites] = useState([]);
   const [armed, setArmed] = useState(false);
   const [sealed, setSealed] = useState(false);
+  const [sealing, setSealing] = useState(false);
+  const [sealErr, setSealErr] = useState(null);
+  const [result, setResult] = useState(null);
+  const widgetHost = React.useRef(null);
+  const widgetId = React.useRef(null);
   const toggle = (name) => setCites((c) => c.includes(name) ? c.filter((x) => x !== name) : [...c, name]);
   const ready = text.trim().length >= 12;
   const locked = armed || sealed;
-  const echoHash = sealed ? fauxHash(text.trim()) : null;
-  const seal = () => {
-    setSealed(true);
-    setTimeout(() => go("challenge"), 1400);
+  useEffect(() => {
+    if (!armed || sealed) return;
+    const ts = window.turnstile;
+    if (!ts || !widgetHost.current || widgetId.current != null) return;
+    try {
+      widgetId.current = ts.render(widgetHost.current, { sitekey: TURNSTILE_SITE_KEY });
+    } catch (e) {
+      widgetId.current = null;
+    }
+    return () => {
+      if (widgetId.current != null && window.turnstile) {
+        try {
+          window.turnstile.remove(widgetId.current);
+        } catch (e) {
+        }
+        widgetId.current = null;
+      }
+    };
+  }, [armed, sealed]);
+  const echoHash = sealed ? result ? result.headHash : fauxHash(text.trim()) : null;
+  const hashDisplay = sealed ? result ? `${echoHash.slice(0, 17)}\u2026${echoHash.slice(-4)} \xB7 sealed \xB7 seq 0001` : `sha256:${echoHash.slice(0, 10)}\u2026${echoHash.slice(-4)} \xB7 sealed \xB7 seq 0001` : "sha256: \u2014 assigned on seal \xB7 prev: null (genesis)";
+  const seal = async () => {
+    if (sealing) return;
+    const ts = window.turnstile;
+    if (!ts || widgetId.current == null) {
+      setSealed(true);
+      setTimeout(() => go("challenge"), 1400);
+      return;
+    }
+    const token = ts.getResponse(widgetId.current);
+    if (!token) {
+      setSealErr("Complete the human-verification check above, then seal.");
+      return;
+    }
+    setSealErr(null);
+    setSealing(true);
+    try {
+      const res = await fetch("/try", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ decision: text.trim(), turnstileToken: token })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setResult({ headHash: data.headHash, viewUrl: data.viewUrl });
+        setSealed(true);
+        setSealing(false);
+        return;
+      }
+      let code = null;
+      try {
+        code = (await res.json()).code;
+      } catch (e) {
+      }
+      const msg = {
+        turnstile_failed: "Human-verification failed. Retry the check above and seal again.",
+        rate_limited: "Rate limit reached \u2014 5 seals per 10 minutes from one network. Wait a few minutes and try again.",
+        at_capacity: "The live sandbox is at capacity \u2014 it keeps a deliberately small footprint. Nothing was recorded; try again shortly.",
+        payload_too_large: "That decision is too long for the sandbox. Shorten it and seal again."
+      }[code] || `The seal could not be completed (error ${res.status}). Nothing was recorded \u2014 please try again.`;
+      setSealErr(msg);
+      setSealing(false);
+      try {
+        window.turnstile.reset(widgetId.current);
+      } catch (e) {
+      }
+    } catch (e) {
+      setSealErr("Network error \u2014 the seal did not complete and nothing was recorded. Check your connection and try again.");
+      setSealing(false);
+      try {
+        window.turnstile.reset(widgetId.current);
+      } catch (e2) {
+      }
+    }
   };
-  return /* @__PURE__ */ React.createElement("div", { style: { maxWidth: 720, margin: "0 auto", padding: "44px 28px 72px" } }, /* @__PURE__ */ React.createElement("div", { style: { fontFamily: "var(--font-sans)", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--ink-2)", marginBottom: 12 } }, "Genesis \xB7 sequence 0"), /* @__PURE__ */ React.createElement("h1", { style: { fontFamily: "var(--font-serif)", fontSize: 34, fontWeight: 600, lineHeight: 1.14, letterSpacing: "-0.015em", color: "var(--ink-0)", margin: "0 0 22px", maxWidth: "22ch" } }, "Paste the decision you need to defend."), /* @__PURE__ */ React.createElement("div", { style: { opacity: locked ? 0.5 : 1, pointerEvents: locked ? "none" : "auto", transition: "opacity var(--dur-base) var(--ease-standard)" } }, /* @__PURE__ */ React.createElement("div", { style: { position: "relative", border: "1px solid var(--rule-strong)", borderRadius: 2, background: "var(--paper-0)" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 7, padding: "9px 14px", borderBottom: "1px dashed var(--rule-strong)" } }, /* @__PURE__ */ React.createElement("span", { style: { width: 6, height: 6, borderRadius: 999, background: "var(--ink-3)", flex: "none" } }), /* @__PURE__ */ React.createElement("span", { style: { fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--ink-2)" } }, "free-form \u2014 nothing here is witnessed")), /* @__PURE__ */ React.createElement("textarea", { value: text, onChange: (e) => setText(e.target.value), placeholder: "e.g. Promote fraud-threshold-v4 to production, raising the auto-decline cutoff from 0.74 to 0.82\u2026", style: { width: "100%", boxSizing: "border-box", minHeight: 168, resize: "vertical", border: 0, outline: "none", background: "transparent", fontFamily: "var(--font-serif)", fontSize: 17, lineHeight: 1.6, color: "var(--ink-0)", padding: "16px 16px 18px" } })), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 24 } }, /* @__PURE__ */ React.createElement("div", { style: { fontFamily: "var(--font-sans)", fontSize: 12, fontWeight: 600, color: "var(--ink-1)", marginBottom: 4 } }, "Instruments in scope"), /* @__PURE__ */ React.createElement("p", { style: { fontFamily: "var(--font-sans)", fontSize: 12, color: "var(--ink-2)", margin: "0 0 12px", maxWidth: "56ch" } }, "Registry instruments are pulled in as ", /* @__PURE__ */ React.createElement("b", { style: { fontWeight: 600 } }, "PrecedentReference"), " citations \u2014 named, versioned, context-hashed. They are cited, never silently inlined into your text."), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 8 } }, PRECEDENTS.map((p) => /* @__PURE__ */ React.createElement(PrecedentCitation, { key: p.name, p, cited: cites.includes(p.name), onToggle: () => toggle(p.name) }))))), /* @__PURE__ */ React.createElement("div", { style: { position: "relative", marginTop: 40, borderTop: "1.5px solid var(--ink-0)" } }, /* @__PURE__ */ React.createElement("span", { style: { position: "absolute", top: -8, left: "50%", transform: "translateX(-50%)", background: "var(--paper-0)", padding: "0 12px", fontFamily: "var(--font-sans)", fontSize: 10, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: sealed ? "var(--ink-0)" : "var(--ink-2)", whiteSpace: "nowrap" } }, sealed ? "witnessed \xB7 sequence 0 sealed" : "the threshold \xB7 past this line, witnessed")), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 30 } }, /* @__PURE__ */ React.createElement("div", { style: { fontFamily: "var(--font-sans)", fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: sealed ? "var(--verify)" : "var(--ink-3)", marginBottom: 14, transition: "color var(--dur-base) var(--ease-standard)" } }, sealed ? "Recorded \u2014 this is now the chain" : "What becomes permanent"), /* @__PURE__ */ React.createElement("div", { className: "cp-spine", style: { paddingLeft: 28 } }, /* @__PURE__ */ React.createElement("div", { className: "cp-node", "data-seal": sealed ? "" : void 0, style: { padding: "0 0 6px" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "baseline", gap: 10, marginBottom: 6 } }, /* @__PURE__ */ React.createElement("span", { style: { fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--ink-3)" } }, "#0001"), /* @__PURE__ */ React.createElement("span", { style: { fontFamily: "var(--font-sans)", fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: sealed ? "var(--ink-0)" : "var(--ink-2)" } }, "Genesis \xB7 ClaimCreated")), /* @__PURE__ */ React.createElement("div", { style: { fontFamily: "var(--font-serif)", fontSize: 17, lineHeight: 1.55, color: "var(--ink-0)", maxWidth: "58ch", minHeight: "1.55em" } }, text.trim() || /* @__PURE__ */ React.createElement("span", { style: { color: "var(--ink-3)" } }, "your decision, verbatim, appears here as sequence 0")), cites.length > 0 && /* @__PURE__ */ React.createElement("div", { style: { marginTop: 8, display: "flex", flexWrap: "wrap", gap: 6 } }, cites.map((c) => /* @__PURE__ */ React.createElement("span", { key: c, style: { fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--ink-2)", border: "1px solid var(--rule)", borderRadius: 2, padding: "2px 7px" } }, "cites ", c))), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 10, fontFamily: "var(--font-mono)", fontSize: 12, color: sealed ? "var(--verify-ink)" : "var(--ink-3)", wordBreak: "break-all" } }, sealed ? `sha256:${echoHash.slice(0, 10)}\u2026${echoHash.slice(-4)} \xB7 sealed \xB7 seq 0001` : "sha256: \u2014 assigned on seal \xB7 prev: null (genesis)")))), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 24 } }, !armed && !sealed && /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(Button, { variant: "primary", size: "lg", disabled: !ready, onClick: () => setArmed(true), style: { width: "100%", padding: "16px 22px", fontSize: 16 } }, "Cross the threshold \u2192"), /* @__PURE__ */ React.createElement("p", { style: { fontFamily: "var(--font-serif)", fontSize: 14, lineHeight: 1.55, color: "var(--ink-1)", margin: "14px 0 0", textAlign: "center", maxWidth: "52ch", marginLeft: "auto", marginRight: "auto" } }, ready ? "There is no draft state past this line. Crossing it is the signature." : "Paste a decision above to arm the threshold.")), armed && !sealed && /* @__PURE__ */ React.createElement("div", { style: { border: "1.5px solid var(--ink-0)", borderRadius: 2, background: "var(--paper-1)", padding: "20px 22px" } }, /* @__PURE__ */ React.createElement("div", { style: { fontFamily: "var(--font-serif)", fontSize: 18, fontWeight: 500, lineHeight: 1.5, color: "var(--ink-0)", maxWidth: "50ch" } }, "Recorded verbatim as sequence 0. ", /* @__PURE__ */ React.createElement("b", { style: { fontWeight: 600 } }, "No edits. No withdrawal."), " The text above becomes the permanent first record of this thread."), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 12, marginTop: 18, flexWrap: "wrap" } }, /* @__PURE__ */ React.createElement(Button, { variant: "primary", size: "lg", onClick: seal, style: { padding: "13px 20px" } }, "Seal genesis record"), /* @__PURE__ */ React.createElement(Button, { variant: "ghost", size: "lg", onClick: () => setArmed(false), style: { padding: "13px 16px" } }, "Not yet"))), sealed && /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, border: "1px solid var(--verify-rule)", background: "var(--verify-wash)", borderRadius: 2, padding: "16px 20px" } }, /* @__PURE__ */ React.createElement("span", { style: { width: 8, height: 8, background: "var(--verify)", flex: "none" } }), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { style: { fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 600, color: "var(--verify-ink)" } }, "Sequence 0 sealed \u2014 the thread exists."), /* @__PURE__ */ React.createElement("div", { style: { fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--ink-2)", marginTop: 2 } }, "opening the Challenge Run\u2026"))), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 22, fontFamily: "var(--font-sans)", fontSize: 11, color: "var(--ink-3)", lineHeight: 1.5 } }, "After sealing: maker + checker deliberate \xB7 every act witnessed in seq \xB7 the terminal report cites the records it rests on \xB7 head hash anchored.")));
+  return /* @__PURE__ */ React.createElement("div", { style: { maxWidth: 720, margin: "0 auto", padding: "44px 28px 72px" } }, /* @__PURE__ */ React.createElement("div", { style: { fontFamily: "var(--font-sans)", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--ink-2)", marginBottom: 12 } }, "Genesis \xB7 sequence 0"), /* @__PURE__ */ React.createElement("h1", { style: { fontFamily: "var(--font-serif)", fontSize: 34, fontWeight: 600, lineHeight: 1.14, letterSpacing: "-0.015em", color: "var(--ink-0)", margin: "0 0 22px", maxWidth: "22ch" } }, "Paste the decision you need to defend."), /* @__PURE__ */ React.createElement("div", { style: { opacity: locked ? 0.5 : 1, pointerEvents: locked ? "none" : "auto", transition: "opacity var(--dur-base) var(--ease-standard)" } }, /* @__PURE__ */ React.createElement("div", { style: { position: "relative", border: "1px solid var(--rule-strong)", borderRadius: 2, background: "var(--paper-0)" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 7, padding: "9px 14px", borderBottom: "1px dashed var(--rule-strong)" } }, /* @__PURE__ */ React.createElement("span", { style: { width: 6, height: 6, borderRadius: 999, background: "var(--ink-3)", flex: "none" } }), /* @__PURE__ */ React.createElement("span", { style: { fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--ink-2)" } }, "free-form \u2014 nothing here is witnessed")), /* @__PURE__ */ React.createElement("textarea", { value: text, onChange: (e) => setText(e.target.value), placeholder: "e.g. Promote fraud-threshold-v4 to production, raising the auto-decline cutoff from 0.74 to 0.82\u2026", style: { width: "100%", boxSizing: "border-box", minHeight: 168, resize: "vertical", border: 0, outline: "none", background: "transparent", fontFamily: "var(--font-serif)", fontSize: 17, lineHeight: 1.6, color: "var(--ink-0)", padding: "16px 16px 18px" } })), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 24 } }, /* @__PURE__ */ React.createElement("div", { style: { fontFamily: "var(--font-sans)", fontSize: 12, fontWeight: 600, color: "var(--ink-1)", marginBottom: 4 } }, "Instruments in scope"), /* @__PURE__ */ React.createElement("p", { style: { fontFamily: "var(--font-sans)", fontSize: 12, color: "var(--ink-2)", margin: "0 0 12px", maxWidth: "56ch" } }, "Registry instruments are pulled in as ", /* @__PURE__ */ React.createElement("b", { style: { fontWeight: 600 } }, "PrecedentReference"), " citations \u2014 named, versioned, context-hashed. They are cited, never silently inlined into your text."), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 8 } }, PRECEDENTS.map((p) => /* @__PURE__ */ React.createElement(PrecedentCitation, { key: p.name, p, cited: cites.includes(p.name), onToggle: () => toggle(p.name) }))))), /* @__PURE__ */ React.createElement("div", { style: { position: "relative", marginTop: 40, borderTop: "1.5px solid var(--ink-0)" } }, /* @__PURE__ */ React.createElement("span", { style: { position: "absolute", top: -8, left: "50%", transform: "translateX(-50%)", background: "var(--paper-0)", padding: "0 12px", fontFamily: "var(--font-sans)", fontSize: 10, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: sealed ? "var(--ink-0)" : "var(--ink-2)", whiteSpace: "nowrap" } }, sealed ? "witnessed \xB7 sequence 0 sealed" : "the threshold \xB7 past this line, witnessed")), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 30 } }, /* @__PURE__ */ React.createElement("div", { style: { fontFamily: "var(--font-sans)", fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: sealed ? "var(--verify)" : "var(--ink-3)", marginBottom: 14, transition: "color var(--dur-base) var(--ease-standard)" } }, sealed ? "Recorded \u2014 this is now the chain" : "What becomes permanent"), /* @__PURE__ */ React.createElement("div", { className: "cp-spine", style: { paddingLeft: 28 } }, /* @__PURE__ */ React.createElement("div", { className: "cp-node", "data-seal": sealed ? "" : void 0, style: { padding: "0 0 6px" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "baseline", gap: 10, marginBottom: 6 } }, /* @__PURE__ */ React.createElement("span", { style: { fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--ink-3)" } }, "#0001"), /* @__PURE__ */ React.createElement("span", { style: { fontFamily: "var(--font-sans)", fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: sealed ? "var(--ink-0)" : "var(--ink-2)" } }, "Genesis \xB7 ClaimCreated")), /* @__PURE__ */ React.createElement("div", { style: { fontFamily: "var(--font-serif)", fontSize: 17, lineHeight: 1.55, color: "var(--ink-0)", maxWidth: "58ch", minHeight: "1.55em" } }, text.trim() || /* @__PURE__ */ React.createElement("span", { style: { color: "var(--ink-3)" } }, "your decision, verbatim, appears here as sequence 0")), cites.length > 0 && /* @__PURE__ */ React.createElement("div", { style: { marginTop: 8, display: "flex", flexWrap: "wrap", gap: 6 } }, cites.map((c) => /* @__PURE__ */ React.createElement("span", { key: c, style: { fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--ink-2)", border: "1px solid var(--rule)", borderRadius: 2, padding: "2px 7px" } }, "cites ", c))), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 10, fontFamily: "var(--font-mono)", fontSize: 12, color: sealed ? "var(--verify-ink)" : "var(--ink-3)", wordBreak: "break-all" } }, hashDisplay)))), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 24 } }, !armed && !sealed && /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(Button, { variant: "primary", size: "lg", disabled: !ready, onClick: () => setArmed(true), style: { width: "100%", padding: "16px 22px", fontSize: 16 } }, "Cross the threshold \u2192"), /* @__PURE__ */ React.createElement("p", { style: { fontFamily: "var(--font-serif)", fontSize: 14, lineHeight: 1.55, color: "var(--ink-1)", margin: "14px 0 0", textAlign: "center", maxWidth: "52ch", marginLeft: "auto", marginRight: "auto" } }, ready ? "There is no draft state past this line. Crossing it is the signature." : "Paste a decision above to arm the threshold.")), armed && !sealed && /* @__PURE__ */ React.createElement("div", { style: { border: "1.5px solid var(--ink-0)", borderRadius: 2, background: "var(--paper-1)", padding: "20px 22px" } }, /* @__PURE__ */ React.createElement("div", { style: { fontFamily: "var(--font-serif)", fontSize: 18, fontWeight: 500, lineHeight: 1.5, color: "var(--ink-0)", maxWidth: "50ch" } }, "Recorded verbatim as sequence 0. ", /* @__PURE__ */ React.createElement("b", { style: { fontWeight: 600 } }, "No edits. No withdrawal."), " The text above becomes the permanent first record of this thread."), /* @__PURE__ */ React.createElement("div", { ref: widgetHost, style: { marginTop: 16 } }), sealErr && /* @__PURE__ */ React.createElement("div", { role: "alert", style: { marginTop: 14, border: "1px solid var(--dissent-rule)", background: "var(--dissent-wash)", borderRadius: 2, padding: "10px 14px", fontFamily: "var(--font-sans)", fontSize: 13, lineHeight: 1.5, color: "var(--dissent-ink)" } }, sealErr), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 12, marginTop: 18, flexWrap: "wrap" } }, /* @__PURE__ */ React.createElement(Button, { variant: "primary", size: "lg", disabled: sealing, onClick: seal, style: { padding: "13px 20px" } }, sealing ? "Sealing\u2026" : "Seal genesis record"), /* @__PURE__ */ React.createElement(Button, { variant: "ghost", size: "lg", disabled: sealing, onClick: () => {
+    setArmed(false);
+    setSealErr(null);
+  }, style: { padding: "13px 16px" } }, "Not yet"))), sealed && /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, border: "1px solid var(--verify-rule)", background: "var(--verify-wash)", borderRadius: 2, padding: "16px 20px" } }, /* @__PURE__ */ React.createElement("span", { style: { width: 8, height: 8, background: "var(--verify)", flex: "none" } }), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { style: { fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 600, color: "var(--verify-ink)" } }, "Sequence 0 sealed \u2014 the thread exists."), result ? /* @__PURE__ */ React.createElement("div", { style: { fontFamily: "var(--font-sans)", fontSize: 12, color: "var(--ink-1)", marginTop: 4, lineHeight: 1.5 } }, "A real, signed, hash-chained record. ", /* @__PURE__ */ React.createElement("a", { href: result.viewUrl, style: { color: "var(--dissent-ink)", fontWeight: 600 } }, "View & verify this record \u2192"), /* @__PURE__ */ React.createElement("span", { style: { display: "block", fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--ink-3)", marginTop: 3 } }, "ephemeral sandbox demo \xB7 expires within 24h \xB7 not a governance record")) : /* @__PURE__ */ React.createElement("div", { style: { fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--ink-2)", marginTop: 2 } }, "opening the Challenge Run\u2026"))), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 22, fontFamily: "var(--font-sans)", fontSize: 11, color: "var(--ink-3)", lineHeight: 1.5 } }, "After sealing: maker + checker deliberate \xB7 every act witnessed in seq \xB7 the terminal report cites the records it rests on \xB7 head hash anchored.")));
 }
 function MapStage({ NS, n, name, sub, event, tone = "neutral", door, onClick }) {
   const accent = { neutral: "var(--rule-strong)", seal: "var(--ink-0)", dissent: "var(--dissent)", verify: "var(--verify)", pending: "var(--pending)" }[tone] || "var(--rule-strong)";

@@ -15,10 +15,15 @@ it('GET /prototype → 200 self-contained HTML app, no external hosts, public', 
   expect(html).toMatch(/<!doctype html>/i);
   expect(html).toContain('Consensus Protocol — connected prototype');
   expect(html).toContain('<div id="root"></div>');
-  // The app + its runtime are inlined (no CDN / external host references).
+  // The app + its runtime are inlined. The ONLY permitted external host is the
+  // Cloudflare Turnstile script (Phase 4 — the Genesis seal's bot-protection
+  // widget, hostname-locked to consensusprotocol.ai; graceful-degrades to the
+  // mockup seal everywhere else). Assert exactly one external <script src> and
+  // that it is the documented Turnstile host — nothing else may reference a CDN.
   expect(html).toContain('window.ConsensusApp');
   expect(html).toContain('ConsensusProtocolDesignSystem_0d2492');
-  expect(html).not.toMatch(/src="https?:\/\//);
+  const externalSrcs = html.match(/src="https?:\/\/[^"]+"/g) || [];
+  expect(externalSrcs).toEqual(['src="https://challenges.cloudflare.com/turnstile/v0/api.js"']);
   expect(html).not.toMatch(/@import url\(['"]?https?:/);
   // Trailing-slash alias serves the same bytes.
   const slash = await pubGet('/prototype/');
