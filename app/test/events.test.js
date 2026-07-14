@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { createRequire } from 'node:module';
 import {
-  buildObjection, buildAssumption, buildClaim, buildPosition, buildDecisionRequest, buildReview, guard,
+  buildObjection, buildAssumption, buildClaim, buildPosition, buildDecisionRequest, buildReview, buildEvidence, guard,
 } from '../src/events.js';
 
 const require = createRequire(import.meta.url);
@@ -57,6 +57,7 @@ const genesis = [
 // Build each kind through the shared builders, threading real ids so the chain
 // references resolve (objection/position target the claim; review targets the DRQ).
 const claim = buildClaim({ threadId, actorId: ACTOR, text: 'A base claim for the substrate', id: 'clm_base' });
+const evidence = buildEvidence({ threadId, actorId: ACTOR, source: 'moltbook u/tester', finding: 'A sourced finding grounding the claim', confidence: 0.75, id: 'evd_base' });
 const assumption = buildAssumption({ threadId, actorId: ACTOR, text: 'A base premise the decision rests on', confidence: 0.75, id: 'asm_base' });
 const objection = buildObjection({ threadId, actorId: ACTOR, target: 'clm_base', text: 'A recorded challenge to the claim', id: 'obj_1' });
 const position = buildPosition({ threadId, actorId: ACTOR, target: 'clm_base', stance: 'support', reason: 'stands with it', id: 'pos_1' });
@@ -65,10 +66,10 @@ const review = buildReview({ threadId, actorId: ACTOR, decisionRequestId: 'drq_1
 
 const fullLog = [
   ...genesis,
-  envelope(claim), envelope(assumption), envelope(objection), envelope(position), envelope(drq), envelope(review),
+  envelope(claim), envelope(evidence), envelope(assumption), envelope(objection), envelope(position), envelope(drq), envelope(review),
 ];
 
-test('all six builders produce a chain that validates and re-chains', () => {
+test('all seven builders produce a chain that validates and re-chains', () => {
   const chained = engine.chainEvents(fullLog);
   const validation = engine.validateEvents(chained);
   assert.equal(validation.valid, true, JSON.stringify(validation.errors, null, 2));
@@ -80,9 +81,22 @@ test('every builder sets the nested participant id to the actor (the 422 trap)',
   assert.equal(objection.payload.objection.participantId, ACTOR);
   assert.equal(assumption.payload.assumption.declaredByParticipantId, ACTOR);
   assert.equal(claim.payload.claim.createdByParticipantId, ACTOR);
+  assert.equal(evidence.payload.evidence.committedByParticipantId, ACTOR);
   assert.equal(position.payload.position.participantId, ACTOR);
   assert.equal(drq.payload.decisionRequest.openedByParticipantId, ACTOR);
   assert.equal(review.payload.review.reviewerParticipantId, ACTOR);
+});
+
+test('buildEvidence carries source/finding/confidence in the canonical evidence shape', () => {
+  const e = evidence.payload.evidence;
+  assert.equal(evidence.event_type, 'EvidenceCommitted');
+  assert.equal(e.object, 'evidence');
+  assert.equal(e.threadId, threadId);
+  assert.equal(e.source, 'moltbook u/tester');
+  assert.equal(e.finding, 'A sourced finding grounding the claim');
+  assert.equal(e.confidence, 0.75);
+  assert.ok(Array.isArray(e.artifactIds));
+  assert.match(e.contentHash, /^sha256:/);
 });
 
 test('an objection is typed by its target id — decision challenges attach to the request (drq_*)', () => {
@@ -106,4 +120,10 @@ test('guard mirrors the engine rules (target/open-DRQ/min-12, optional text for 
   assert.equal(guard('objection', { target: 'clm_1', text: 'a sufficiently long objection' }), null);
   assert.equal(guard('position', { target: 'clm_1', text: '' }), null); // reason optional
   assert.equal(guard('review', { decisionRequest: { id: 'drq_1' }, text: '' }), null); // comment optional
+});
+
+test('guard requires a source and min-12 finding for evidence', () => {
+  assert.match(guard('evidence', { source: '', text: 'a long enough finding here' }), /source is required/);
+  assert.match(guard('evidence', { source: 'moltbook u/x', text: 'too short' }), /min 12 chars/);
+  assert.equal(guard('evidence', { source: 'moltbook u/x', text: 'a sufficiently long sourced finding' }), null);
 });

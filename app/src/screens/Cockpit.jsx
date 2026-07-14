@@ -178,6 +178,9 @@ export function Cockpit({ threadId, me, go }) {
   // thread's full substrate so a complete thread is still mergeable.
   const fallback = (set, all) => (set && set.length ? set : all.map((x) => x.id));
   const mergeMissingAssumptions = canMerge && !(proposal.supportingAssumptionIds.length || vm.assumptions.length);
+  // Symmetric to assumptions: the merge fallback narrows to supporting evidence,
+  // so warn before the fail-closed rejection when the thread has none to gather.
+  const mergeMissingEvidence = canMerge && !(proposal.supportingEvidenceIds.length || vm.evidence.some((e) => e.supporting));
   const recordDecision = async () => {
     if (mSummary.trim().length < 12) {
       setMergeResult({ ok: false, reason: 'A decision needs a summary (min 12 chars) — state what was decided.' });
@@ -522,6 +525,13 @@ export function Cockpit({ threadId, me, go }) {
               <div style={css('margin-bottom:14px; padding:11px 14px; background:#f7f2e8; border:1px solid rgba(154,107,7,0.28); border-radius:5px;')}>
                 <span style={css('font-size:12.5px; color:#7a5a07; line-height:1.5;')}>
                   This thread has no declared assumption — a decision requires at least one (evidence + claims + assumptions). Declare one in <span style={css(MONO + ' font-size:11.5px;')}>Compose → AssumptionDeclared</span> first, or the merge will be rejected fail-closed.
+                </span>
+              </div>
+            )}
+            {mergeMissingEvidence && (
+              <div style={css('margin-bottom:14px; padding:11px 14px; background:#f7f2e8; border:1px solid rgba(154,107,7,0.28); border-radius:5px;')}>
+                <span style={css('font-size:12.5px; color:#7a5a07; line-height:1.5;')}>
+                  This thread has no supporting evidence — a decision requires at least one (evidence + claims + assumptions). Commit one in <span style={css(MONO + ' font-size:11.5px;')}>Compose → EvidenceCommitted</span> first, or the merge will be rejected fail-closed.
                 </span>
               </div>
             )}

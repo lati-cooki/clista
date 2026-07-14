@@ -9,7 +9,7 @@ import { api } from '../api.js';
 import { useThread } from '../useThread.js';
 import {
   rid, ID_PREFIX, SEVERITIES, STANCES, REVIEW_STATUSES, CONFIDENCE, guard,
-  buildObjection, buildAssumption, buildClaim, buildPosition, buildDecisionRequest, buildReview,
+  buildObjection, buildAssumption, buildClaim, buildEvidence, buildPosition, buildDecisionRequest, buildReview,
 } from '../events.js';
 
 const MONO = "font-family:'JetBrains Mono',monospace;";
@@ -33,6 +33,11 @@ const KINDS = {
     label: 'claim', event: 'ClaimCreated', idPrefix: 'clm', icon: 'claims', color: '#1c7a4f',
     h1: 'Create a claim',
     desc: 'A claim is an interpretation built from evidence and assumptions. State it precisely so others can support it, object to it, or ground it.',
+  },
+  evidence: {
+    label: 'evidence', event: 'EvidenceCommitted', idPrefix: 'evd', icon: 'fileSearch', color: '#2c5f96',
+    h1: 'Commit evidence',
+    desc: 'Evidence is a sourced finding committed to the ledger. It grounds claims and is what a decision must rest on — name the source, state the finding.',
   },
   position: {
     label: 'position', event: 'PositionTaken', idPrefix: 'pos', icon: 'checkSquare', color: '#6a4ca5',
@@ -59,6 +64,7 @@ export function Compose({ threadId, me, go }) {
   const [target, setTarget] = useState('');
   const [statement, setStatement] = useState('');
   const [basis, setBasis] = useState('');
+  const [source, setSource] = useState('');
   const [severity, setSeverity] = useState('major');
   const [confidence, setConfidence] = useState(0.75);
   const [stance, setStance] = useState('support');
@@ -110,6 +116,7 @@ export function Compose({ threadId, me, go }) {
     if (kind === 'objection') return buildObjection({ ...base, target, text: statement, basis });
     if (kind === 'assumption') return buildAssumption({ ...base, text: statement, confidence });
     if (kind === 'claim') return buildClaim({ ...base, text: statement });
+    if (kind === 'evidence') return buildEvidence({ ...base, source, finding: statement, confidence });
     if (kind === 'position') return buildPosition({ ...base, target, stance, reason: statement });
     if (kind === 'decisionRequest') return buildDecisionRequest({ ...base, proposal: statement, refs });
     return buildReview({ ...base, decisionRequestId: decisionRequest && decisionRequest.id, status: reviewStatus, conditions, comment: statement });
@@ -117,7 +124,7 @@ export function Compose({ threadId, me, go }) {
 
   const submit = async () => {
     // Client-side guard mirrors the engine's rules for a fast local rejection.
-    const reason = guard(kind, { target, text: statement, decisionRequest });
+    const reason = guard(kind, { target, text: statement, source, decisionRequest });
     if (reason) {
       setResult({ ok: false, id: '—', reason });
       return;
@@ -149,6 +156,7 @@ export function Compose({ threadId, me, go }) {
     setTarget('');
     setStatement('');
     setBasis('');
+    setSource('');
     setSeverity('major');
     setConfidence(0.75);
     setStance('support');
@@ -163,12 +171,13 @@ export function Compose({ threadId, me, go }) {
     <RefGroup title={title} items={refLists[bucket] || []} selected={refs[bucket]} onToggle={(id) => toggleRef(bucket, id)} />
   );
 
-  const textLabel = kind === 'position' ? 'position.reason' : kind === 'decisionRequest' ? 'decisionRequest.proposal' : kind === 'review' ? 'review.comment' : `${k.label}.text`;
+  const textLabel = kind === 'position' ? 'position.reason' : kind === 'decisionRequest' ? 'decisionRequest.proposal' : kind === 'review' ? 'review.comment' : kind === 'evidence' ? 'evidence.finding' : `${k.label}.text`;
   const textRequired = kind !== 'position' && kind !== 'review';
   const placeholders = {
     objection: 'State precisely what this objection challenges, and what would retire it.',
     assumption: 'State the premise you are taking as given — what must hold for this to stand.',
     claim: 'State the interpretation precisely — what it asserts, drawn from what.',
+    evidence: 'State the finding precisely — what was observed or measured, and what it grounds.',
     position: 'Why do you stand here? (optional, but recorded)',
     decisionRequest: 'State the proposal precisely — what is being decided, and on what terms.',
     review: 'Your verdict in words (optional, but recorded).',
@@ -229,6 +238,14 @@ export function Compose({ threadId, me, go }) {
           </div>
         )}
 
+        {/* source — evidence only */}
+        {kind === 'evidence' && (
+          <div style={css('margin-bottom:20px;')}>
+            <label style={css(fieldLabel)}>evidence.source <span style={css('color:#b3343c;')}>*</span></label>
+            <input value={source} onChange={clear(setSource)} placeholder="where this finding came from — e.g. moltbook u/handle, a run id, a document" style={css(inputBase)} />
+          </div>
+        )}
+
         {/* statement / text */}
         <div style={css('margin-bottom:20px;')}>
           <label style={css(fieldLabel)}>{textLabel} {textRequired ? <span style={css('color:#b3343c;')}>*</span> : <span style={css('color:#a5a5a5; font-weight:500;')}>optional</span>}</label>
@@ -259,10 +276,10 @@ export function Compose({ threadId, me, go }) {
             </div>
           </div>
         )}
-        {/* confidence — assumption only */}
-        {kind === 'assumption' && (
+        {/* confidence — assumption + evidence */}
+        {(kind === 'assumption' || kind === 'evidence') && (
           <div style={css('margin-bottom:24px;')}>
-            <label style={css(fieldLabel)}>assumption.confidence</label>
+            <label style={css(fieldLabel)}>{k.label}.confidence</label>
             <div style={css('display:flex; gap:8px;')}>
               {CONFIDENCE.map((c) => (
                 <button key={c.v} onClick={() => { setConfidence(c.v); setResult(null); }} style={filterStyle(confidence === c.v)}>{c.label} · {c.v}</button>
