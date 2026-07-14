@@ -32,6 +32,23 @@ const RATE_WINDOW_MS = 10 * 60_000; // ... per 10 minutes, per IP
 const SWEEP_INTERVAL_MS = 60 * 60_000; // alarm cadence (TTL is enforced by age, not cadence)
 const MAX_DECISION_CHARS = 100_000; // a paste ceiling well under hub.js's 256KB record cap
 
+// --- the pinned demo (persistent, curated sandbox record) ---
+// One curated demo thread with a FIXED, recognizable slug that is EXEMPT from
+// the 24h TTL sweep, so it can be shared as a lasting example while staying
+// honestly a sandbox record (never anchored, not governance). It is seeded
+// IDEMPOTENTLY on first access — created exactly like a normal /try thread
+// (mint custodial writer → createThread genesis → publish), so its records
+// verify with the real checker (signatures n/n) just like any sandbox thread.
+//
+// DEMO_DECISION is the one-line swap to recurate the demo. DEMO_SLUGS is the
+// exemption set: the alarm sweep deletes `slug NOT IN (DEMO_SLUGS)`, and the
+// view banner branches to the persistent variant for these slugs. Adding a slug
+// here (no schema change — this uses the existing `slug` column) pins one more
+// thread; store-parity is untouched.
+const DEMO_SLUGS = ['demo'];
+const DEMO_DECISION = 'Raise the auto-approval limit for personal loans from $10,000 to $25,000.';
+const isDemoSlug = (slug) => DEMO_SLUGS.includes(slug);
+
 // Random, non-enumerable slug (owner ruling D-SLUG): "try-" + 12 base32 chars.
 // Visibly distinct from prod slugs, unguessable, collision-free in practice.
 const B32 = 'abcdefghijklmnopqrstuvwxyz234567';
@@ -143,42 +160,63 @@ export class SandboxDO extends DurableObject {
         });
       }
 
-      const writer = this.hub.createIdentity({ displayName: 'sandbox writer', kind: 'agent' });
-      const threadId = randomThreadId();
-      const slug = randomSlug();
-      try {
-        const thread = this.hub.createThread({
-          id: threadId,
-          title: title && String(title).trim() ? String(title).slice(0, 200) : deriveTitle(decision),
-          question: decision,
-          authorId: writer.id,
-          slug,
-        });
-        // The witnessed publication act, authored by the custodial writer.
-        const pub = this.hub.append({
-          threadId: thread.id,
-          authorId: writer.id,
-          kind: 'clista.event',
-          payload: publicationEvent(writer.id, thread.id),
-        });
-
-        await this.#ensureAlarm();
-        return json(200, { slug: thread.slug, headHash: pub.record_hash, viewUrl: `/try/${thread.slug}/view` });
-      } catch (e) {
-        // No orphan threads on partial failure: if any step after the mint
-        // throws (e.g. the publish append), remove whatever was created so a
-        // genesis-only thread cannot persist and occupy a cap slot. DO SQL is
-        // synchronous, so this cleanup is atomic w.r.t. this call.
-        // deleteThreadCascade drops the thread + its records + its 1:1 writer
-        // when the thread row exists; the explicit identity delete covers the
-        // case where createThread threw before inserting the thread.
-        this.store.deleteThreadCascade(threadId);
-        this.store.sql.exec('DELETE FROM identities WHERE id = ?', writer.id);
-        throw e;
-      }
+      const { thread, pub } = this.#mintPublishedThread({ decision, title, slug: randomSlug() });
+      await this.#ensureAlarm();
+      return json(200, { slug: thread.slug, headHash: pub.record_hash, viewUrl: `/try/${thread.slug}/view` });
     } catch (e) {
       return errorResponse(e); // hub errors (e.g. payload_too_large) → mapped status
     }
+  }
+
+  // Mint a fresh custodial writer → createThread (decision = genesis seq 0) →
+  // append the ThreadPublished act (seq 1). Returns { thread, pub }. On any
+  // partial failure, roll back so no orphan thread/writer persists: DO SQL is
+  // synchronous, so this cleanup is atomic w.r.t. the call. This is the exact
+  // create path BOTH a normal /try write and the pinned-demo self-seed run,
+  // so the demo is byte-for-byte a normal sandbox thread — just with a fixed
+  // slug and TTL exemption.
+  #mintPublishedThread({ decision, title, slug }) {
+    const writer = this.hub.createIdentity({ displayName: 'sandbox writer', kind: 'agent' });
+    const threadId = randomThreadId();
+    try {
+      const thread = this.hub.createThread({
+        id: threadId,
+        title: title && String(title).trim() ? String(title).slice(0, 200) : deriveTitle(decision),
+        question: decision,
+        authorId: writer.id,
+        slug,
+      });
+      // The witnessed publication act, authored by the custodial writer.
+      const pub = this.hub.append({
+        threadId: thread.id,
+        authorId: writer.id,
+        kind: 'clista.event',
+        payload: publicationEvent(writer.id, thread.id),
+      });
+      return { thread, pub };
+    } catch (e) {
+      // No orphan threads on partial failure: if any step after the mint throws
+      // (e.g. the publish append), remove whatever was created so a genesis-only
+      // thread cannot persist and occupy a cap slot. deleteThreadCascade drops
+      // the thread + its records + its 1:1 writer when the thread row exists;
+      // the explicit identity delete covers the case where createThread threw
+      // before inserting the thread.
+      this.store.deleteThreadCascade(threadId);
+      this.store.sql.exec('DELETE FROM identities WHERE id = ?', writer.id);
+      throw e;
+    }
+  }
+
+  // Idempotent self-seed of the pinned demo. On first access to a demo slug the
+  // read path calls this; if the demo thread doesn't already exist it is created
+  // exactly like a normal /try thread carrying DEMO_DECISION verbatim. Fully
+  // synchronous (hub SQL + ed25519 signing, no await), so it cannot interleave
+  // with a concurrent request inside this DO — there is no double-seed race and
+  // no gated admin endpoint. Cheap after the first hit (a single indexed lookup).
+  #ensureDemo(slug) {
+    if (!isDemoSlug(slug)) return;
+    if (this.store.getThread(slug)) return;
+    this.#mintPublishedThread({ decision: DEMO_DECISION, slug });
   }
 
   // --- the read surface (GET) ---
@@ -186,14 +224,18 @@ export class SandboxDO extends DurableObject {
     try {
       let m;
       if ((m = path.match(/^\/try\/([^/]+)\.json$/)) && method === 'GET') {
-        const thread = this.store.getThread(decodeURIComponent(m[1]));
+        const slug = decodeURIComponent(m[1]);
+        this.#ensureDemo(slug); // idempotent self-seed on first demo access
+        const thread = this.store.getThread(slug);
         if (!thread) return { ...NOT_FOUND };
         const rows = this.store.recordsOf(thread.id);
         if (!isPublished(rows)) return { ...NOT_FOUND };
         return json(200, signedExport(rows));
       }
       if ((m = path.match(/^\/try\/([^/]+)\/view$/)) && method === 'GET') {
-        const thread = this.store.getThread(decodeURIComponent(m[1]));
+        const slug = decodeURIComponent(m[1]);
+        this.#ensureDemo(slug); // idempotent self-seed on first demo access
+        const thread = this.store.getThread(slug);
         if (!thread) return { ...NOT_FOUND };
         const rows = this.store.recordsOf(thread.id);
         if (!isPublished(rows)) return { ...NOT_FOUND };
@@ -209,6 +251,7 @@ export class SandboxDO extends DurableObject {
         return html(200, sandboxViewHTML(
           { thread, records: rows, verification: this.hub.verifyThread(thread.id), authors },
           this.#ttlHours(),
+          isDemoSlug(thread.slug), // pinned → persistent-banner variant (no 24h line)
         ));
       }
       return { ...NOT_FOUND };
@@ -226,7 +269,12 @@ export class SandboxDO extends DurableObject {
 
   async alarm() {
     const cutoff = new Date(Date.now() - this.#ttlHours() * 3600_000).toISOString();
-    for (const t of this.store.threadsOlderThan(cutoff)) {
+    // TTL exemption: the pinned demo (by its known slug) is NEVER swept, no
+    // matter how old — `threadsOlderThan` excludes DEMO_SLUGS via a
+    // `slug NOT IN (...)` filter, so the demo + its 1:1 custodial writer are
+    // never passed to deleteThreadCascade. Done with the existing `slug` column
+    // — no `pinned` column, so store-parity is untouched.
+    for (const t of this.store.threadsOlderThan(cutoff, DEMO_SLUGS)) {
       this.store.deleteThreadCascade(t.id);
     }
     // Reschedule while anything is still live; otherwise the next write re-arms.

@@ -69,3 +69,26 @@ it('the REAL verify-standalone.mjs returns PASS with signatures verified n/n on 
   const bad = await verifyExport(tampered);
   expect(bad.ok).toBe(false);
 });
+
+it('the pinned demo thread (DEMO_DECISION verbatim) also PASSes n/n with the real checker', async () => {
+  // Mirrors sandbox-do.js `#ensureDemo` → `#mintPublishedThread`: the demo is
+  // created by the exact same create path as a normal /try thread, so its
+  // signed export verifies identically. DEMO_DECISION lives as a one-line
+  // constant in sandbox-do.js (not importable here — it pulls in
+  // 'cloudflare:workers'); kept verbatim in sync by this literal.
+  const decision = 'Raise the auto-approval limit for personal loans from $10,000 to $25,000.';
+  const hub = new Hub(memStore());
+  const writer = hub.createIdentity({ displayName: 'sandbox writer', kind: 'agent' });
+  const thread = hub.createThread({ title: decision.slice(0, 80), question: decision, authorId: writer.id, slug: 'demo' });
+  hub.append({ threadId: thread.id, authorId: writer.id, kind: 'clista.event', payload: publicationEvent(writer.id, thread.id) });
+
+  const signed = hub.store.recordsOf(thread.id).map((r) => ({ ...JSON.parse(r.body), record_hash: r.record_hash, signature: r.signature }));
+  expect(signed.map((r) => r.seq)).toEqual([0, 1]);
+  expect(signed[0].payload.question).toBe(decision); // verbatim
+
+  const result = await verifyExport(signed);
+  expect(result.ok).toBe(true);
+  expect(result.records).toBe(2);
+  expect(result.signaturesVerified).toBe(2); // n/n
+  expect(result.line).toContain('signatures verified 2/2');
+});
