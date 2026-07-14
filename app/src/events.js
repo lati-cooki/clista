@@ -20,6 +20,7 @@ export const ID_PREFIX = {
   objection: 'obj',
   assumption: 'asm',
   claim: 'clm',
+  evidence: 'evd',
   position: 'pos',
   decisionRequest: 'drq',
   review: 'rev',
@@ -85,6 +86,26 @@ export function buildClaim({ threadId, actorId, text, id = rid(ID_PREFIX.claim),
       claim: {
         id, object: 'claim', threadId, text: (text || '').trim(),
         status: 'proposed', createdByParticipantId: actorId, createdAt: at,
+      },
+    },
+  };
+}
+
+// A sourced finding committed to the thread. `finding` is the recorded substance;
+// `source` names where it came from. The engine validates only id/thread/committer
+// (validateEvidenceCommitted), but the canonical shape carries source/finding/
+// confidence/artifactIds/contentHash — so a merge that gathers supporting evidence
+// has real substance to rest on. contentHash is an unvalidated provenance stamp
+// here (mirrors the engine scripts' placeholder convention), not a chain hash.
+export function buildEvidence({ threadId, actorId, source, finding, confidence, id = rid(ID_PREFIX.evidence), at = nowIso() }) {
+  return {
+    event_type: 'EvidenceCommitted',
+    payload: {
+      evidence: {
+        id, object: 'evidence', threadId,
+        source: (source || '').trim(), finding: (finding || '').trim(), confidence,
+        committedByParticipantId: actorId, committedAt: at,
+        artifactIds: [], contentHash: 'sha256:evd_' + id,
       },
     },
   };
@@ -157,7 +178,7 @@ export function buildReviewTrigger({ threadId, actorId, decisionRecordId, trigge
 // human sees the same reason the server would return without a round trip. Returns
 // a reason string, or null when the draft passes. `text` is the recorded substance
 // for every kind except position (reason) and review (comment), where it is optional.
-export function guard(kind, { target, text, decisionRequest } = {}) {
+export function guard(kind, { target, text, source, decisionRequest } = {}) {
   if (kind === 'objection' && !target) {
     return 'objection.target is required — every objection must attach to a claim or the decision. Append rejected; reasoning state unchanged.';
   }
@@ -166,6 +187,9 @@ export function guard(kind, { target, text, decisionRequest } = {}) {
   }
   if (kind === 'review' && !(decisionRequest && decisionRequest.id)) {
     return 'no open decision request to review — open one first. Append rejected; reasoning state unchanged.';
+  }
+  if (kind === 'evidence' && !(source || '').trim()) {
+    return 'evidence.source is required — name where this finding came from. Append rejected; reasoning state unchanged.';
   }
   const textRequired = kind !== 'position' && kind !== 'review';
   if (textRequired && (text || '').trim().length < 12) {
