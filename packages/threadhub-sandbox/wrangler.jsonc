@@ -54,12 +54,15 @@
 
   "observability": { "enabled": true },
 
-  // Apex path-split (Phase-5 prep): route consensusprotocol.ai/try/* to THIS
-  // Worker. More-specific than the hub's apex custom_domain catch-all, so it
-  // wins for /try/* exactly as studio's /object/* + /api/* routes win over the
-  // same catch-all (proven live at cutover). The route only takes effect on a
-  // deploy (owner-gated, Phase 5). workers_dev left as-is (unset).
+  // Apex path-split: route consensusprotocol.ai/try to THIS Worker. Both the
+  // BARE /try (the POST write endpoint the frontend calls) AND the /try/*
+  // subtree (view, .json, verify.mjs) are needed — `/try/*` does NOT match the
+  // slash-less `/try`, so without the exact route the POST falls through to the
+  // hub's catch-all and gets walled 404 (caught in the Phase-5 live test).
+  // More-specific than the hub's apex custom_domain catch-all, so both win, the
+  // same way studio's /object/* + /api/* win (proven live at cutover).
   "routes": [
+    { "pattern": "consensusprotocol.ai/try", "zone_name": "consensusprotocol.ai" },
     { "pattern": "consensusprotocol.ai/try/*", "zone_name": "consensusprotocol.ai" }
   ]
 }
