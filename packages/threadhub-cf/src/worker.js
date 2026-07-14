@@ -18,6 +18,7 @@
 //   5. Every response carries Cache-Control: no-store — an edge cache
 //      must never serve a revoked thread.
 import checkerSource from '../../threadhub/scripts/verify-standalone.mjs'; // Text rule → string
+import prototypeHtml from '../prototype/consensus-prototype.html'; // Text rule → string
 import { PUBLIC_404_BODY, errorResponse } from '../../threadhub/src/routes.js';
 
 export { HubDO } from './hub-do.js';
@@ -30,6 +31,7 @@ export { HubInternal } from './hub-internal.js';
 // the byte-identity tests hold both sides to the same strings).
 const JSON_TYPE = 'application/json; charset=utf-8';
 const CHECKER_TYPE = 'text/javascript; charset=utf-8';
+const HTML_TYPE = 'text/html; charset=utf-8';
 
 // Same body ceiling as the Node adapter's readBody (server.js).
 const MAX_BODY_CHARS = 5e6;
@@ -65,6 +67,13 @@ export default {
     // (1) The standalone checker, straight from the repo file's bytes.
     if (method === 'GET' && url.pathname === '/verify.mjs') {
       return respond({ status: 200, contentType: CHECKER_TYPE, body: checkerSource });
+    }
+
+    // (1b) The connected design-system prototype — a self-contained
+    // (React + DS bundle + tokens all inlined) navigable click-through,
+    // served verbatim from the Text-imported repo file. Static, no DO hop.
+    if (method === 'GET' && (url.pathname === '/prototype' || url.pathname === '/prototype/')) {
+      return respond({ status: 200, contentType: HTML_TYPE, body: prototypeHtml });
     }
 
     // (2) Role. Computed once, here, never anywhere else.
