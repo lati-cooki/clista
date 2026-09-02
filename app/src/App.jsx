@@ -26,6 +26,7 @@ const NAV = [
 const SURFACE_NAV = [
   { label: 'Home', href: 'https://clista.ai/' },
   { label: 'Cockpit', href: 'https://app.clista.ai/', active: true, live: true },
+  { label: 'Ledger', href: 'https://ledger.clista.ai/', live: true },
   { label: 'CLI', href: 'https://cli.clista.ai/' },
   { label: 'Docs', href: 'https://docs.clista.ai/' },
   { label: 'The gate', href: 'https://gate.clista.ai/' },
