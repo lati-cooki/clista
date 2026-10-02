@@ -1,5 +1,5 @@
 const { PROTOCOL_VERSION, contentHash } = require("./integrity");
-const { indexBy, normalizeType, stripUndefined, unique } = require("./utils");
+const { arrayOrEmpty, indexBy, normalizeType, stripUndefined, unique } = require("./utils");
 
 const COMPATIBILITY_SCHEMA = "clista.compatibility.v0";
 const COMPATIBILITY_VERIFY_SCHEMA = "clista.compatibility.verify.v0";
@@ -223,7 +223,7 @@ function verifyProtocolCompatibility(packet, options = {}) {
     reasons.push(reason("clista_protocol_version", `unsupported ClisTa protocol version ${packet.clista_protocol_version}`));
   }
 
-  const requiredCapabilities = arrayValues(packet?.capability_set);
+  const requiredCapabilities = arrayOrEmpty(packet?.capability_set);
   if (!requiredCapabilities.length) {
     reasons.push(reason("capability_set", "required capabilities must be declared"));
   }
@@ -233,14 +233,14 @@ function verifyProtocolCompatibility(packet, options = {}) {
     }
   }
 
-  const optionalCapabilities = arrayValues(packet?.optional_capability_set || packet?.optional_capabilities);
+  const optionalCapabilities = arrayOrEmpty(packet?.optional_capability_set || packet?.optional_capabilities);
   for (const capability of optionalCapabilities) {
     if (!localContext.localCapabilitySet.includes(capability)) {
       degradations.push(reason("optional_capability_set", `unsupported optional capability ${capability}`));
     }
   }
 
-  const requiredLayers = arrayValues(packet?.verification_state?.requiredLayers);
+  const requiredLayers = arrayOrEmpty(packet?.verification_state?.requiredLayers);
   if (!requiredLayers.length) {
     reasons.push(reason("verification_state.requiredLayers", "required verification layers must be declared"));
   }
@@ -334,7 +334,7 @@ function validateCapabilitySetDeclaration(declaration) {
   if (!declaration?.id) {
     reasons.push("capability set declaration requires id");
   }
-  const capabilities = arrayValues(declaration?.capabilitySet || declaration?.capabilities);
+  const capabilities = arrayOrEmpty(declaration?.capabilitySet || declaration?.capabilities);
   if (!capabilities.length) {
     reasons.push("capability set declaration requires capabilities");
   }
@@ -502,7 +502,7 @@ function validateActiveAmendmentCompatibility(packet, localContext, reasons) {
 
 function activeAmendmentsFromPacket(packet) {
   const amendmentState = packet?.continuity_state?.amendment_state || packet?.continuity_state?.amendments || {};
-  return arrayValues(amendmentState.activeAmendments || amendmentState.active_amendments);
+  return arrayOrEmpty(amendmentState.activeAmendments || amendmentState.active_amendments);
 }
 
 function verificationLayerStatus(verificationState, layer) {
@@ -540,9 +540,9 @@ function packetContext(packet) {
     sourceThreadId: packet?.source_thread_id || null,
     resumeStatus: packet?.resume_status || null,
     verificationMode: packet?.verification_mode || null,
-    requiredCapabilities: arrayValues(packet?.capability_set),
-    optionalCapabilities: arrayValues(packet?.optional_capability_set || packet?.optional_capabilities),
-    requiredVerificationLayers: arrayValues(packet?.verification_state?.requiredLayers),
+    requiredCapabilities: arrayOrEmpty(packet?.capability_set),
+    optionalCapabilities: arrayOrEmpty(packet?.optional_capability_set || packet?.optional_capabilities),
+    requiredVerificationLayers: arrayOrEmpty(packet?.verification_state?.requiredLayers),
     activeAmendmentIds: activeAmendmentsFromPacket(packet).map((amendment) => amendment.id)
   };
 }
@@ -571,13 +571,6 @@ function normalizeStatus(status) {
 }
 
 
-
-function arrayValues(value) {
-  if (Array.isArray(value)) {
-    return value.filter(Boolean);
-  }
-  return [];
-}
 
 
 

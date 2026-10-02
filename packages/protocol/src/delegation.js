@@ -1,5 +1,5 @@
 const { PROTOCOL_VERSION, contentHash } = require("./integrity");
-const { groupBy, indexBy, normalizeType, stripUndefined, unique } = require("./utils");
+const { arrayValues, groupBy, indexBy, normalizeType, stripUndefined, unique } = require("./utils");
 
 const DELEGATION_SCHEMA = "clista.delegation.v0";
 const DELEGATION_PROTOCOL_VERSION = "0.19.0";
@@ -671,16 +671,6 @@ function addRecord(records, record) {
 }
 
 
-
-function arrayValues(value) {
-  if (Array.isArray(value)) {
-    return value.filter(Boolean);
-  }
-  if (value === undefined || value === null || value === "") {
-    return [];
-  }
-  return [value];
-}
 
 
 

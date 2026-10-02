@@ -53,4 +53,28 @@ function normalizeType(value) {
     .replace(/[\s-]+/g, "_");
 }
 
-module.exports = { groupBy, groupByByValues, indexBy, normalizeType, stripUndefined, unique };
+function arrayValues(value) {
+  if (Array.isArray(value)) {
+    return value.filter(Boolean);
+  }
+  if (value === undefined || value === null || value === "") {
+    return [];
+  }
+  return [value];
+}
+
+function arrayOrEmpty(value) {
+  if (Array.isArray(value)) {
+    return value.filter(Boolean);
+  }
+  return [];
+}
+
+function normalizeString(value) {
+  if (value === undefined || value === null) {
+    return "";
+  }
+  return String(value).trim();
+}
+
+module.exports = { arrayOrEmpty, arrayValues, groupBy, groupByByValues, indexBy, normalizeString, normalizeType, stripUndefined, unique };

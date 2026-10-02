@@ -1,5 +1,5 @@
 const { PROTOCOL_VERSION, contentHash } = require("./integrity");
-const { groupBy, indexBy, normalizeType, stripUndefined } = require("./utils");
+const { groupBy, indexBy, normalizeString, normalizeType, stripUndefined } = require("./utils");
 
 const REVIEW_SCHEMA = "clista.review.v0";
 const REVIEW_PROTOCOL_VERSION = "0.23.0";
@@ -707,13 +707,6 @@ function normalizeStatus(status) {
   return normalizeType(status || "open");
 }
 
-
-function normalizeString(value) {
-  if (value === undefined || value === null) {
-    return "";
-  }
-  return String(value).trim();
-}
 
 function subjectKey(subjectType, subjectId) {
   return `${normalizeType(subjectType)}:${subjectId || ""}`;

@@ -5,7 +5,7 @@ const {
   buildLocalInteroperabilityProfile
 } = require("./interoperability");
 const { PROTOCOL_VERSION, contentHash } = require("./integrity");
-const { groupBy, indexBy, normalizeType, stripUndefined } = require("./utils");
+const { arrayOrEmpty, groupBy, indexBy, normalizeType, stripUndefined } = require("./utils");
 
 const NEGOTIATION_SCHEMA = "clista.negotiation.v0";
 const NEGOTIATION_VERIFY_SCHEMA = "clista.negotiation.verify.v0";
@@ -550,7 +550,7 @@ function validateNegotiationTerms(terms, priorEvents, expectedStatus) {
 
 function compareCapabilityDifferences(packet, options, differences, reasons, degradations) {
   const localContext = buildLocalCompatibilityContext(options);
-  for (const capability of arrayValues(packet?.capability_set)) {
+  for (const capability of arrayOrEmpty(packet?.capability_set)) {
     if (!localContext.localCapabilitySet.includes(capability)) {
       addRejectedDifference(differences, reasons,
         "capability",
@@ -561,7 +561,7 @@ function compareCapabilityDifferences(packet, options, differences, reasons, deg
       );
     }
   }
-  for (const capability of arrayValues(packet?.optional_capability_set || packet?.optional_capabilities)) {
+  for (const capability of arrayOrEmpty(packet?.optional_capability_set || packet?.optional_capabilities)) {
     if (!localContext.localCapabilitySet.includes(capability)) {
       differences.push(difference(
         "capability",
@@ -576,7 +576,7 @@ function compareCapabilityDifferences(packet, options, differences, reasons, deg
 }
 
 function compareAmendmentDifferences(packet, options, differences, reasons) {
-  const supportedAmendmentIds = arrayValues(options.supportedAmendmentIds);
+  const supportedAmendmentIds = arrayOrEmpty(options.supportedAmendmentIds);
   for (const amendmentId of activeAmendmentIds(packet)) {
     if (!supportedAmendmentIds.includes(amendmentId)) {
       addRejectedDifference(differences, reasons,
@@ -592,7 +592,7 @@ function compareAmendmentDifferences(packet, options, differences, reasons) {
 
 function compareValidationRequirementDifferences(packet, options, differences, reasons) {
   const localContext = buildLocalCompatibilityContext(options);
-  const requiredLayers = arrayValues(packet?.verification_state?.requiredLayers);
+  const requiredLayers = arrayOrEmpty(packet?.verification_state?.requiredLayers);
   for (const layer of requiredLayers) {
     if (!localContext.supportedVerificationLayers.includes(layer)) {
       addRejectedDifference(differences, reasons,
@@ -639,7 +639,7 @@ function compareInteroperabilityProfileDifferences(packet, options, differences,
       profile.exchangeFormat
     );
   }
-  for (const semantic of arrayValues(profile.requiredSemantics)) {
+  for (const semantic of arrayOrEmpty(profile.requiredSemantics)) {
     if (!localProfile.supportedSemantics.includes(semantic)) {
       addRejectedDifference(differences, reasons,
         "interoperability_profile",
@@ -650,7 +650,7 @@ function compareInteroperabilityProfileDifferences(packet, options, differences,
       );
     }
   }
-  for (const semantic of arrayValues(profile.optionalSemantics)) {
+  for (const semantic of arrayOrEmpty(profile.optionalSemantics)) {
     if (!localProfile.supportedSemantics.includes(semantic)) {
       differences.push(difference(
         "interoperability_profile",
@@ -662,7 +662,7 @@ function compareInteroperabilityProfileDifferences(packet, options, differences,
       degradations.push(reason("interoperability_profile.optionalSemantics", `unsupported optional semantic ${semantic}`));
     }
   }
-  for (const eventType of arrayValues(profile.eventTypes)) {
+  for (const eventType of arrayOrEmpty(profile.eventTypes)) {
     if (!localProfile.supportedEventTypes.includes(eventType)) {
       addRejectedDifference(differences, reasons,
         "interoperability_profile",
@@ -727,10 +727,10 @@ function buildExchangeTermsSummary(packet, differences, degradations) {
     schema: "clista.negotiation.exchange_terms.v0",
     exchangeFormat: packet?.interoperability_profile?.exchangeFormat || null,
     remoteThreadId: packet?.source_thread_id || null,
-    requiredCapabilities: arrayValues(packet?.capability_set),
+    requiredCapabilities: arrayOrEmpty(packet?.capability_set),
     activeAmendmentIds: activeAmendmentIds(packet),
-    requiredVerificationLayers: arrayValues(packet?.verification_state?.requiredLayers),
-    requiredSemantics: arrayValues(packet?.interoperability_profile?.requiredSemantics),
+    requiredVerificationLayers: arrayOrEmpty(packet?.verification_state?.requiredLayers),
+    requiredSemantics: arrayOrEmpty(packet?.interoperability_profile?.requiredSemantics),
     differenceCount: differences.length,
     degradationCount: degradations.length,
     explicitReviewRequired: differences.length > 0 || degradations.length > 0,
@@ -921,7 +921,7 @@ function activeAmendmentIds(packet) {
   const amendmentState = packet?.continuity_state?.amendment_state
     || packet?.continuity_state?.amendments
     || {};
-  const active = arrayValues(amendmentState.activeAmendments || amendmentState.active_amendments);
+  const active = arrayOrEmpty(amendmentState.activeAmendments || amendmentState.active_amendments);
   return active.map((item) => {
     if (typeof item === "string") {
       return item;
@@ -960,9 +960,9 @@ function packetContext(packet) {
     schemaVersion: packet?.schema_version || null,
     sourceThreadId: packet?.source_thread_id || null,
     resumeStatus: packet?.resume_status || null,
-    capabilitySet: arrayValues(packet?.capability_set),
+    capabilitySet: arrayOrEmpty(packet?.capability_set),
     activeAmendmentIds: activeAmendmentIds(packet),
-    requiredVerificationLayers: arrayValues(packet?.verification_state?.requiredLayers),
+    requiredVerificationLayers: arrayOrEmpty(packet?.verification_state?.requiredLayers),
     eventLogHash: packet?.event_log_hash || null,
     projectionHash: packet?.projection_hash || null,
     stateHash: packet?.state_hash || null,
@@ -1040,13 +1040,6 @@ function addRecord(records, record) {
 }
 
 
-
-function arrayValues(value) {
-  if (Array.isArray(value)) {
-    return value.filter(Boolean);
-  }
-  return [];
-}
 
 
 module.exports = {

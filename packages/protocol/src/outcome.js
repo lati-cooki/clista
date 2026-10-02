@@ -1,5 +1,5 @@
 const { PROTOCOL_VERSION, contentHash } = require("./integrity");
-const { groupBy, indexBy, normalizeType, stripUndefined } = require("./utils");
+const { arrayValues, groupBy, indexBy, normalizeType, stripUndefined } = require("./utils");
 
 const OUTCOME_SCHEMA = "clista.outcome.v0";
 const OUTCOME_PROTOCOL_VERSION = "0.21.0";
@@ -668,16 +668,6 @@ function addRecord(records, record) {
 }
 
 
-
-function arrayValues(value) {
-  if (Array.isArray(value)) {
-    return value.filter(Boolean);
-  }
-  if (value === undefined || value === null || value === "") {
-    return [];
-  }
-  return [value];
-}
 
 
 module.exports = {

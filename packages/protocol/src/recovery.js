@@ -1,5 +1,5 @@
 const { PROTOCOL_VERSION, contentHash } = require("./integrity");
-const { groupBy, indexBy, normalizeType, stripUndefined } = require("./utils");
+const { groupBy, indexBy, normalizeString, normalizeType, stripUndefined } = require("./utils");
 
 const RECOVERY_SCHEMA = "clista.recovery.v0";
 const RECOVERY_VERIFY_SCHEMA = "clista.recovery.verify.v0";
@@ -1213,13 +1213,6 @@ function deterministicId(prefix, type, seed) {
   return `${prefix}_${normalizeType(type).slice(0, 24) || "recovery"}_${hash}`;
 }
 
-
-function normalizeString(value) {
-  if (value === undefined || value === null) {
-    return "";
-  }
-  return String(value).trim();
-}
 
 function subjectKey(subjectType, subjectId) {
   return `${normalizeType(subjectType)}:${subjectId || ""}`;

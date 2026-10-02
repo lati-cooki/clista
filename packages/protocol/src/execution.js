@@ -1,5 +1,5 @@
 const { PROTOCOL_VERSION, contentHash } = require("./integrity");
-const { groupBy, indexBy, normalizeType, stripUndefined, unique } = require("./utils");
+const { arrayValues, groupBy, indexBy, normalizeType, stripUndefined, unique } = require("./utils");
 
 const EXECUTION_SCHEMA = "clista.execution.v0";
 const EXECUTION_PROTOCOL_VERSION = "0.20.0";
@@ -628,16 +628,6 @@ function addRecord(records, record) {
 }
 
 
-
-function arrayValues(value) {
-  if (Array.isArray(value)) {
-    return value.filter(Boolean);
-  }
-  if (value === undefined || value === null || value === "") {
-    return [];
-  }
-  return [value];
-}
 
 
 

@@ -1,5 +1,5 @@
 const { PROTOCOL_VERSION, contentHash } = require("./integrity");
-const { indexBy, stripUndefined, unique } = require("./utils");
+const { arrayOrEmpty, indexBy, stripUndefined, unique } = require("./utils");
 
 const INTEROPERABILITY_SCHEMA = "clista.interoperability.v0";
 const INTEROPERABILITY_VERIFY_SCHEMA = "clista.interoperability.verify.v0";
@@ -465,7 +465,7 @@ function validateProfileObject(profile, label) {
   if (!profile?.exchangeFormat) {
     reasons.push(`${label} requires exchangeFormat`);
   }
-  if (!arrayValues(profile?.requiredSemantics).length) {
+  if (!arrayOrEmpty(profile?.requiredSemantics).length) {
     reasons.push(`${label} requires requiredSemantics`);
   }
   reasons.push(...rejectInteroperabilityGuardFields(profile));
@@ -618,18 +618,18 @@ function validateSemanticMeaning(profile, localProfile, packet, reasons, degrada
     reasons.push(reason("interoperability_profile.exchangeFormat", `unsupported exchange format ${profile.exchangeFormat}`));
   }
 
-  for (const semantic of arrayValues(profile.requiredSemantics)) {
+  for (const semantic of arrayOrEmpty(profile.requiredSemantics)) {
     if (!localProfile.supportedSemantics.includes(semantic)) {
       reasons.push(reason("interoperability_profile.requiredSemantics", `unknown required semantic ${semantic}`));
     }
   }
-  for (const semantic of arrayValues(profile.optionalSemantics)) {
+  for (const semantic of arrayOrEmpty(profile.optionalSemantics)) {
     if (!localProfile.supportedSemantics.includes(semantic)) {
       degradations.push(reason("interoperability_profile.optionalSemantics", `unsupported optional semantic ${semantic}`));
     }
   }
 
-  for (const eventType of arrayValues(profile.eventTypes)) {
+  for (const eventType of arrayOrEmpty(profile.eventTypes)) {
     if (!localProfile.supportedEventTypes.includes(eventType)) {
       reasons.push(reason("interoperability_profile.eventTypes", `unsupported event type semantic ${eventType}`));
     }
@@ -656,9 +656,9 @@ function semanticProfileHash(profile) {
     interoperabilityProtocolVersion: profile.interoperabilityProtocolVersion,
     localProtocolVersion: profile.localProtocolVersion,
     exchangeFormat: profile.exchangeFormat,
-    requiredSemantics: arrayValues(profile.requiredSemantics),
-    optionalSemantics: arrayValues(profile.optionalSemantics),
-    eventTypes: arrayValues(profile.eventTypes),
+    requiredSemantics: arrayOrEmpty(profile.requiredSemantics),
+    optionalSemantics: arrayOrEmpty(profile.optionalSemantics),
+    eventTypes: arrayOrEmpty(profile.eventTypes),
     objectSemantics: profile.objectSemantics || {},
     semanticLossAccepted: false,
     semanticReinterpretation: false,
@@ -679,9 +679,9 @@ function packetContext(packet) {
     sourceThreadId: packet?.source_thread_id || null,
     resumeStatus: packet?.resume_status || null,
     exchangeFormat: packet?.interoperability_profile?.exchangeFormat || null,
-    requiredSemantics: arrayValues(packet?.interoperability_profile?.requiredSemantics),
-    optionalSemantics: arrayValues(packet?.interoperability_profile?.optionalSemantics),
-    eventTypeCount: arrayValues(packet?.interoperability_profile?.eventTypes).length
+    requiredSemantics: arrayOrEmpty(packet?.interoperability_profile?.requiredSemantics),
+    optionalSemantics: arrayOrEmpty(packet?.interoperability_profile?.optionalSemantics),
+    eventTypeCount: arrayOrEmpty(packet?.interoperability_profile?.eventTypes).length
   };
 }
 
@@ -715,13 +715,6 @@ function normalizeSemantic(value) {
     .replace(/[\s-]+/g, "_");
 }
 
-
-function arrayValues(value) {
-  if (Array.isArray(value)) {
-    return value.filter(Boolean);
-  }
-  return [];
-}
 
 
 
