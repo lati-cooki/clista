@@ -1,5 +1,5 @@
 const { PROTOCOL_VERSION, contentHash } = require("./integrity");
-const { groupBy, indexBy, stripUndefined, unique } = require("./utils");
+const { groupBy, indexBy, normalizeType, stripUndefined, unique } = require("./utils");
 
 const EXECUTION_SCHEMA = "clista.execution.v0";
 const EXECUTION_PROTOCOL_VERSION = "0.20.0";
@@ -173,8 +173,8 @@ function buildExecutionRollback(options = {}) {
 
 function buildExecutionRecord(options = {}) {
   const authorizationRef = normalizeAuthorizationRef(options);
-  const actionType = normalizeText(options.actionType || options.action);
-  const scope = normalizeText(options.scope);
+  const actionType = normalizeType(options.actionType || options.action);
+  const scope = normalizeType(options.scope);
   const record = stripUndefined({
     id: options.id || deterministicId("exe", "execution_record", {
       actorId: options.actorId,
@@ -234,7 +234,7 @@ function buildExecutionViolation(options = {}) {
     object: "executionViolation",
     executionId: options.executionId || null,
     threadId: options.threadId || null,
-    violationType: normalizeText(options.violationType),
+    violationType: normalizeType(options.violationType),
     reason: options.reason || null,
     detectedByParticipantId: options.detectedByParticipantId || null,
     detectedAt: options.detectedAt || null,
@@ -355,7 +355,7 @@ function validateExecutionViolation(violation) {
   if (!violation?.threadId) {
     reasons.push("execution violation requires threadId");
   }
-  if (!normalizeText(violation?.violationType)) {
+  if (!normalizeType(violation?.violationType)) {
     reasons.push("execution violation requires violationType");
   }
   if (!violation?.reason) {
@@ -384,10 +384,10 @@ function validateExecutionRecordBase(record) {
   }
   const authorizationReasons = validateAuthorizationRef(record?.authorizationRef);
   reasons.push(...authorizationReasons);
-  if (!normalizeText(record?.actionType)) {
+  if (!normalizeType(record?.actionType)) {
     reasons.push("execution record requires actionType");
   }
-  if (!normalizeText(record?.scope)) {
+  if (!normalizeType(record?.scope)) {
     reasons.push("execution record requires scope");
   }
   if (!arrayValues(record?.constraints).length) {
@@ -417,7 +417,7 @@ function validateAuthorizationRef(ref) {
     reasons.push("execution record requires authorizationRef");
     return reasons;
   }
-  if (!AUTHORIZATION_TYPES.has(normalizeText(ref.type))) {
+  if (!AUTHORIZATION_TYPES.has(normalizeType(ref.type))) {
     reasons.push("execution authorizationRef type must be decision or delegation");
   }
   if (!ref.id) {
@@ -439,8 +439,8 @@ function normalizeExecutionRecord(record, event, status) {
     authorizationRef: normalizeAuthorizationRef(record),
     delegationId: record.delegationId || (record.authorizationRef?.type === "delegation" ? record.authorizationRef.id : null),
     decisionId: record.decisionId || (record.authorizationRef?.type === "decision" ? record.authorizationRef.id : null),
-    actionType: normalizeText(record.actionType || record.action),
-    scope: normalizeText(record.scope),
+    actionType: normalizeType(record.actionType || record.action),
+    scope: normalizeType(record.scope),
     constraints: unique(arrayValues(record.constraints)),
     status: normalizeStatus(status || record.status || "active"),
     evidence: normalizeEvidence(record.evidence),
@@ -473,7 +473,7 @@ function normalizeExecutionViolation(violation, event) {
     id: violation.id || deterministicId("exv", "execution_violation", event.event_id),
     object: "executionViolation",
     threadId: violation.threadId || event.thread_id,
-    violationType: normalizeText(violation.violationType),
+    violationType: normalizeType(violation.violationType),
     detectedAt: violation.detectedAt || event.timestamp,
     sourceEventId: event.event_id,
     authorityCreated: false,
@@ -538,7 +538,7 @@ function normalizeAuthorizationRef(options = {}) {
   const ref = options.authorizationRef;
   if (ref && typeof ref === "object") {
     return {
-      type: normalizeText(ref.type),
+      type: normalizeType(ref.type),
       id: ref.id || null
     };
   }
@@ -601,7 +601,7 @@ function executionHash(record) {
 
 function deterministicId(prefix, type, seed) {
   const hash = contentHash({ type, seed }).slice("sha256:".length, "sha256:".length + 16);
-  return `${prefix}_${normalizeText(type).slice(0, 24) || "execution"}_${hash}`;
+  return `${prefix}_${normalizeType(type).slice(0, 24) || "execution"}_${hash}`;
 }
 
 function lastForExecution(records, executionId) {
@@ -610,13 +610,6 @@ function lastForExecution(records, executionId) {
 
 function normalizeStatus(status) {
   return String(status || "active").trim().toLowerCase().replace(/[\s-]+/g, "_");
-}
-
-function normalizeText(value) {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/[\s-]+/g, "_");
 }
 
 function normalizeEvidence(value) {

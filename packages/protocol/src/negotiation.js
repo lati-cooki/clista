@@ -5,7 +5,7 @@ const {
   buildLocalInteroperabilityProfile
 } = require("./interoperability");
 const { PROTOCOL_VERSION, contentHash } = require("./integrity");
-const { groupBy, indexBy, stripUndefined } = require("./utils");
+const { groupBy, indexBy, normalizeType, stripUndefined } = require("./utils");
 
 const NEGOTIATION_SCHEMA = "clista.negotiation.v0";
 const NEGOTIATION_VERIFY_SCHEMA = "clista.negotiation.verify.v0";
@@ -1026,18 +1026,11 @@ function addRejectedDifference(differences, reasons, differenceType, field, mess
 
 function deterministicId(prefix, type, seed) {
   const hash = contentHash({ type, seed }).slice("sha256:".length, "sha256:".length + 16);
-  return `${prefix}_${normalizeText(type).slice(0, 24) || "negotiation"}_${hash}`;
+  return `${prefix}_${normalizeType(type).slice(0, 24) || "negotiation"}_${hash}`;
 }
 
 function normalizeStatus(status) {
   return String(status || "proposed").trim().toLowerCase();
-}
-
-function normalizeText(value) {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/[\s-]+/g, "_");
 }
 
 function addRecord(records, record) {

@@ -1,5 +1,5 @@
 const { PROTOCOL_VERSION, contentHash } = require("./integrity");
-const { groupBy, indexBy, stripUndefined } = require("./utils");
+const { groupBy, indexBy, normalizeType, stripUndefined } = require("./utils");
 
 const OUTCOME_SCHEMA = "clista.outcome.v0";
 const OUTCOME_PROTOCOL_VERSION = "0.21.0";
@@ -243,7 +243,7 @@ function buildOutcomeViolation(options = {}) {
     outcomeId: options.outcomeId || null,
     executionId: options.executionId || null,
     threadId: options.threadId || null,
-    violationType: normalizeText(options.violationType),
+    violationType: normalizeType(options.violationType),
     reason: options.reason || null,
     detectedByParticipantId: options.detectedByParticipantId || null,
     detectedAt: options.detectedAt || null,
@@ -393,7 +393,7 @@ function validateOutcomeViolation(violation) {
   if (!violation?.threadId) {
     reasons.push("outcome violation requires threadId");
   }
-  if (!normalizeText(violation?.violationType)) {
+  if (!normalizeType(violation?.violationType)) {
     reasons.push("outcome violation requires violationType");
   }
   if (!violation?.reason) {
@@ -510,7 +510,7 @@ function normalizeOutcomeViolation(violation, event) {
     id: violation.id || deterministicId("ovl", "outcome_violation", event.event_id),
     object: "outcomeViolation",
     threadId: violation.threadId || event.thread_id,
-    violationType: normalizeText(violation.violationType),
+    violationType: normalizeType(violation.violationType),
     detectedAt: violation.detectedAt || event.timestamp,
     sourceEventId: event.event_id,
     completionAsSuccess: false,
@@ -624,7 +624,7 @@ function outcomeHash(record) {
 
 function deterministicId(prefix, type, seed) {
   const hash = contentHash({ type, seed }).slice("sha256:".length, "sha256:".length + 16);
-  return `${prefix}_${normalizeText(type).slice(0, 24) || "outcome"}_${hash}`;
+  return `${prefix}_${normalizeType(type).slice(0, 24) || "outcome"}_${hash}`;
 }
 
 function lastForOutcome(records, outcomeId) {
@@ -632,19 +632,12 @@ function lastForOutcome(records, outcomeId) {
 }
 
 function normalizeEvaluationResult(result) {
-  const normalized = normalizeText(result);
+  const normalized = normalizeType(result);
   return normalized || null;
 }
 
 function normalizeStatus(status) {
-  return normalizeText(status || "pending");
-}
-
-function normalizeText(value) {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/[\s-]+/g, "_");
+  return normalizeType(status || "pending");
 }
 
 function normalizeEffect(value) {

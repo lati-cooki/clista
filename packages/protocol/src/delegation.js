@@ -1,5 +1,5 @@
 const { PROTOCOL_VERSION, contentHash } = require("./integrity");
-const { groupBy, indexBy, stripUndefined, unique } = require("./utils");
+const { groupBy, indexBy, normalizeType, stripUndefined, unique } = require("./utils");
 
 const DELEGATION_SCHEMA = "clista.delegation.v0";
 const DELEGATION_PROTOCOL_VERSION = "0.19.0";
@@ -133,7 +133,7 @@ function projectDelegation(state = emptyDelegationState()) {
 
 function buildDelegationGrant(options = {}) {
   const action = normalizeAction(options.action);
-  const scope = normalizeText(options.scope || options.threadId || "thread");
+  const scope = normalizeType(options.scope || options.threadId || "thread");
   const grant = stripUndefined({
     id: options.id || deterministicId("dlg", "delegation_grant", {
       threadId: options.threadId,
@@ -185,7 +185,7 @@ function buildDelegatedAction(options = {}) {
     delegateId: options.delegateId || null,
     delegateType: normalizeDelegateType(options.delegateType || "participant"),
     action,
-    scope: normalizeText(options.scope),
+    scope: normalizeType(options.scope),
     targetObjectType: options.targetObjectType || null,
     targetObjectId: options.targetObjectId || null,
     summary: options.summary || null,
@@ -260,7 +260,7 @@ function buildDelegationViolation(options = {}) {
     delegationId: options.delegationId || null,
     actionId: options.actionId || null,
     threadId: options.threadId || null,
-    violationType: normalizeText(options.violationType),
+    violationType: normalizeType(options.violationType),
     reason: options.reason || null,
     detectedByParticipantId: options.detectedByParticipantId || null,
     detectedAt: options.detectedAt || null,
@@ -331,7 +331,7 @@ function validateDelegationGrant(grant) {
   if (!normalizeAction(grant?.action)) {
     reasons.push("delegation grant requires action");
   }
-  if (!normalizeText(grant?.scope)) {
+  if (!normalizeType(grant?.scope)) {
     reasons.push("delegation grant requires scope");
   }
   if (!arrayValues(grant?.limits).length) {
@@ -375,7 +375,7 @@ function validateDelegatedAction(action) {
   if (!normalizeAction(action?.action)) {
     reasons.push("delegated action requires action");
   }
-  if (!normalizeText(action?.scope)) {
+  if (!normalizeType(action?.scope)) {
     reasons.push("delegated action requires scope");
   }
   if (!action?.summary) {
@@ -468,7 +468,7 @@ function normalizeDelegationGrant(grant, event) {
     threadId: grant.threadId || event.thread_id,
     delegateType: normalizeDelegateType(grant.delegateType || "participant"),
     action: normalizeAction(grant.action),
-    scope: normalizeText(grant.scope),
+    scope: normalizeType(grant.scope),
     authorityRequired: normalizeAuthority(grant.authorityRequired || "decision_owner"),
     limits: unique(arrayValues(grant.limits)),
     attributionRequired: true,
@@ -500,7 +500,7 @@ function normalizeDelegatedAction(action, event) {
     threadId: action.threadId || event.thread_id,
     delegateType: normalizeDelegateType(action.delegateType || "participant"),
     action: normalizeAction(action.action),
-    scope: normalizeText(action.scope),
+    scope: normalizeType(action.scope),
     recordedAt: action.recordedAt || event.timestamp,
     sourceEventId: event.event_id,
     authoritySurrender: false,
@@ -565,7 +565,7 @@ function normalizeDelegationViolation(violation, event) {
     id: violation.id || deterministicId("dlv", "delegation_violation", event.event_id),
     object: "delegationViolation",
     threadId: violation.threadId || event.thread_id,
-    violationType: normalizeText(violation.violationType),
+    violationType: normalizeType(violation.violationType),
     detectedAt: violation.detectedAt || event.timestamp,
     sourceEventId: event.event_id,
     authoritySurrender: false,
@@ -630,7 +630,7 @@ function delegationHash(record) {
 
 function deterministicId(prefix, type, seed) {
   const hash = contentHash({ type, seed }).slice("sha256:".length, "sha256:".length + 16);
-  return `${prefix}_${normalizeText(type).slice(0, 24) || "delegation"}_${hash}`;
+  return `${prefix}_${normalizeType(type).slice(0, 24) || "delegation"}_${hash}`;
 }
 
 function normalizeStatus(status) {
@@ -638,22 +638,15 @@ function normalizeStatus(status) {
 }
 
 function normalizeAction(action) {
-  return normalizeText(action);
+  return normalizeType(action);
 }
 
 function normalizeDelegateType(type) {
-  return normalizeText(type || "participant");
+  return normalizeType(type || "participant");
 }
 
 function normalizeAuthority(authority) {
-  return normalizeText(authority || "decision_owner");
-}
-
-function normalizeText(value) {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/[\s-]+/g, "_");
+  return normalizeType(authority || "decision_owner");
 }
 
 function isValidDateString(value) {

@@ -1,5 +1,5 @@
 const { PROTOCOL_VERSION, contentHash } = require("./integrity");
-const { groupBy, indexBy, stripUndefined } = require("./utils");
+const { groupBy, indexBy, normalizeType, stripUndefined } = require("./utils");
 
 const FEDERATION_SCHEMA = "clista.federation.v0";
 const FEDERATION_VERIFY_SCHEMA = "clista.federation.verify.v0";
@@ -685,18 +685,11 @@ function reason(field, message, details = {}) {
 
 function deterministicId(prefix, type, seed) {
   const hash = contentHash({ type, seed }).slice("sha256:".length, "sha256:".length + 16);
-  return `${prefix}_${normalizeText(type).slice(0, 24) || "federation"}_${hash}`;
+  return `${prefix}_${normalizeType(type).slice(0, 24) || "federation"}_${hash}`;
 }
 
 function normalizeStatus(status) {
   return String(status || "pending").trim().toLowerCase();
-}
-
-function normalizeText(value) {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/[\s-]+/g, "_");
 }
 
 

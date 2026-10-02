@@ -1,5 +1,5 @@
 const { PROTOCOL_VERSION, contentHash } = require("./integrity");
-const { groupBy, indexBy, stripUndefined, unique } = require("./utils");
+const { groupBy, indexBy, normalizeType, stripUndefined, unique } = require("./utils");
 
 const OUTCOME_LEARNING_SCHEMA = "clista.outcome_learning.v0";
 const OUTCOME_LEARNING_PROTOCOL_VERSION = "0.22.0";
@@ -119,11 +119,11 @@ function buildOutcomeLearningSignal(options = {}) {
       lesson: options.lesson || options.finding
     }),
     object: "outcomeLearningSignal",
-    signalType: normalizeText(options.signalType || "outcome_learning"),
+    signalType: normalizeType(options.signalType || "outcome_learning"),
     outcomeId: options.outcomeId || null,
     executionId: options.executionId || null,
     threadId: options.threadId || null,
-    evaluationResult: normalizeText(options.evaluationResult || options.result),
+    evaluationResult: normalizeType(options.evaluationResult || options.result),
     lesson: normalizeString(options.lesson || options.finding),
     confirmedAssumptionIds: unique(options.confirmedAssumptionIds || options.confirmedAssumptions || []),
     failedAssumptionIds: unique(options.failedAssumptionIds || options.failedAssumptions || []),
@@ -213,7 +213,7 @@ function buildOutcomeLearningViolation(options = {}) {
     outcomeId: options.outcomeId || null,
     executionId: options.executionId || null,
     threadId: options.threadId || null,
-    violationType: normalizeText(options.violationType),
+    violationType: normalizeType(options.violationType),
     reason: normalizeString(options.reason),
     detectedByParticipantId: options.detectedByParticipantId || options.actorId || null,
     detectedAt: options.detectedAt || null,
@@ -378,7 +378,7 @@ function validateOutcomeLearningViolation(violation) {
   if (!violation?.threadId) {
     reasons.push("outcome learning violation requires threadId");
   }
-  if (!normalizeText(violation?.violationType)) {
+  if (!normalizeType(violation?.violationType)) {
     reasons.push("outcome learning violation requires violationType");
   }
   if (!normalizeString(violation?.reason)) {
@@ -399,9 +399,9 @@ function normalizeOutcomeLearningSignal(signal, event) {
     ...signal,
     id: signal.id || deterministicId("ols", "outcome_learning_signal", event.event_id),
     object: "outcomeLearningSignal",
-    signalType: normalizeText(signal.signalType || "outcome_learning"),
+    signalType: normalizeType(signal.signalType || "outcome_learning"),
     threadId: signal.threadId || event.thread_id,
-    evaluationResult: normalizeText(signal.evaluationResult || signal.result),
+    evaluationResult: normalizeType(signal.evaluationResult || signal.result),
     lesson: normalizeString(signal.lesson || signal.finding),
     confirmedAssumptionIds: unique(signal.confirmedAssumptionIds || signal.confirmedAssumptions || []),
     failedAssumptionIds: unique(signal.failedAssumptionIds || signal.failedAssumptions || []),
@@ -487,7 +487,7 @@ function normalizeOutcomeLearningViolation(violation, event) {
     id: violation.id || deterministicId("olv", "outcome_learning_violation", event.event_id),
     object: "outcomeLearningViolation",
     threadId: violation.threadId || event.thread_id,
-    violationType: normalizeText(violation.violationType),
+    violationType: normalizeType(violation.violationType),
     reason: normalizeString(violation.reason),
     detectedByParticipantId: violation.detectedByParticipantId || event.actor_id,
     detectedAt: violation.detectedAt || event.timestamp,
@@ -560,7 +560,7 @@ function outcomeLearningHash(record) {
 
 function deterministicId(prefix, type, seed) {
   const hash = contentHash({ type, seed }).slice("sha256:".length, "sha256:".length + 16);
-  return `${prefix}_${normalizeText(type).slice(0, 24) || "outcome_learning"}_${hash}`;
+  return `${prefix}_${normalizeType(type).slice(0, 24) || "outcome_learning"}_${hash}`;
 }
 
 function normalizeEvidence(value) {
@@ -573,14 +573,7 @@ function normalizeEvidence(value) {
 }
 
 function normalizeConfidence(value) {
-  return normalizeText(value || "medium");
-}
-
-function normalizeText(value) {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/[\s-]+/g, "_");
+  return normalizeType(value || "medium");
 }
 
 function normalizeString(value) {
